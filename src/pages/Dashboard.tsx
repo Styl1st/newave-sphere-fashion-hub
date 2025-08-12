@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const Stat = ({ label, value }) => (
+const Stat = ({ label, value }: { label: string; value: string }) => (
   <Card>
     <CardHeader>
       <CardTitle className="text-base text-muted-foreground">{label}</CardTitle>
