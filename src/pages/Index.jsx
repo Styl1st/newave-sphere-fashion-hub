@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProductCard, type Product } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 
 import hoodie from "@/assets/products/hoodie.jpg";
 import denimJacket from "@/assets/products/denim-jacket.jpg";
@@ -14,13 +14,9 @@ import tote from "@/assets/products/tote.jpg";
 import jeans from "@/assets/products/jeans.jpg";
 import { useMemo, useState } from "react";
 
-const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
+const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"];
 
-type Category = typeof CATEGORIES[number];
-
-type Sort = "relevance" | "price_asc" | "price_desc";
-
-const MOCK_PRODUCTS: Product[] = [
+const MOCK_PRODUCTS = [
   { id: "1", name: "Charcoal Oversized Hoodie", brand: "Void Atelier", category: "Streetwear", price: 95, image: hoodie },
   { id: "2", name: "Raw Indigo Denim Jacket", brand: "North Loom", category: "Denim", price: 145, image: denimJacket },
   { id: "3", name: "Worn Combat Boots", brand: "Shiver", category: "Grunge", price: 160, image: boots },
@@ -30,21 +26,21 @@ const MOCK_PRODUCTS: Product[] = [
 ];
 
 const Index = () => {
-  const [selected, setSelected] = useState<Set<Category>>(new Set());
-  const [maxPrice, setMaxPrice] = useState<number>(200);
-  const [sort, setSort] = useState<Sort>("relevance");
+  const [selected, setSelected] = useState(new Set());
+  const [maxPrice, setMaxPrice] = useState(200);
+  const [sort, setSort] = useState("relevance");
 
   const filtered = useMemo(() => {
     let list = MOCK_PRODUCTS.filter(p => p.price <= maxPrice);
     if (selected.size > 0) {
-      list = list.filter(p => selected.has(p.category as Category));
+      list = list.filter(p => selected.has(p.category));
     }
     if (sort === "price_asc") list = [...list].sort((a,b) => a.price - b.price);
     if (sort === "price_desc") list = [...list].sort((a,b) => b.price - a.price);
     return list;
   }, [selected, maxPrice, sort]);
 
-  const toggleCategory = (c: Category) => {
+  const toggleCategory = (c) => {
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(c)) next.delete(c); else next.add(c);
@@ -94,7 +90,7 @@ const Index = () => {
               </div>
               <div className="w-44">
                 <Label className="text-sm">Sort</Label>
-                <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
+                <Select value={sort} onValueChange={(v) => setSort(v)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>

@@ -1,15 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 
-export type Product = {
-  id: string;
-  name: string;
-  brand: string;
-  category: string;
-  price: number;
-  image: string;
-};
-
-export const ProductCard = ({ product }: { product: Product }) => {
+export const ProductCard = ({ product }) => {
   return (
     <Card className="overflow-hidden group hover:shadow-elegant transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-0.5">
       <div className="aspect-square overflow-hidden">
