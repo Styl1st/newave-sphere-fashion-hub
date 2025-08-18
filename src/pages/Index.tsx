@@ -57,7 +57,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
-      <main>
+      <main className="relative z-10">
         {/* Hero */}
         <section className="relative overflow-hidden px-4">
           <div className="absolute inset-0 -z-10 opacity-20 blur-3xl bg-gradient-primary animate-gradient" />
