@@ -12,6 +12,7 @@ import boots from "@/assets/products/boots.jpg";
 import tee from "@/assets/products/tee.jpg";
 import tote from "@/assets/products/tote.jpg";
 import jeans from "@/assets/products/jeans.jpg";
+import logo from "@/assets/newave/logo.png";
 import { useMemo, useState } from "react";
 
 const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
@@ -60,8 +61,9 @@ const Index = () => {
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 -z-10 opacity-30 blur-3xl bg-gradient-primary animate-gradient" />
           <div className="container mx-auto py-16 text-center">
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
-              NeWave Sphere — Independent Fashion Marketplace
+            <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
+              <img src={logo} alt="logo" className="flex h-[80px] items-center" />
+              - Independent Fashion Marketplace
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
               Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
