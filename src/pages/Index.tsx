@@ -60,8 +60,7 @@ const Index = () => {
       <main className="relative z-10">
         {/* Hero */}
         <section className="relative overflow-hidden px-4">
-          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl bg-gradient-primary animate-gradient" />
-          <div className="max-w-6xl mx-auto py-16 text-center">
+          <div className="max-w-4xl mx-auto py-16 text-center">
             <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
               <img src={logoTransparent} alt="logo" className="flex h-[80px] items-center" />
               - Independent Fashion Marketplace
