@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/newave/logo.png";
+import logoTransparent from "..logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
@@ -15,7 +16,7 @@ const BrandNavbar = () => {
           </span>
         </Link> */}
 
-        <img src={logo} alt="logo" className="h-10 w-auto" />
+        <img src={logoTransparent} alt="logo" className="h-10 w-auto" />
 
         <div className="flex items-center gap-4">
           <Link to="/">
