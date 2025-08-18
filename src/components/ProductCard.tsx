@@ -1,4 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
+import { useState } from "react";
 
 export type Product = {
   id: string;
@@ -10,15 +13,27 @@ export type Product = {
 };
 
 export const ProductCard = ({ product }: { product: Product }) => {
+  const [isLiked, setIsLiked] = useState(false);
+
   return (
-    <Card className="overflow-hidden group hover:shadow-elegant transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-0.5">
-      <div className="aspect-square overflow-hidden">
+    <Card className="overflow-hidden group hover:shadow-elegant transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-1 bg-background/80 backdrop-blur border rounded-3xl">
+      <div className="aspect-square overflow-hidden rounded-t-3xl relative">
         <img
           src={product.image}
           alt={`${product.name} by ${product.brand} — ${product.category} independent fashion`}
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`absolute top-3 right-3 rounded-full transition-colors ${
+            isLiked ? 'text-red-500 bg-background/90' : 'text-muted-foreground bg-background/70 hover:bg-background/90'
+          }`}
+          onClick={() => setIsLiked(!isLiked)}
+        >
+          <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+        </Button>
       </div>
       <CardContent className="pt-4">
         <div className="flex items-center justify-between">

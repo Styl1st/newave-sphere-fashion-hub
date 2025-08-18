@@ -132,10 +132,30 @@ All colors MUST be HSL.
     animation: gradient-move 8s ease infinite;
     background-size: 200% 200%;
   }
+  .bg-animated-fade {
+    background: linear-gradient(
+      45deg,
+      hsl(var(--brand) / 0.05) 0%,
+      hsl(var(--brand-2) / 0.1) 25%,
+      hsl(var(--background)) 50%,
+      hsl(var(--brand-2) / 0.08) 75%,
+      hsl(var(--brand) / 0.06) 100%
+    );
+    background-size: 400% 400%;
+    animation: gradient-fade 12s ease infinite;
+  }
 }
 
 @keyframes gradient-move {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gradient-fade {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
   100% { background-position: 0% 50%; }
 }

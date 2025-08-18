@@ -7,15 +7,15 @@ const BrandNavbar = () => {
   const { user, signOut } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 bg-background/80 backdrop-blur border-b">
-      <nav className="container mx-auto flex items-center justify-between h-20">
+    <header className="sticky top-4 z-30 px-4">
+      <nav className="max-w-6xl mx-auto flex items-center justify-between h-16 bg-background/90 backdrop-blur border rounded-2xl px-6 shadow-elegant">
         {/* <Link to="/" className="flex items-center gap-2">
           <span className="text-lg font-semibold tracking-tight">
             NeWave Sphere
           </span>
         </Link> */}
 
-        <img src={logo} alt="logo" className="h-full w-auto" />
+        <img src={logo} alt="logo" className="h-10 w-auto" />
 
         <div className="flex items-center gap-4">
           <Link to="/">

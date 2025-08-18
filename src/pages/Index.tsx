@@ -54,13 +54,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       <main>
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 -z-10 opacity-30 blur-3xl bg-gradient-primary animate-gradient" />
-          <div className="container mx-auto py-16 text-center">
+        <section className="relative overflow-hidden px-4">
+          <div className="absolute inset-0 -z-10 opacity-20 blur-3xl bg-gradient-primary animate-gradient" />
+          <div className="max-w-6xl mx-auto py-16 text-center">
             <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
               <img src={logo} alt="logo" className="flex h-[80px] items-center" />
               - Independent Fashion Marketplace
@@ -78,45 +78,49 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section className="border-t">
-          <div className="container mx-auto py-6 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
-            <div className="flex flex-wrap gap-4 items-center">
-              <span className="text-sm text-muted-foreground">Categories:</span>
-              {CATEGORIES.map((c) => (
-                <label key={c} className="flex items-center gap-2">
-                  <Checkbox id={c} checked={selected.has(c)} onCheckedChange={() => toggleCategory(c)} />
-                  <Label htmlFor={c} className="cursor-pointer">{c}</Label>
-                </label>
-              ))}
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="w-56">
-                <Label className="text-sm">Max price: €{maxPrice}</Label>
-                <Slider value={[maxPrice]} min={20} max={300} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 200)} />
+        <section className="px-4">
+          <div className="max-w-6xl mx-auto py-6 bg-background/60 backdrop-blur rounded-2xl border shadow-sm">
+            <div className="px-6 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+              <div className="flex flex-wrap gap-4 items-center">
+                <span className="text-sm text-muted-foreground">Categories:</span>
+                {CATEGORIES.map((c) => (
+                  <label key={c} className="flex items-center gap-2">
+                    <Checkbox id={c} checked={selected.has(c)} onCheckedChange={() => toggleCategory(c)} />
+                    <Label htmlFor={c} className="cursor-pointer">{c}</Label>
+                  </label>
+                ))}
               </div>
-              <div className="w-44">
-                <Label className="text-sm">Sort</Label>
-                <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                    <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-6">
+                <div className="w-56">
+                  <Label className="text-sm">Max price: €{maxPrice}</Label>
+                  <Slider value={[maxPrice]} min={20} max={300} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 200)} />
+                </div>
+                <div className="w-44">
+                  <Label className="text-sm">Sort</Label>
+                  <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                      <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Grid */}
-        <section className="container mx-auto py-10">
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+        <section className="px-4 py-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
           </div>
         </section>
       </main>
