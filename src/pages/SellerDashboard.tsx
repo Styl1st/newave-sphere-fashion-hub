@@ -6,7 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Upload, X, Package } from "lucide-react";
 import BrandNavbar from "@/components/BrandNavbar";
@@ -30,7 +36,36 @@ const SellerDashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id); // sécurité côté client aussi
+
+      if (error) throw error;
+
+      toast({
+        title: "Produit supprimé",
+        description: "Le produit a bien été supprimé.",
+      });
+
+      // refresh liste
+      fetchUserProducts();
+    } catch (error) {
+      console.error("Erreur suppression produit:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le produit",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -70,20 +105,20 @@ const SellerDashboard = () => {
 
   const handleImageUpload = (files: FileList | null) => {
     if (!files) return;
-    
+
     const newFiles = Array.from(files).slice(0, 5 - selectedImages.length);
-    setSelectedImages(prev => [...prev, ...newFiles]);
-    
+    setSelectedImages((prev) => [...prev, ...newFiles]);
+
     // Create preview URLs
-    newFiles.forEach(file => {
+    newFiles.forEach((file) => {
       const url = URL.createObjectURL(file);
-      setImageUrls(prev => [...prev, url]);
+      setImageUrls((prev) => [...prev, url]);
     });
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-    setImageUrls(prev => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImageUrls((prev) => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
@@ -91,26 +126,26 @@ const SellerDashboard = () => {
 
   const uploadImages = async (): Promise<string[]> => {
     if (selectedImages.length === 0) return [];
-    
+
     const uploadedUrls: string[] = [];
-    
+
     for (const file of selectedImages) {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
-      
+
       const { error: uploadError } = await supabase.storage
-        .from('product-images')
+        .from("product-images")
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
-        .from('product-images')
+        .from("product-images")
         .getPublicUrl(fileName);
 
       uploadedUrls.push(data.publicUrl);
     }
-    
+
     return uploadedUrls;
   };
 
@@ -122,18 +157,16 @@ const SellerDashboard = () => {
     try {
       // Upload images first
       const uploadedImageUrls = await uploadImages();
-      
-      const { error } = await supabase
-        .from("products")
-        .insert({
-          user_id: user.id,
-          name: formData.name,
-          brand: formData.brand,
-          category: formData.category,
-          price: parseFloat(formData.price),
-          description: formData.description,
-          images: uploadedImageUrls,
-        });
+
+      const { error } = await supabase.from("products").insert({
+        user_id: user.id,
+        name: formData.name,
+        brand: formData.brand,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        description: formData.description,
+        images: uploadedImageUrls,
+      });
 
       if (error) throw error;
 
@@ -152,10 +185,9 @@ const SellerDashboard = () => {
       });
       setSelectedImages([]);
       setImageUrls([]);
-      
+
       // Refresh products list
       fetchUserProducts();
-      
     } catch (error) {
       console.error("Error adding product:", error);
       toast({
@@ -202,7 +234,9 @@ const SellerDashboard = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
                     required
                   />
                 </div>
@@ -212,14 +246,24 @@ const SellerDashboard = () => {
                   <Input
                     id="brand"
                     value={formData.brand}
-                    onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        brand: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="category">Catégorie</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, category: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une catégorie" />
                     </SelectTrigger>
@@ -241,7 +285,12 @@ const SellerDashboard = () => {
                     step="0.01"
                     min="0"
                     value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        price: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </div>
@@ -251,7 +300,12 @@ const SellerDashboard = () => {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     rows={3}
                   />
                 </div>
@@ -271,14 +325,16 @@ const SellerDashboard = () => {
                     <label
                       htmlFor="image-upload"
                       className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${
-                        selectedImages.length >= 5 
-                          ? 'border-muted cursor-not-allowed' 
-                          : 'border-primary/50 hover:border-primary'
+                        selectedImages.length >= 5
+                          ? "border-muted cursor-not-allowed"
+                          : "border-primary/50 hover:border-primary"
                       }`}
                     >
                       <Upload className="h-8 w-8 text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        {selectedImages.length >= 5 ? 'Maximum 5 images' : 'Cliquez pour ajouter des images'}
+                        {selectedImages.length >= 5
+                          ? "Maximum 5 images"
+                          : "Cliquez pour ajouter des images"}
                       </p>
                     </label>
                   </div>
@@ -307,10 +363,16 @@ const SellerDashboard = () => {
                   )}
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={uploading || !formData.name || !formData.brand || !formData.category || !formData.price}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    uploading ||
+                    !formData.name ||
+                    !formData.brand ||
+                    !formData.category ||
+                    !formData.price
+                  }
                 >
                   {uploading ? "Ajout en cours..." : "Ajouter le produit"}
                 </Button>
@@ -334,7 +396,10 @@ const SellerDashboard = () => {
                   </p>
                 ) : (
                   products.map((product) => (
-                    <div key={product.id} className="flex items-center gap-4 p-4 border rounded-2xl">
+                    <div
+                      key={product.id}
+                      className="flex items-center gap-4 p-4 border rounded-2xl"
+                    >
                       {product.images.length > 0 && (
                         <img
                           src={product.images[0]}
@@ -344,9 +409,19 @@ const SellerDashboard = () => {
                       )}
                       <div className="flex-1">
                         <h4 className="font-medium">{product.name}</h4>
-                        <p className="text-sm text-muted-foreground">{product.brand}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {product.brand}
+                        </p>
                         <p className="text-sm font-medium">€{product.price}</p>
                       </div>
+
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        Supprimer
+                      </Button>
                     </div>
                   ))
                 )}
