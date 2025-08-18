@@ -23,18 +23,28 @@ const BrandNavbar = () => {
             <Button variant="ghost">Home</Button>
           </Link>
           {user && (
-            <Link to="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
-            </Link>
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+              <Link to="/seller">
+                <Button variant="ghost">Espace vendeur</Button>
+              </Link>
+            </>
           )}
           {user ? (
             <Button onClick={signOut} variant="outline">
               Se déconnecter
             </Button>
           ) : (
-            <Link to="/auth">
-              <Button variant="hero">Sell with us</Button>
-            </Link>
+            <>
+              <Link to="/seller">
+                <Button variant="secondary">Devenir vendeur</Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="hero">Se connecter</Button>
+              </Link>
+            </>
           )}
         </div>
       </nav>

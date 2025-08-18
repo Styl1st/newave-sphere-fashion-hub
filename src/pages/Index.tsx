@@ -5,16 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductCard, type Product } from "@/components/ProductCard";
+import { supabase } from "@/integrations/supabase/client";
 
-import hoodie from "@/assets/products/hoodie.jpg";
-import denimJacket from "@/assets/products/denim-jacket.jpg";
-import boots from "@/assets/products/boots.jpg";
-import tee from "@/assets/products/tee.jpg";
-import tote from "@/assets/products/tote.jpg";
-import jeans from "@/assets/products/jeans.jpg";
-import logo from "@/assets/newave/logo.png";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
 
@@ -22,29 +16,53 @@ type Category = typeof CATEGORIES[number];
 
 type Sort = "relevance" | "price_asc" | "price_desc";
 
-const MOCK_PRODUCTS: Product[] = [
-  { id: "1", name: "Charcoal Oversized Hoodie", brand: "Void Atelier", category: "Streetwear", price: 95, image: hoodie },
-  { id: "2", name: "Raw Indigo Denim Jacket", brand: "North Loom", category: "Denim", price: 145, image: denimJacket },
-  { id: "3", name: "Worn Combat Boots", brand: "Shiver", category: "Grunge", price: 160, image: boots },
-  { id: "4", name: "Minimal Graphic Tee", brand: "Nocturn", category: "Goth", price: 60, image: tee },
-  { id: "5", name: "Canvas Logo Tote", brand: "Kaito", category: "Alternative", price: 40, image: tote },
-  { id: "6", name: "Distressed Black Jeans", brand: "Wraith", category: "Grunge", price: 120, image: jeans },
-];
-
 const Index = () => {
   const [selected, setSelected] = useState<Set<Category>>(new Set());
-  const [maxPrice, setMaxPrice] = useState<number>(200);
+  const [maxPrice, setMaxPrice] = useState<number>(300);
   const [sort, setSort] = useState<Sort>("relevance");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      // Transform database products to match ProductCard type
+      const transformedProducts: Product[] = (data || []).map(product => ({
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        category: product.category,
+        price: Number(product.price),
+        image: product.images[0] || "/placeholder.svg", // Use first image or placeholder
+      }));
+      
+      setProducts(transformedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = useMemo(() => {
-    let list = MOCK_PRODUCTS.filter(p => p.price <= maxPrice);
+    let list = products.filter(p => p.price <= maxPrice);
     if (selected.size > 0) {
       list = list.filter(p => selected.has(p.category as Category));
     }
     if (sort === "price_asc") list = [...list].sort((a,b) => a.price - b.price);
     if (sort === "price_desc") list = [...list].sort((a,b) => b.price - a.price);
     return list;
-  }, [selected, maxPrice, sort]);
+  }, [products, selected, maxPrice, sort]);
 
   const toggleCategory = (c: Category) => {
     setSelected(prev => {
@@ -93,7 +111,7 @@ const Index = () => {
               <div className="flex items-center gap-6">
                 <div className="w-56">
                   <Label className="text-sm">Max price: €{maxPrice}</Label>
-                  <Slider value={[maxPrice]} min={20} max={300} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 200)} />
+                  <Slider value={[maxPrice]} min={20} max={500} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 300)} />
                 </div>
                 <div className="w-44">
                   <Label className="text-sm">Sort</Label>
@@ -116,11 +134,26 @@ const Index = () => {
         {/* Grid */}
         <section className="px-4 py-10">
           <div className="max-w-6xl mx-auto">
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Chargement des produits...</p>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  {products.length === 0 
+                    ? "Aucun produit disponible pour le moment." 
+                    : "Aucun produit ne correspond à vos critères de recherche."
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
