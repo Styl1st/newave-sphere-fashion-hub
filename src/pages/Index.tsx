@@ -13,6 +13,7 @@ import tee from "@/assets/products/tee.jpg";
 import tote from "@/assets/products/tote.jpg";
 import jeans from "@/assets/products/jeans.jpg";
 import logo from "@/assets/newave/logo.png";
+import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState } from "react";
 
 const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
@@ -62,7 +63,7 @@ const Index = () => {
           <div className="absolute inset-0 -z-10 opacity-20 blur-3xl bg-gradient-primary animate-gradient" />
           <div className="max-w-6xl mx-auto py-16 text-center">
             <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
-              <img src={logo} alt="logo" className="flex h-[80px] items-center" />
+              <img src={logoTransparent} alt="logo" className="flex h-[80px] items-center" />
               - Independent Fashion Marketplace
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">

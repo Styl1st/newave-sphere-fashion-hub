@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/newave/logo.png";
-import logoTransparent from "..logo_transparent.png";
+import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
