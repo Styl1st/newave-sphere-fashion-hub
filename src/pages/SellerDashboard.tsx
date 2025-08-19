@@ -16,6 +16,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Upload, X, Package } from "lucide-react";
 import BrandNavbar from "@/components/BrandNavbar";
+import { SellerProfileManager } from "@/components/SellerProfileManager";
 
 const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"];
 
@@ -217,10 +218,16 @@ const SellerDashboard = () => {
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid gap-8 lg:grid-cols-2">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="grid gap-6 xl:grid-cols-3 lg:grid-cols-2">
+          {/* Seller Profile */}
+          <div className="xl:col-span-1">
+            <SellerProfileManager />
+          </div>
+          
           {/* Add Product Form */}
-          <Card className="bg-background/80 backdrop-blur border rounded-3xl">
+          <div className="xl:col-span-1">
+            <Card className="bg-background/80 backdrop-blur border rounded-3xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plus className="h-5 w-5" />
@@ -379,9 +386,11 @@ const SellerDashboard = () => {
               </form>
             </CardContent>
           </Card>
+          </div>
 
           {/* My Products */}
-          <Card className="bg-background/80 backdrop-blur border rounded-3xl">
+          <div className="xl:col-span-1">
+            <Card className="bg-background/80 backdrop-blur border rounded-3xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
@@ -427,7 +436,8 @@ const SellerDashboard = () => {
                 )}
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

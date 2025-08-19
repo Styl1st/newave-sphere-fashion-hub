@@ -16,7 +16,8 @@ export const ProductCard = ({ product }: { product: Product }) => {
   const [isLiked, setIsLiked] = useState(false);
 
   return (
-    <Card className="overflow-hidden group hover:shadow-elegant transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-1 bg-background/80 backdrop-blur border rounded-3xl">
+    <Card className="overflow-hidden group hover:shadow-elegant transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-1 bg-background/80 backdrop-blur border rounded-3xl cursor-pointer"
+          onClick={() => window.location.href = `/product/${product.id}`}>
       <div className="aspect-square overflow-hidden rounded-t-3xl relative">
         <img
           src={product.image}
