@@ -105,18 +105,37 @@ export const SellerProfileManager = () => {
     if (!user) return;
 
     try {
-      const profileData = {
-        user_id: user.id,
-        email: user.email,
-        is_seller: true,
-        ...updates,
-      };
-
-      const { error } = await supabase
+      // First check if profile exists
+      const { data: existingProfile } = await supabase
         .from("profiles")
-        .upsert(profileData);
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
 
-      if (error) throw error;
+      if (existingProfile) {
+        // Profile exists, update it
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            is_seller: true,
+            ...updates,
+          })
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+      } else {
+        // Profile doesn't exist, create it
+        const { error } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user.id,
+            email: user.email,
+            is_seller: true,
+            ...updates,
+          });
+
+        if (error) throw error;
+      }
 
       // Refresh profile data
       await fetchProfile();
