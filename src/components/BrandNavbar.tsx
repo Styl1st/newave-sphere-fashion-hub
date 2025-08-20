@@ -26,20 +26,26 @@ const BrandNavbar = () => {
           </Link>
           {user && (
             <>
-              {/* <Link to="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link> */}
-              
               {role === 'seller' && (
-                <Link to="/seller">
-                  <Button variant="ghost">Espace vendeur</Button>
-                </Link>
+                <>
+                  <Link to="/seller">
+                    <Button variant="ghost">Espace vendeur</Button>
+                  </Link>
+                  <Link to="/my-profile">
+                    <Button variant="ghost">Mon Profil</Button>
+                  </Link>
+                </>
               )}
               
               {role === 'admin' && (
-                <Link to="/admin">
-                  <Button variant="ghost">Administration</Button>
-                </Link>
+                <>
+                  <Link to="/admin">
+                    <Button variant="ghost">Administration</Button>
+                  </Link>
+                  <Link to="/my-profile">
+                    <Button variant="ghost">Mon Profil</Button>
+                  </Link>
+                </>
               )}
               
               {role === 'buyer' && (
