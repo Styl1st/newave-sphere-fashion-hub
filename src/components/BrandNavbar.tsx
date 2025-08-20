@@ -26,9 +26,9 @@ const BrandNavbar = () => {
           </Link>
           {user && (
             <>
-              <Link to="/dashboard">
+              {/* <Link to="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
-              </Link>
+              </Link> */}
               
               {role === 'seller' && (
                 <Link to="/seller">

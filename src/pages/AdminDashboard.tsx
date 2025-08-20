@@ -6,10 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import BrandNavbar from "@/components/BrandNavbar";
-import { Settings, Edit, Ban, UserCheck, Users, Package, ShoppingBag } from "lucide-react";
+import {
+  Settings,
+  Edit,
+  Ban,
+  UserCheck,
+  Users,
+  Package,
+  ShoppingBag,
+} from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 type Profile = {
@@ -19,7 +33,7 @@ type Profile = {
   email?: string;
   avatar_url?: string;
   bio?: string;
-  role: 'admin' | 'seller' | 'buyer';
+  role: "admin" | "seller" | "buyer";
   is_seller: boolean;
   created_at: string;
 };
@@ -129,13 +143,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleRoleChange = async (profileId: string, newRole: 'admin' | 'seller' | 'buyer') => {
+  const handleRoleChange = async (
+    profileId: string,
+    newRole: "admin" | "seller" | "buyer"
+  ) => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ 
+        .update({
           role: newRole,
-          is_seller: newRole === 'seller'
+          is_seller: newRole === "seller",
         })
         .eq("id", profileId);
 
@@ -157,12 +174,62 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleProfilePictureChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    profileId: string
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const filePath = `public/${profileId}`;
+    try {
+      // Essayer d'uploader (si le fichier existe déjà, update le)
+      let uploadError = null;
+      let uploadResult = await supabase.storage
+        .from("profile-pictures")
+        .upload(filePath, file, { upsert: true });
+      uploadError = uploadResult.error;
+
+      if (uploadError) throw uploadError;
+
+      // Récupérer l'URL publique
+      const { data } = supabase.storage.from("profile-pictures").getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+
+      // Mettre à jour le champ avatar_url dans la table profiles
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", profileId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Photo de profil mise à jour",
+        description: `La photo de profil de ${profileId} a été mise à jour.`,
+      });
+
+      fetchProfiles();
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la photo de profil.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'seller': return 'bg-blue-100 text-blue-800';
-      case 'buyer': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "admin":
+        return "bg-red-100 text-red-800";
+      case "seller":
+        return "bg-blue-100 text-blue-800";
+      case "buyer":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -171,10 +238,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <ProtectedRoute allowedRoles={['admin']}>
+    <ProtectedRoute allowedRoles={["admin"]}>
       <div className="min-h-screen bg-background">
         <BrandNavbar />
-        
+
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
@@ -182,7 +249,8 @@ const AdminDashboard = () => {
               Panneau d'Administration
             </h1>
             <p className="text-muted-foreground">
-              Gérez les utilisateurs, les marques et les paramètres de la plateforme.
+              Gérez les utilisateurs, les marques et les paramètres de la
+              plateforme.
             </p>
           </div>
 
@@ -199,7 +267,7 @@ const AdminDashboard = () => {
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -211,7 +279,7 @@ const AdminDashboard = () => {
                 <div className="text-2xl font-bold">{stats.totalSellers}</div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -223,7 +291,7 @@ const AdminDashboard = () => {
                 <div className="text-2xl font-bold">{stats.totalProducts}</div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -264,7 +332,7 @@ const AdminDashboard = () => {
                             <Users className="h-5 w-5 text-muted-foreground" />
                           </div>
                         )}
-                        
+
                         <div>
                           <div className="font-medium">
                             {profile.full_name || "Nom non défini"}
@@ -273,14 +341,14 @@ const AdminDashboard = () => {
                             {profile.email}
                           </div>
                         </div>
-                        
+
                         <Badge className={getRoleColor(profile.role)}>
                           {profile.role}
                         </Badge>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
-                        {profile.role === 'seller' && (
+                        {profile.role != "admin" && (
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
@@ -296,35 +364,65 @@ const AdminDashboard = () => {
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
-                                <DialogTitle>Modifier le nom de marque</DialogTitle>
+                                <DialogTitle>
+                                  Modifier le profil de {profile.full_name}
+                                </DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4">
                                 <div>
-                                  <Label htmlFor="brandName">Nouveau nom de marque</Label>
+                                  <Label htmlFor="brandName">
+                                    Nouveau nom de marque
+                                  </Label>
                                   <Input
                                     id="brandName"
                                     value={newBrandName}
-                                    onChange={(e) => setNewBrandName(e.target.value)}
+                                    onChange={(e) =>
+                                      setNewBrandName(e.target.value)
+                                    }
                                     placeholder="Nom de la marque"
                                   />
                                 </div>
-                                <Button onClick={handleUpdateBrandName} className="w-full">
+
+                                <div>
+                                  <Label>
+                                    Modifier la photo de profil de {profile.full_name} 
+                                  </Label>
+                                  <Input
+                                    id="profilePicture"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                      handleProfilePictureChange(e, profile.id)
+                                    }
+                                  />
+                                </div>
+                                <Button
+                                  onClick={handleUpdateBrandName}
+                                  className="w-full"
+                                >
                                   Mettre à jour
                                 </Button>
                               </div>
                             </DialogContent>
                           </Dialog>
                         )}
-                        
-                        <select
-                          value={profile.role}
-                          onChange={(e) => handleRoleChange(profile.id, e.target.value as any)}
-                          className="text-sm border rounded px-2 py-1"
-                        >
-                          <option value="buyer">Acheteur</option>
-                          <option value="seller">Vendeur</option>
-                          <option value="admin">Admin</option>
-                        </select>
+
+                        {profile.role != "admin" && (
+                          <select
+                            value={profile.role}
+                            onChange={(e) =>
+                              handleRoleChange(
+                                profile.id,
+                                e.target.value as any
+                              )
+                            }
+                            className="text-sm border rounded px-2 py-1"
+                          >
+                            <option value="buyer">Acheteur</option>
+                            <option value="seller">Vendeur</option>
+                            {/* <option value="admin">Admin</option> */}
+                          </select>
+                        )}
                       </div>
                     </div>
                   ))}
