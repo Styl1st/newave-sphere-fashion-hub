@@ -69,11 +69,15 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       
       let allProjects = [...(createdProjects.data || [])];
       
-      if (memberProjectIds.length > 0) {
+      // Only fetch member projects that are not already in created projects
+      const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
+      const uniqueMemberProjectIds = memberProjectIds.filter(id => !createdProjectIds.includes(id));
+      
+      if (uniqueMemberProjectIds.length > 0) {
         const { data: memberProjectsData, error } = await supabase
           .from('projects')
           .select('*')
-          .in('id', memberProjectIds);
+          .in('id', uniqueMemberProjectIds);
         
         if (!error && memberProjectsData) {
           allProjects = [...allProjects, ...memberProjectsData];

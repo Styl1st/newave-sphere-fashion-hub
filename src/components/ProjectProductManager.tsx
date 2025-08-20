@@ -66,14 +66,29 @@ export const ProjectProductManager = () => {
       if (createdProjects.error) throw createdProjects.error;
       if (memberProjects.error) throw memberProjects.error;
 
-      const allProjects = [
-        ...(createdProjects.data || []),
-        ...(memberProjects.data?.map(m => m.projects).filter(Boolean) || [])
-      ];
-
-      setProjects(allProjects);
-      if (allProjects.length > 0 && !selectedProject) {
-        setSelectedProject(allProjects[0].id);
+      // Combine projects and remove duplicates by id
+      const createdProjectsData = createdProjects.data || [];
+      const memberProjectsData = memberProjects.data?.map(m => m.projects).filter(Boolean) || [];
+      
+      const allProjectsMap = new Map();
+      
+      // Add created projects first
+      createdProjectsData.forEach(project => {
+        allProjectsMap.set(project.id, project);
+      });
+      
+      // Add member projects (will not overwrite if already exists)
+      memberProjectsData.forEach(project => {
+        if (!allProjectsMap.has(project.id)) {
+          allProjectsMap.set(project.id, project);
+        }
+      });
+      
+      const uniqueProjects = Array.from(allProjectsMap.values());
+      
+      setProjects(uniqueProjects);
+      if (uniqueProjects.length > 0 && !selectedProject) {
+        setSelectedProject(uniqueProjects[0].id);
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -97,12 +112,13 @@ export const ProjectProductManager = () => {
       if (createdProjects.error) throw createdProjects.error;
       if (memberProjects.error) throw memberProjects.error;
 
-      const allProjectIds = [
-        ...(createdProjects.data?.map(p => p.id) || []),
-        ...(memberProjects.data?.map(m => m.project_id) || [])
-      ];
+      // Combine project IDs and remove duplicates
+      const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
+      const memberProjectIds = memberProjects.data?.map(m => m.project_id) || [];
+      
+      const uniqueProjectIds = [...new Set([...createdProjectIds, ...memberProjectIds])];
 
-      if (allProjectIds.length === 0) {
+      if (uniqueProjectIds.length === 0) {
         setProducts([]);
         setLoading(false);
         return;
@@ -115,7 +131,7 @@ export const ProjectProductManager = () => {
           *,
           projects(name)
         `)
-        .in('project_id', allProjectIds);
+        .in('project_id', uniqueProjectIds);
 
       if (error) throw error;
       setProducts(data || []);
