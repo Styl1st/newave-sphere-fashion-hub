@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandNavbar from "@/components/BrandNavbar";
-import UserProfileEditor from "@/components/UserProfileEditor";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { Heart, ShoppingBag, User, Package, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -270,7 +270,7 @@ const UserDashboard = () => {
             </TabsContent>
 
             <TabsContent value="profile" className="mt-6">
-              <UserProfileEditor />
+              <NotificationCenter />
             </TabsContent>
 
             <TabsContent value="settings" className="mt-6">
