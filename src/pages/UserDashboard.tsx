@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandNavbar from "@/components/BrandNavbar";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { UserProfileManager } from "@/components/UserProfileManager";
 import { Heart, ShoppingBag, User, Package, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -270,7 +271,7 @@ const UserDashboard = () => {
             </TabsContent>
 
             <TabsContent value="profile" className="mt-6">
-              <NotificationCenter />
+              <UserProfileManager />
             </TabsContent>
 
             <TabsContent value="settings" className="mt-6">
