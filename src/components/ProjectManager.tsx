@@ -29,7 +29,11 @@ interface ProjectMember {
   };
 }
 
-export const ProjectManager = () => {
+interface ProjectManagerProps {
+  onProjectsChange?: () => void;
+}
+
+export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +133,7 @@ export const ProjectManager = () => {
 
       setNewProject({ name: '', description: '' });
       fetchProjects();
+      onProjectsChange?.();
       toast.success('Projet créé avec succès!');
     } catch (error) {
       console.error('Error creating project:', error);

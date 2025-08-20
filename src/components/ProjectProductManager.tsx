@@ -226,6 +226,16 @@ export const ProjectProductManager = () => {
     return <div className="text-center p-4">Chargement...</div>;
   }
 
+  if (projects.length === 0) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-muted-foreground mb-4">
+          Vous devez d'abord créer un projet dans l'onglet "Mes Projets" pour pouvoir ajouter des produits.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
