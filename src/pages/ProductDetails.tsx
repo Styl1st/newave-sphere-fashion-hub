@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, ArrowLeft, Store, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BrandNavbar from "@/components/BrandNavbar";
+import ProductComments from "@/components/ProductComments";
 
 type Product = {
   id: string;
@@ -299,6 +300,11 @@ const ProductDetails = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Comments Section */}
+        <div className="mt-8">
+          <ProductComments productId={id!} />
+        </div>
       </div>
     </div>
   );

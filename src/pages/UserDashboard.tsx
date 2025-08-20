@@ -3,8 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandNavbar from "@/components/BrandNavbar";
-import { Heart, ShoppingBag, User, Package } from "lucide-react";
+import UserProfileEditor from "@/components/UserProfileEditor";
+import { Heart, ShoppingBag, User, Package, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -143,11 +145,19 @@ const UserDashboard = () => {
               Mon Espace Personnel
             </h1>
             <p className="text-muted-foreground">
-              Gérez vos achats et vos articles favoris.
+              Gérez votre profil, vos achats et vos articles favoris.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Tabs defaultValue="activity" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="activity">Activité</TabsTrigger>
+              <TabsTrigger value="profile">Profil</TabsTrigger>
+              <TabsTrigger value="settings">Paramètres</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="activity" className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Liked Products Section */}
             <Card>
               <CardHeader>
@@ -256,7 +266,33 @@ const UserDashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="profile" className="mt-6">
+              <UserProfileEditor />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Paramètres du compte
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                    <p>Paramètres avancés à venir</p>
+                    <p className="text-sm">
+                      Préférences de notification, confidentialité, etc.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProtectedRoute>
