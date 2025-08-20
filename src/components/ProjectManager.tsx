@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Mail } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Users, Plus, Mail, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Project {
@@ -174,6 +175,32 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
     }
   };
 
+  const deleteProject = async (projectId: string) => {
+    try {
+      // First delete project members
+      await supabase
+        .from('project_members')
+        .delete()
+        .eq('project_id', projectId);
+
+      // Then delete the project
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId)
+        .eq('creator_id', user?.id);
+
+      if (error) throw error;
+
+      toast.success('Projet supprimé avec succès!');
+      fetchProjects();
+      onProjectsChange?.();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast.error('Erreur lors de la suppression du projet');
+    }
+  };
+
   if (loading) {
     return <div className="text-center p-4">Chargement...</div>;
   }
@@ -208,10 +235,39 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{project.name}</span>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {project.members?.length || 0}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {project.members?.length || 0}
+                  </Badge>
+                  {project.creator_id === user?.id && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer le projet "{project.name}" ? 
+                            Cette action est irréversible et supprimera tous les produits associés.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => deleteProject(project.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
               </CardTitle>
               {project.description && (
                 <p className="text-sm text-muted-foreground">{project.description}</p>
