@@ -117,6 +117,7 @@ export const SellerProfileManager = () => {
         const { error } = await supabase
           .from("profiles")
           .update({
+            role: 'seller',
             is_seller: true,
             ...updates,
           })
@@ -130,6 +131,7 @@ export const SellerProfileManager = () => {
           .insert({
             user_id: user.id,
             email: user.email,
+            role: 'seller',
             is_seller: true,
             ...updates,
           });
@@ -248,7 +250,11 @@ export const SellerProfileManager = () => {
           </div>
 
           <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-xl">
-            <p className="font-medium mb-1">Email public :</p>
+            <p className="font-medium mb-1">Nom de marque :</p>
+            <p className="text-xs mb-2">
+              Le nom complet que vous saisissez sera le nom de votre marque. Une fois défini, seuls les administrateurs peuvent le modifier.
+            </p>
+            <p className="font-medium mb-1 mt-3">Email public :</p>
             <p>{user?.email}</p>
             <p className="text-xs mt-2">
               Votre email sera visible sur votre profil public pour que les acheteurs puissent vous contacter.

@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import logo from "@/assets/newave/logo.png";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
+  const { role } = useRole();
 
   return (
     <header className="sticky top-4 z-30 px-4">
@@ -27,9 +29,24 @@ const BrandNavbar = () => {
               <Link to="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
               </Link>
-              <Link to="/seller">
-                <Button variant="ghost">Espace vendeur</Button>
-              </Link>
+              
+              {role === 'seller' && (
+                <Link to="/seller">
+                  <Button variant="ghost">Espace vendeur</Button>
+                </Link>
+              )}
+              
+              {role === 'admin' && (
+                <Link to="/admin">
+                  <Button variant="ghost">Administration</Button>
+                </Link>
+              )}
+              
+              {role === 'buyer' && (
+                <Link to="/user">
+                  <Button variant="ghost">Mon Espace</Button>
+                </Link>
+              )}
             </>
           )}
           {user ? (
@@ -38,7 +55,7 @@ const BrandNavbar = () => {
             </Button>
           ) : (
             <>
-              <Link to="/seller">
+              <Link to="/auth">
                 <Button variant="secondary">Devenir vendeur</Button>
               </Link>
               <Link to="/auth">
