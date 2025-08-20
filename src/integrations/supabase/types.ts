@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      likes: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           brand: string
@@ -62,6 +83,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_seller: boolean | null
+          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
           user_id: string
         }
@@ -73,6 +95,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_seller?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id: string
         }
@@ -84,7 +107,38 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_seller?: boolean | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          id: string
+          price_paid: number
+          product_id: string
+          purchased_at: string
+          quantity: number
+          seller_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          price_paid: number
+          product_id: string
+          purchased_at?: string
+          quantity?: number
+          seller_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          price_paid?: number
+          product_id?: string
+          purchased_at?: string
+          quantity?: number
+          seller_id?: string
           user_id?: string
         }
         Relationships: []
@@ -94,10 +148,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "seller" | "buyer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -224,6 +281,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "seller", "buyer"],
+    },
   },
 } as const
