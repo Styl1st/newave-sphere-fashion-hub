@@ -42,6 +42,19 @@ export const ProjectProductManager = () => {
     description: ''
   });
 
+  const categories = [
+    'Vêtements',
+    'Accessoires',
+    'Chaussures',
+    'Bijoux',
+    'Sacs',
+    'Électronique',
+    'Maison & Décoration',
+    'Beauté & Cosmétiques',
+    'Sport',
+    'Autre'
+  ];
+
   useEffect(() => {
     if (user) {
       fetchProjects();
@@ -283,12 +296,18 @@ export const ProjectProductManager = () => {
               required
             />
 
-            <Input
-              placeholder="Catégorie"
-              value={newProduct.category}
-              onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-              required
-            />
+            <Select value={newProduct.category} onValueChange={(value) => setNewProduct({ ...newProduct, category: value })} required>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <Input
               type="number"

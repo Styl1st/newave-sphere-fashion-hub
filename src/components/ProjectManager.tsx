@@ -91,8 +91,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
           .select(`
             id,
             user_id,
-            role,
-            profiles!inner(full_name, email)
+            role
           `)
           .eq('project_id', project.id);
         
@@ -283,7 +282,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
                 <div className="space-y-1">
                   {project.members?.map((member) => (
                     <div key={member.id} className="flex items-center justify-between text-sm">
-                      <span>{member.profiles?.full_name || member.profiles?.email}</span>
+                      <span>{member.user_id}</span>
                       <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
                         {member.role === 'owner' ? 'Propriétaire' : 'Collaborateur'}
                       </Badge>
