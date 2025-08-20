@@ -1,0 +1,1 @@
+DELETE FROM products WHERE project_id IS NULL;

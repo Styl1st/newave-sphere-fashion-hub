@@ -82,13 +82,40 @@ export const ProjectProductManager = () => {
 
   const fetchProducts = async () => {
     try {
+      // First get all project IDs where user is creator or member
+      const [createdProjects, memberProjects] = await Promise.all([
+        supabase
+          .from('projects')
+          .select('id')
+          .eq('creator_id', user?.id),
+        supabase
+          .from('project_members')
+          .select('project_id')
+          .eq('user_id', user?.id)
+      ]);
+
+      if (createdProjects.error) throw createdProjects.error;
+      if (memberProjects.error) throw memberProjects.error;
+
+      const allProjectIds = [
+        ...(createdProjects.data?.map(p => p.id) || []),
+        ...(memberProjects.data?.map(m => m.project_id) || [])
+      ];
+
+      if (allProjectIds.length === 0) {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch products only from user's projects
       const { data, error } = await supabase
         .from('products')
         .select(`
           *,
           projects(name)
         `)
-        .not('project_id', 'is', null);
+        .in('project_id', allProjectIds);
 
       if (error) throw error;
       setProducts(data || []);
