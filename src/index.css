@@ -48,8 +48,8 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* NeWave brand tokens */
-    --brand: 0 0% 100%;
-    --brand-2: 0 100% 50%;
+    --brand: 0, 0%, 10%;
+    --brand-2: 180, 100%, 70%;
     --brand-contrast: 0 0% 100%;
 
     /* Signature gradient & shadows */
@@ -144,9 +144,9 @@ All colors MUST be HSL.
     background: linear-gradient(
       45deg,
       hsl(var(--brand) / 0.3) 25%,
-      hsl(var(--brand-2) / 0.1) 50%,
+      hsl(var(--brand-2) / 0.4) 50%,
       hsl(var(--brand) / 0.3) 75%,
-      hsl(var(--brand-2) / 0.1) 100%
+      hsl(var(--brand-2) / 0.4) 100%
     );
     background-size: 400% 400%;
     animation: gradient-fade 10s ease infinite;

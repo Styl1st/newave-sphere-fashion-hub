@@ -26,7 +26,7 @@ const BrandNavbar = () => {
           </Link>
           {user && (
             <>
-              {role === 'seller' && (
+              {role !== 'seller' || (
                 <>
                   <Link to="/seller">
                     <Button variant="ghost">Espace vendeur</Button>
