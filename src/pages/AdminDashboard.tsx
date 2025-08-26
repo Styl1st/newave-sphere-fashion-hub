@@ -193,7 +193,9 @@ const AdminDashboard = () => {
       if (uploadError) throw uploadError;
 
       // Récupérer l'URL publique
-      const { data } = supabase.storage.from("profile-pictures").getPublicUrl(filePath);
+      const { data } = supabase.storage
+        .from("profile-pictures")
+        .getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
       // Mettre à jour le champ avatar_url dans la table profiles
@@ -239,7 +241,7 @@ const AdminDashboard = () => {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
 
         <div className="container mx-auto px-4 py-8">
@@ -385,7 +387,8 @@ const AdminDashboard = () => {
 
                                 <div>
                                   <Label>
-                                    Modifier la photo de profil de {profile.full_name} 
+                                    Modifier la photo de profil de{" "}
+                                    {profile.full_name}
                                   </Label>
                                   <Input
                                     id="profilePicture"

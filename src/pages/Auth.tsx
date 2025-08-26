@@ -85,7 +85,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       <main className="container mx-auto py-16 flex items-center justify-center">
         <Card className="w-full max-w-md">

@@ -32,7 +32,7 @@ const MyProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
