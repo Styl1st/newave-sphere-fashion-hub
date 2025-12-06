@@ -244,7 +244,7 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 page-gap">
           <div className="mb-8">
             <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
               <Settings className="h-8 w-8" />

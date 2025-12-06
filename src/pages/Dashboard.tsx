@@ -21,7 +21,7 @@ const Dashboard = () => {
     <ProtectedRoute>
       <div className="min-h-screen bg-background">
         <BrandNavbar />
-        <main className="container mx-auto py-10">
+        <main className="container mx-auto py-10 page-gap">
           <div className="mb-6">
             <h1 className="text-3xl font-semibold">Dashboard</h1>
             <p className="text-muted-foreground mt-2">

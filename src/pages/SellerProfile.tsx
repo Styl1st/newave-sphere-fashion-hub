@@ -88,7 +88,7 @@ const SellerProfile = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 page-gap">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -104,7 +104,7 @@ const SellerProfile = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 page-gap">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Profil vendeur non trouvé</h1>
             <p className="text-muted-foreground">
@@ -125,7 +125,7 @@ const SellerProfile = () => {
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 page-gap">
         {/* Seller Header */}
         <Card className="mb-8 bg-background/80 backdrop-blur border rounded-3xl">
           <CardContent className="p-8">

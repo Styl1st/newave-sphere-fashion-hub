@@ -139,6 +139,10 @@ All colors MUST be HSL.
   .bg-gradient-primary {
     background-image: var(--gradient-primary);
   }
+  /* Consistent top spacing below the fixed navbar */
+  .page-gap {
+    padding-top: clamp(4rem, 6vw, 6.5rem);
+  }
   .shadow-elegant {
     box-shadow: var(--shadow-elegant);
   }

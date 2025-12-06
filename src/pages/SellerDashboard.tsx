@@ -53,7 +53,7 @@ const SellerDashboard = () => {
     <ProtectedRoute allowedRoles={["seller"]}>
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 page-gap">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold mb-8">Tableau de bord vendeur</h1>
 
