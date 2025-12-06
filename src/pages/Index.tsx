@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState, useEffect } from "react";
 
-const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
+const CATEGORIES = ["Chaussures", "Sweats", "Vestes", "Pantalons", "T-shirts", "Sous-vêtements", "Accessoires", "Robes", "Jupes"] as const;
 
 type Category = typeof CATEGORIES[number];
 
@@ -84,7 +84,7 @@ const Index = () => {
               - Independent Fashion Marketplace
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
+              Découvrez des vêtements uniques de marques émergentes. Pièces sélectionnées, communauté avant tout.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button variant="hero" size="lg">Explore drops</Button>

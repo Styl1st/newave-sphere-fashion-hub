@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Upload, X, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Plus, Upload, X, Trash2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Project {
@@ -34,6 +34,9 @@ export const ProjectProductManager = () => {
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editImages, setEditImages] = useState<File[]>([]);
 
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -42,17 +45,24 @@ export const ProjectProductManager = () => {
     description: ''
   });
 
+  const [editForm, setEditForm] = useState({
+    name: '',
+    category: '',
+    price: '',
+    description: '',
+    project_id: ''
+  });
+
   const categories = [
-    'Vêtements',
-    'Accessoires',
     'Chaussures',
-    'Bijoux',
-    'Sacs',
-    'Électronique',
-    'Maison & Décoration',
-    'Beauté & Cosmétiques',
-    'Sport',
-    'Autre'
+    'Sweats',
+    'Vestes',
+    'Pantalons',
+    'T-shirts',
+    'Sous-vêtements',
+    'Accessoires',
+    'Robes',
+    'Jupes'
   ];
 
   useEffect(() => {
@@ -64,7 +74,6 @@ export const ProjectProductManager = () => {
 
   const fetchProjects = async () => {
     try {
-      // Fetch projects where user is creator or member
       const [createdProjects, memberProjects] = await Promise.all([
         supabase
           .from('projects')
@@ -79,18 +88,15 @@ export const ProjectProductManager = () => {
       if (createdProjects.error) throw createdProjects.error;
       if (memberProjects.error) throw memberProjects.error;
 
-      // Combine projects and remove duplicates by id
       const createdProjectsData = createdProjects.data || [];
       const memberProjectsData = memberProjects.data?.map(m => m.projects).filter(Boolean) || [];
       
       const allProjectsMap = new Map();
       
-      // Add created projects first
       createdProjectsData.forEach(project => {
         allProjectsMap.set(project.id, project);
       });
       
-      // Add member projects (will not overwrite if already exists)
       memberProjectsData.forEach(project => {
         if (!allProjectsMap.has(project.id)) {
           allProjectsMap.set(project.id, project);
@@ -110,7 +116,6 @@ export const ProjectProductManager = () => {
 
   const fetchProducts = async () => {
     try {
-      // First get all project IDs where user is creator or member
       const [createdProjects, memberProjects] = await Promise.all([
         supabase
           .from('projects')
@@ -125,7 +130,6 @@ export const ProjectProductManager = () => {
       if (createdProjects.error) throw createdProjects.error;
       if (memberProjects.error) throw memberProjects.error;
 
-      // Combine project IDs and remove duplicates
       const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
       const memberProjectIds = memberProjects.data?.map(m => m.project_id) || [];
       
@@ -137,7 +141,6 @@ export const ProjectProductManager = () => {
         return;
       }
 
-      // Fetch products only from user's projects
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -160,14 +163,23 @@ export const ProjectProductManager = () => {
     setSelectedImages(prev => [...prev, ...files].slice(0, 5));
   };
 
+  const handleEditImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setEditImages(prev => [...prev, ...files].slice(0, 5));
+  };
+
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const uploadImages = async (): Promise<string[]> => {
+  const removeEditImage = (index: number) => {
+    setEditImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadImages = async (images: File[]): Promise<string[]> => {
     const imageUrls: string[] = [];
     
-    for (const image of selectedImages) {
+    for (const image of images) {
       const fileExt = image.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `products/${fileName}`;
@@ -204,7 +216,7 @@ export const ProjectProductManager = () => {
     try {
       setLoading(true);
       
-      const imageUrls = selectedImages.length > 0 ? await uploadImages() : [];
+      const imageUrls = selectedImages.length > 0 ? await uploadImages(selectedImages) : [];
       const projectName = projects.find(p => p.id === selectedProject)?.name || '';
 
       const { error } = await supabase
@@ -234,6 +246,90 @@ export const ProjectProductManager = () => {
     }
   };
 
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setEditForm({
+      name: product.name,
+      category: product.category,
+      price: product.price.toString(),
+      description: product.description || '',
+      project_id: product.project_id
+    });
+    setEditImages([]);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingProduct) return;
+
+    if (!editForm.name || !editForm.category || !editForm.price) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      let imageUrls = editingProduct.images || [];
+      
+      if (editImages.length > 0) {
+        const newImageUrls = await uploadImages(editImages);
+        imageUrls = [...imageUrls, ...newImageUrls].slice(0, 5);
+      }
+
+      const projectName = projects.find(p => p.id === editForm.project_id)?.name || editingProduct.brand;
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          name: editForm.name,
+          brand: projectName,
+          category: editForm.category,
+          price: parseFloat(editForm.price),
+          description: editForm.description,
+          images: imageUrls,
+          project_id: editForm.project_id
+        })
+        .eq('id', editingProduct.id);
+
+      if (error) throw error;
+
+      setEditDialogOpen(false);
+      setEditingProduct(null);
+      setEditImages([]);
+      fetchProducts();
+      toast.success('Produit mis à jour avec succès!');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error('Erreur lors de la mise à jour du produit');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveExistingImage = async (imageUrl: string) => {
+    if (!editingProduct) return;
+
+    const updatedImages = editingProduct.images.filter(img => img !== imageUrl);
+    
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ images: updatedImages })
+        .eq('id', editingProduct.id);
+
+      if (error) throw error;
+
+      setEditingProduct({ ...editingProduct, images: updatedImages });
+      toast.success('Image supprimée');
+    } catch (error) {
+      console.error('Error removing image:', error);
+      toast.error('Erreur lors de la suppression de l\'image');
+    }
+  };
+
   const handleDeleteProduct = async (productId: string) => {
     try {
       const { error } = await supabase
@@ -251,7 +347,7 @@ export const ProjectProductManager = () => {
     }
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return <div className="text-center p-4">Chargement...</div>;
   }
 
@@ -337,7 +433,7 @@ export const ProjectProductManager = () => {
                     id="image-upload"
                   />
                   <label htmlFor="image-upload" className="cursor-pointer">
-                    <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-md hover:border-gray-400">
+                    <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md hover:border-primary">
                       <Upload className="h-4 w-4" />
                       <span>Choisir des images</span>
                     </div>
@@ -356,7 +452,7 @@ export const ProjectProductManager = () => {
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                          className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -399,13 +495,22 @@ export const ProjectProductManager = () => {
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDeleteProduct(product.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditProduct(product)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteProduct(product.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
             
@@ -419,6 +524,142 @@ export const ProjectProductManager = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier le produit</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateProduct} className="space-y-4">
+            <Select value={editForm.project_id} onValueChange={(value) => setEditForm({ ...editForm, project_id: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un projet" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              placeholder="Nom du produit"
+              value={editForm.name}
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              required
+            />
+
+            <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Prix (€)"
+              value={editForm.price}
+              onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+              required
+            />
+
+            <Textarea
+              placeholder="Description"
+              value={editForm.description}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+            />
+
+            {/* Existing Images */}
+            {editingProduct?.images && editingProduct.images.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Images actuelles</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {editingProduct.images.map((imageUrl, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={imageUrl}
+                        alt={`Image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExistingImage(imageUrl)}
+                        className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Images Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Ajouter des images</label>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleEditImageUpload}
+                    className="hidden"
+                    id="edit-image-upload"
+                  />
+                  <label htmlFor="edit-image-upload" className="cursor-pointer">
+                    <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md hover:border-primary">
+                      <Upload className="h-4 w-4" />
+                      <span>Choisir des images</span>
+                    </div>
+                  </label>
+                </div>
+
+                {editImages.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {editImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeEditImage(index)}
+                          className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Mise à jour...' : 'Enregistrer'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
