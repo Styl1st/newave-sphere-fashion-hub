@@ -27,8 +27,8 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
+        title: "Error",
+        description: "Please fill in all fields",
         variant: "destructive"
       });
       return;
@@ -39,8 +39,8 @@ const Auth = () => {
     
     if (error) {
       toast({
-        title: "Erreur de connexion",
-        description: error.message || "Impossible de se connecter",
+        title: "Login error",
+        description: error.message || "Unable to sign in",
         variant: "destructive"
       });
     }
@@ -51,8 +51,8 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password || !fullName) {
       toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
+        title: "Error",
+        description: "Please fill in all fields",
         variant: "destructive"
       });
       return;
@@ -64,21 +64,21 @@ const Auth = () => {
     if (error) {
       if (error.message?.includes('already registered')) {
         toast({
-          title: "Compte existant",
-          description: "Un compte avec cet email existe déjà. Essayez de vous connecter.",
+          title: "Account exists",
+          description: "An account with this email already exists. Try signing in.",
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Erreur d'inscription",
-          description: error.message || "Impossible de créer le compte",
+          title: "Registration error",
+          description: error.message || "Unable to create account",
           variant: "destructive"
         });
       }
     } else {
       toast({
-        title: "Compte créé avec succès!",
-        description: "Vous pouvez maintenant vous connecter."
+        title: "Account created successfully!",
+        description: "You can now sign in."
       });
     }
     setLoading(false);
@@ -90,16 +90,16 @@ const Auth = () => {
       <main className="container mx-auto py-16 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Authentification</CardTitle>
+            <CardTitle className="text-2xl">Authentication</CardTitle>
             <CardDescription>
-              Connectez-vous ou créez votre compte marque
+              Sign in or create your brand account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Se connecter</TabsTrigger>
-                <TabsTrigger value="signup">S'inscrire</TabsTrigger>
+                <TabsTrigger value="signin">Sign in</TabsTrigger>
+                <TabsTrigger value="signup">Sign up</TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4 mt-6">
@@ -111,12 +111,12 @@ const Auth = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre@email.com"
+                      placeholder="your@email.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Mot de passe</Label>
+                    <Label htmlFor="signin-password">Password</Label>
                     <Input
                       id="signin-password"
                       type="password"
@@ -127,7 +127,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Connexion..." : "Se connecter"}
+                    {loading ? "Signing in..." : "Sign in"}
                   </Button>
                 </form>
               </TabsContent>
@@ -135,13 +135,13 @@ const Auth = () => {
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nom complet</Label>
+                    <Label htmlFor="signup-name">Full name</Label>
                     <Input
                       id="signup-name"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Votre nom"
+                      placeholder="Your name"
                       required
                     />
                   </div>
@@ -152,12 +152,12 @@ const Auth = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre@email.com"
+                      placeholder="your@email.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Mot de passe</Label>
+                    <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -168,7 +168,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Création..." : "Créer le compte"}
+                    {loading ? "Creating..." : "Create account"}
                   </Button>
                 </form>
               </TabsContent>

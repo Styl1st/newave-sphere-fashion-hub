@@ -29,10 +29,10 @@ const BrandNavbar = () => {
               {role !== 'seller' || (
                 <>
                   <Link to="/seller">
-                    <Button variant="ghost">Espace vendeur</Button>
+                    <Button variant="ghost">Seller Dashboard</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost">Mon Profil</Button>
+                    <Button variant="ghost">My Profile</Button>
                   </Link>
                 </>
               )}
@@ -43,29 +43,29 @@ const BrandNavbar = () => {
                     <Button variant="ghost">Administration</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost">Mon Profil</Button>
+                    <Button variant="ghost">My Profile</Button>
                   </Link>
                 </>
               )}
               
               {role === 'buyer' && (
                 <Link to="/user">
-                  <Button variant="ghost">Mon Espace</Button>
+                  <Button variant="ghost">My Space</Button>
                 </Link>
               )}
             </>
           )}
           {user ? (
             <Button onClick={signOut} variant="outline">
-              Se déconnecter
+              Sign out
             </Button>
           ) : (
             <>
               <Link to="/auth">
-                <Button variant="secondary">Devenir vendeur</Button>
+                <Button variant="secondary">Become a seller</Button>
               </Link>
               <Link to="/auth">
-                <Button variant="hero">Se connecter</Button>
+                <Button variant="hero">Sign in</Button>
               </Link>
             </>
           )}

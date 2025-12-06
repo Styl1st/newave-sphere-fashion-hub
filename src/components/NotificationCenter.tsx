@@ -84,7 +84,7 @@ export const NotificationCenter = () => {
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error('Error updating notification');
     }
   };
 
@@ -100,10 +100,10 @@ export const NotificationCenter = () => {
 
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-      toast.success('Toutes les notifications marquées comme lues');
+      toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all as read:', error);
-      toast.error('Erreur lors de la mise à jour');
+      toast.error('Error updating notifications');
     }
   };
 
@@ -119,7 +119,7 @@ export const NotificationCenter = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',
@@ -128,7 +128,7 @@ export const NotificationCenter = () => {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Chargement...</div>;
+    return <div className="text-center p-4">Loading...</div>;
   }
 
   return (
@@ -144,7 +144,7 @@ export const NotificationCenter = () => {
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={markAllAsRead}>
             <Check className="h-4 w-4 mr-2" />
-            Tout marquer comme lu
+            Mark all as read
           </Button>
         )}
       </div>
@@ -177,7 +177,7 @@ export const NotificationCenter = () => {
                     notification.type === 'announcement' ? 'secondary' : 'outline'
                   }>
                     {notification.type === 'invitation' ? 'Invitation' :
-                     notification.type === 'announcement' ? 'Annonce' : 'Général'}
+                     notification.type === 'announcement' ? 'Announcement' : 'General'}
                   </Badge>
                   {!notification.read && (
                     <Button 
@@ -199,7 +199,7 @@ export const NotificationCenter = () => {
         <Card>
           <CardContent className="text-center py-8">
             <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Aucune notification</p>
+            <p className="text-muted-foreground">No notifications</p>
           </CardContent>
         </Card>
       )}

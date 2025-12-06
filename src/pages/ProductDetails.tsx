@@ -90,7 +90,7 @@ const ProductDetails = () => {
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement...</p>
+              <p className="text-muted-foreground">Loading...</p>
             </div>
           </div>
         </div>
@@ -104,10 +104,10 @@ const ProductDetails = () => {
         <BrandNavbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
+            <h1 className="text-2xl font-bold mb-4">Product not found</h1>
             <Button onClick={() => navigate("/")} variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour à l'accueil
+              Back to home
             </Button>
           </div>
         </div>
@@ -140,7 +140,7 @@ const ProductDetails = () => {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
+          Back
         </Button>
 
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
@@ -229,7 +229,7 @@ const ProductDetails = () => {
             {product.description && (
               <div>
                 <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                   {product.description}
                 </p>
               </div>
@@ -237,7 +237,7 @@ const ProductDetails = () => {
 
             <div className="pt-4 border-t">
               <Button size="lg" className="w-full">
-                Contacter le vendeur
+                Contact seller
               </Button>
             </div>
           </div>
@@ -265,15 +265,15 @@ const ProductDetails = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <h3 className="font-semibold text-lg">
-                      {sellerProfile.full_name || "Vendeur"}
+                      {sellerProfile.full_name || "Seller"}
                     </h3>
                     {sellerProfile.is_seller && (
-                      <Badge variant="outline">Vendeur vérifié</Badge>
+                      <Badge variant="outline">Verified seller</Badge>
                     )}
                   </div>
                   
                   {sellerProfile.bio && (
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-muted-foreground mb-3 whitespace-pre-line">
                       {sellerProfile.bio}
                     </p>
                   )}
@@ -282,7 +282,7 @@ const ProductDetails = () => {
                     <Link to={`/seller/${sellerProfile.user_id}`}>
                       <Button variant="outline" size="sm">
                         <Store className="mr-2 h-4 w-4" />
-                        Voir tous ses produits
+                        View all products
                       </Button>
                     </Link>
                     
@@ -290,7 +290,7 @@ const ProductDetails = () => {
                       <Button variant="ghost" size="sm" asChild>
                         <a href={`mailto:${sellerProfile.email}`}>
                           <Mail className="mr-2 h-4 w-4" />
-                          Contacter
+                          Contact
                         </a>
                       </Button>
                     )}

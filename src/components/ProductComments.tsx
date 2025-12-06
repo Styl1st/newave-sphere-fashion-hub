@@ -70,7 +70,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
         const commentsWithProfiles = commentsData.map(comment => ({
           ...comment,
           profiles: profilesData?.find(p => p.user_id === comment.user_id) || {
-            full_name: "Utilisateur anonyme",
+            full_name: "Anonymous user",
             avatar_url: null
           }
         }));
@@ -103,8 +103,8 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       if (error) throw error;
 
       toast({
-        title: "Commentaire ajouté",
-        description: "Votre commentaire a été publié avec succès.",
+        title: "Comment added",
+        description: "Your comment has been published successfully.",
       });
 
       setNewComment("");
@@ -112,8 +112,8 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     } catch (error) {
       console.error("Error submitting comment:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter le commentaire.",
+        title: "Error",
+        description: "Unable to add comment.",
         variant: "destructive",
       });
     } finally {
@@ -135,8 +135,8 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       if (error) throw error;
 
       toast({
-        title: "Commentaire modifié",
-        description: "Votre commentaire a été mis à jour.",
+        title: "Comment updated",
+        description: "Your comment has been updated.",
       });
 
       setEditingComment(null);
@@ -145,8 +145,8 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
     } catch (error) {
       console.error("Error editing comment:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de modifier le commentaire.",
+        title: "Error",
+        description: "Unable to update comment.",
         variant: "destructive",
       });
     } finally {
@@ -164,16 +164,16 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       if (error) throw error;
 
       toast({
-        title: "Commentaire supprimé",
-        description: "Le commentaire a été supprimé avec succès.",
+        title: "Comment deleted",
+        description: "The comment has been deleted successfully.",
       });
 
       fetchComments();
     } catch (error) {
       console.error("Error deleting comment:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le commentaire.",
+        title: "Error",
+        description: "Unable to delete comment.",
         variant: "destructive",
       });
     }
@@ -181,7 +181,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", {
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -195,7 +195,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
-          Commentaires ({comments.length})
+          Comments ({comments.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -205,7 +205,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Partagez votre avis sur cet article..."
+              placeholder="Share your thoughts on this item..."
               rows={3}
               disabled={submitting}
             />
@@ -215,19 +215,19 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
               className="w-full"
             >
               <Send className="h-4 w-4 mr-2" />
-              {submitting ? "Publication..." : "Publier le commentaire"}
+              {submitting ? "Publishing..." : "Post comment"}
             </Button>
           </div>
         )}
 
         {/* Comments List */}
         {loading ? (
-          <div className="text-center py-8">Chargement des commentaires...</div>
+          <div className="text-center py-8">Loading comments...</div>
         ) : comments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p>Aucun commentaire pour le moment.</p>
-            <p className="text-sm">Soyez le premier à donner votre avis !</p>
+            <p>No comments yet.</p>
+            <p className="text-sm">Be the first to share your thoughts!</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -243,12 +243,12 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
                     </Avatar>
                     <div>
                       <div className="font-medium">
-                        {comment.profiles?.full_name || "Utilisateur anonyme"}
+                        {comment.profiles?.full_name || "Anonymous user"}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {formatDate(comment.created_at)}
                         {comment.updated_at !== comment.created_at && (
-                          <span className="ml-2">(modifié)</span>
+                          <span className="ml-2">(edited)</span>
                         )}
                       </div>
                     </div>
@@ -272,7 +272,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Modifier le commentaire</DialogTitle>
+                            <DialogTitle>Edit comment</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <Textarea
@@ -286,7 +286,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
                                 disabled={submitting || !editContent.trim()}
                                 className="flex-1"
                               >
-                                Sauvegarder
+                                Save
                               </Button>
                               <Button
                                 variant="outline"
@@ -296,7 +296,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
                                 }}
                                 className="flex-1"
                               >
-                                Annuler
+                                Cancel
                               </Button>
                             </div>
                           </div>
