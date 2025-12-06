@@ -84,7 +84,7 @@ const Index = () => {
               - Independent Fashion Marketplace
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Découvrez des vêtements uniques de marques émergentes. Pièces sélectionnées, communauté avant tout.
+              Discover unique clothing from emerging brands. Curated pieces, community first.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button variant="hero" size="lg">Explore drops</Button>
@@ -95,8 +95,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Filters */}
-        <section className="px-4">
+        {/* Filters - Sticky */}
+        <section className="px-4 sticky top-20 z-20">
           <div className="max-w-6xl mx-auto py-6 bg-background/60 backdrop-blur rounded-2xl border shadow-sm">
             <div className="px-6 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
               <div className="flex flex-wrap gap-4 items-center">
@@ -136,14 +136,14 @@ const Index = () => {
           <div className="max-w-6xl mx-auto">
             {loading ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Chargement des produits...</p>
+                <p className="text-muted-foreground">Loading products...</p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
                   {products.length === 0 
-                    ? "Aucun produit disponible pour le moment." 
-                    : "Aucun produit ne correspond à vos critères de recherche."
+                    ? "No products available at the moment." 
+                    : "No products match your search criteria."
                   }
                 </p>
               </div>
