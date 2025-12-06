@@ -35,7 +35,7 @@ const Index = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
+
       // Transform database products to match ProductCard type
       const transformedProducts: Product[] = (data || []).map(product => ({
         id: product.id,
@@ -45,7 +45,7 @@ const Index = () => {
         price: Number(product.price),
         image: product.images[0] || "/placeholder.svg", // Use first image or placeholder
       }));
-      
+
       setProducts(transformedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -59,8 +59,8 @@ const Index = () => {
     if (selected.size > 0) {
       list = list.filter(p => selected.has(p.category as Category));
     }
-    if (sort === "price_asc") list = [...list].sort((a,b) => a.price - b.price);
-    if (sort === "price_desc") list = [...list].sort((a,b) => b.price - a.price);
+    if (sort === "price_asc") list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === "price_desc") list = [...list].sort((a, b) => b.price - a.price);
     return list;
   }, [products, selected, maxPrice, sort]);
 
@@ -73,48 +73,52 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-animated-fade">
+    <div className="w-full h-screen bg-animated-fade" style={{width: '100%', height: '100%'}}>
+
+
       <BrandNavbar />
-      <main className="relative z-10">
+      <main className="relative z-10 w-full">
         {/* Hero */}
-        <section className="relative overflow-hidden px-4">
-          <div className="max-w-4xl mx-auto py-16 text-center">
-            <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
-              <img src={logoTransparent} alt="logo" className="flex h-[80px] items-center" />
-              - Independent Fashion Marketplace
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
-            </p>
-            <div className="mt-8 flex justify-center gap-4">
-              <Button variant="hero" size="lg">Explore drops</Button>
-              <a href="/auth">
-                <Button variant="secondary" size="lg">Become a seller</Button>
-              </a>
+        <section className="relative z-0 overflow-hidden w-full bg-gradient-to-b from-white to-white/60 py-[120%]" style={{width: '100%', padding: '5% 5%'}}>
+          <div className="w-[90%] mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
+            <div className="bg-white/80 backdrop-blur rounded-3xl p-[3%]" style={{padding: '7%'}}>
+              <img src={logoTransparent} alt="logo" className="flex items-center mx-auto" style={{height: '8vw', width: 'auto', maxHeight: '80px'}} />
+              <h1 className="flex font-semibold tracking-tight justify-center gap-2 mt-[3%]" style={{fontSize: '2.5vw', marginTop: '3%'}}>
+          Independent Fashion Marketplace
+              </h1>
+              <p className="text-muted-foreground mx-auto" style={{fontSize: '1.1vw', marginTop: '3%', maxWidth: '90%'}}>
+          Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
+              </p>
+              <div className="flex flex-col justify-center gap-[3%]" style={{marginTop: '5%', flexDirection: 'row', justifyContent: 'center', gap: '2%', flexWrap: 'wrap'}}>
+          <Button variant="hero" size="lg">Explore drops</Button>
+          <a href="/auth">
+            <Button variant="secondary" size="lg">Become a seller</Button>
+          </a>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Filters */}
-        <section className="px-4">
-          <div className="max-w-6xl mx-auto py-6 bg-background/60 backdrop-blur rounded-2xl border shadow-sm">
-            <div className="px-6 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
-              <div className="flex flex-wrap gap-4 items-center">
-                <span className="text-sm text-muted-foreground">Categories:</span>
+        <section className="w-full" style={{width: '100%', padding: '2% 5%', marginTop: '-5%'}}>
+          <div className="w-[90%] mx-auto bg-background/60 backdrop-blur rounded-2xl border shadow-sm" style={{width: '90%', padding: '3% 3%'}}>
+            <div className="flex flex-col gap-[2%] md:flex-row md:items-center md:justify-between" style={{padding: '0 3%', gap: '2%'}}>
+              <div className="flex flex-wrap gap-[2%] items-center" style={{gap: '2%'}}>
+                <span className="text-muted-foreground whitespace-nowrap" style={{fontSize: '0.95vw'}}>Categories:</span>
                 {CATEGORIES.map((c) => (
-                  <label key={c} className="flex items-center gap-2">
+                  <label key={c} className="flex items-center gap-[1%]">
                     <Checkbox id={c} checked={selected.has(c)} onCheckedChange={() => toggleCategory(c)} />
-                    <Label htmlFor={c} className="cursor-pointer">{c}</Label>
+                    <Label htmlFor={c} className="cursor-pointer" style={{fontSize: '0.95vw'}}>{c}</Label>
                   </label>
                 ))}
               </div>
-              <div className="flex items-center gap-6">
-                <div className="w-56">
-                  <Label className="text-sm">Max price: €{maxPrice}</Label>
+              <div className="flex flex-col md:flex-row gap-[2%] w-full" style={{gap: '2%'}}>
+                <div className="w-[90%]" style={{width: '100%'}}>
+                  <Label style={{fontSize: '0.95vw'}}>Max price: €{maxPrice}</Label>
                   <Slider value={[maxPrice]} min={20} max={500} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 300)} />
                 </div>
-                <div className="w-44">
-                  <Label className="text-sm">Sort</Label>
+                <div className="w-[90%]" style={{width: '100%'}}>
+                  <Label style={{fontSize: '0.95vw'}}>Sort</Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sort by" />
@@ -132,23 +136,23 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section className="px-4 py-10">
-          <div className="max-w-6xl mx-auto">
+        <section className="w-full" style={{width: '100%', padding: '3% 5%'}}>
+          <div className="w-[90%] mx-auto" style={{width: '90%'}}>
             {loading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Chargement des produits...</p>
+              <div className="text-center" style={{padding: '5%'}}>
+                <p className="text-muted-foreground" style={{fontSize: '0.95vw'}}>Chargement des produits...</p>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  {products.length === 0 
-                    ? "Aucun produit disponible pour le moment." 
+              <div className="text-center" style={{padding: '5%'}}>
+                <p className="text-muted-foreground" style={{fontSize: '0.95vw'}}>
+                  {products.length === 0
+                    ? "Aucun produit disponible pour le moment."
                     : "Aucun produit ne correspond à vos critères de recherche."
                   }
                 </p>
               </div>
             ) : (
-              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-[2%]" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(25%, 1fr))', gap: '2%'}}>
                 {filtered.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
