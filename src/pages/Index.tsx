@@ -22,6 +22,70 @@ const Index = () => {
   const [sort, setSort] = useState<Sort>("relevance");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gradientIndex, setGradientIndex] = useState(0);
+
+  const gradients = [
+    {
+      name: "Plum",
+      backgroundImage: `linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(126, 34, 206, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(40, 20, 50, 1) 100%)`,
+    },
+    {
+      name: "Deep Plum",
+      backgroundImage: `linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(88, 28, 135, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(30, 15, 40, 1) 100%)`,
+    },
+    {
+      name: "Bright Plum",
+      backgroundImage: `linear-gradient(135deg, rgba(196, 123, 255, 0.3), rgba(147, 51, 234, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.25) 0%, rgba(50, 25, 60, 1) 100%)`,
+    },
+    {
+      name: "Plum Rose",
+      backgroundImage: `linear-gradient(135deg, rgba(186, 85, 211, 0.3), rgba(153, 50, 204, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(45, 20, 50, 1) 100%)`,
+    },
+    {
+      name: "Plum Midnight",
+      backgroundImage: `linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(25, 10, 35, 1) 100%)`,
+    },
+    {
+      name: "Plum Soft",
+      backgroundImage: `linear-gradient(135deg, rgba(177, 106, 242, 0.3), rgba(138, 43, 226, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.28) 0%, rgba(42, 22, 52, 1) 100%)`,
+    },
+    {
+      name: "Plum Silk",
+      backgroundImage: `linear-gradient(135deg, rgba(200, 130, 250, 0.3), rgba(160, 50, 220, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.27) 0%, rgba(48, 23, 58, 1) 100%)`,
+    },
+    {
+      name: "Plum Velvet",
+      backgroundImage: `linear-gradient(135deg, rgba(155, 70, 240, 0.3), rgba(100, 20, 150, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.38) 0%, rgba(35, 12, 45, 1) 100%)`,
+    },
+    {
+      name: "Plum Twilight",
+      backgroundImage: `linear-gradient(135deg, rgba(172, 95, 250, 0.3), rgba(120, 30, 180, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.32) 0%, rgba(38, 18, 48, 1) 100%)`,
+    },
+    {
+      name: "Plum Amethyst",
+      backgroundImage: `linear-gradient(135deg, rgba(180, 100, 245, 0.3), rgba(135, 40, 210, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.29) 0%, rgba(44, 21, 54, 1) 100%)`,
+    },
+    {
+      name: "Plum Berry",
+      backgroundImage: `linear-gradient(135deg, rgba(175, 80, 245, 0.3), rgba(110, 25, 165, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.36) 0%, rgba(32, 12, 42, 1) 100%)`,
+    },
+    {
+      name: "Plum Orchid",
+      backgroundImage: `linear-gradient(135deg, rgba(190, 110, 250, 0.3), rgba(145, 60, 215, 0.9)),
+linear-gradient(rgba(0, 0, 0, 0.26) 0%, rgba(52, 26, 62, 1) 100%)`,
+    }
+  ];
 
   useEffect(() => {
     fetchProducts();
@@ -75,15 +139,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar  />
-      <main className="relative z-10">
+      <main className="">
         {/* Hero */}
-        <section className="relative overflow-hidden" style={{padding: '5% 4%'}}>
+        <section className="relative overflow-hidden">
           <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
-            <div className="bg-white/80 backdrop-blur rounded-3xl" style={{padding: '7%'}}>
-            <h1 className="flex font-semibold tracking-tight justify-center" style={{fontSize: '2.5vw', gap: '2%'}}>
-              <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
-              - Independent Fashion Marketplace
-            </h1>
+            <div className="backdrop-blur rounded-3xl relative" style={{padding: '10%', backgroundImage: gradients[gradientIndex].backgroundImage, boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'}}>
+              <button 
+                onClick={() => setGradientIndex((prev) => (prev + 1) % gradients.length)}
+                className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm backdrop-blur transition"
+                style={{fontSize: '0.75vw', padding: '0.5vw 1vw'}}
+              >
+                {gradients[gradientIndex].name} ▶
+              </button>
+              <h1 className="flex font-semibold tracking-tight justify-center" style={{fontSize: '2.5vw', gap: '2%'}}>
+                <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
+                Independent Fashion Marketplace
+              </h1>
             <p className="text-muted-foreground mx-auto" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
               Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
             </p>
@@ -137,8 +208,8 @@ const Index = () => {
         <section style={{padding: '3% 4%'}}>
           <div className="mx-auto" style={{maxWidth: '90%'}}>
             {loading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Chargement des produits...</p>
+              <div className="text-center" style={{padding: '5% 0'}}>
+                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement des produits...</p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center" style={{padding: '5% 0'}}>
