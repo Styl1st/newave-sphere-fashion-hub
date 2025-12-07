@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,8 +28,13 @@ interface Product {
   projects?: { name: string };
 }
 
-export const ProjectProductManager = () => {
+interface ProjectProductManagerProps {
+  isAdminView?: boolean;
+}
+
+export const ProjectProductManager = ({ isAdminView = false }: ProjectProductManagerProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useRole();
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>('');
@@ -54,15 +60,15 @@ export const ProjectProductManager = () => {
   });
 
   const categories = [
-    'Chaussures',
-    'Sweats',
-    'Vestes',
-    'Pantalons',
+    'Shoes',
+    'Sweaters',
+    'Jackets',
+    'Pants',
     'T-shirts',
-    'Sous-vêtements',
-    'Accessoires',
-    'Robes',
-    'Jupes'
+    'Underwear',
+    'Accessories',
+    'Dresses',
+    'Skirts'
   ];
 
   useEffect(() => {
@@ -70,40 +76,53 @@ export const ProjectProductManager = () => {
       fetchProjects();
       fetchProducts();
     }
-  }, [user]);
+  }, [user, isAdminView]);
 
   const fetchProjects = async () => {
     try {
-      const [createdProjects, memberProjects] = await Promise.all([
-        supabase
+      let uniqueProjects: Project[] = [];
+
+      if (isAdminView && isAdmin) {
+        // Admin can see all projects
+        const { data, error } = await supabase
           .from('projects')
           .select('id, name')
-          .eq('creator_id', user?.id),
-        supabase
-          .from('project_members')
-          .select('project_id, projects!inner(id, name)')
-          .eq('user_id', user?.id)
-      ]);
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        uniqueProjects = data || [];
+      } else {
+        const [createdProjects, memberProjects] = await Promise.all([
+          supabase
+            .from('projects')
+            .select('id, name')
+            .eq('creator_id', user?.id),
+          supabase
+            .from('project_members')
+            .select('project_id, projects!inner(id, name)')
+            .eq('user_id', user?.id)
+        ]);
 
-      if (createdProjects.error) throw createdProjects.error;
-      if (memberProjects.error) throw memberProjects.error;
+        if (createdProjects.error) throw createdProjects.error;
+        if (memberProjects.error) throw memberProjects.error;
 
-      const createdProjectsData = createdProjects.data || [];
-      const memberProjectsData = memberProjects.data?.map(m => m.projects).filter(Boolean) || [];
-      
-      const allProjectsMap = new Map();
-      
-      createdProjectsData.forEach(project => {
-        allProjectsMap.set(project.id, project);
-      });
-      
-      memberProjectsData.forEach(project => {
-        if (!allProjectsMap.has(project.id)) {
+        const createdProjectsData = createdProjects.data || [];
+        const memberProjectsData = memberProjects.data?.map(m => m.projects).filter(Boolean) || [];
+        
+        const allProjectsMap = new Map();
+        
+        createdProjectsData.forEach(project => {
           allProjectsMap.set(project.id, project);
-        }
-      });
-      
-      const uniqueProjects = Array.from(allProjectsMap.values());
+        });
+        
+        memberProjectsData.forEach(project => {
+          if (!allProjectsMap.has(project.id)) {
+            allProjectsMap.set(project.id, project);
+          }
+        });
+        
+        uniqueProjects = Array.from(allProjectsMap.values());
+      }
       
       setProjects(uniqueProjects);
       if (uniqueProjects.length > 0 && !selectedProject) {
@@ -116,6 +135,24 @@ export const ProjectProductManager = () => {
 
   const fetchProducts = async () => {
     try {
+      let uniqueProjectIds: string[] = [];
+
+      if (isAdminView && isAdmin) {
+        // Admin can see all products
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            *,
+            projects(name)
+          `)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setProducts(data || []);
+        setLoading(false);
+        return;
+      }
+
       const [createdProjects, memberProjects] = await Promise.all([
         supabase
           .from('projects')
@@ -133,7 +170,7 @@ export const ProjectProductManager = () => {
       const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
       const memberProjectIds = memberProjects.data?.map(m => m.project_id) || [];
       
-      const uniqueProjectIds = [...new Set([...createdProjectIds, ...memberProjectIds])];
+      uniqueProjectIds = [...new Set([...createdProjectIds, ...memberProjectIds])];
 
       if (uniqueProjectIds.length === 0) {
         setProducts([]);
@@ -204,12 +241,12 @@ export const ProjectProductManager = () => {
     e.preventDefault();
     
     if (!selectedProject) {
-      toast.error('Veuillez sélectionner un projet');
+      toast.error('Please select a project');
       return;
     }
 
     if (!newProduct.name || !newProduct.category || !newProduct.price) {
-      toast.error('Veuillez remplir tous les champs obligatoires');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -237,10 +274,10 @@ export const ProjectProductManager = () => {
       setNewProduct({ name: '', category: '', price: '', description: '' });
       setSelectedImages([]);
       fetchProducts();
-      toast.success('Produit ajouté avec succès!');
+      toast.success('Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
-      toast.error('Erreur lors de l\'ajout du produit');
+      toast.error('Error adding product');
     } finally {
       setLoading(false);
     }
@@ -265,7 +302,7 @@ export const ProjectProductManager = () => {
     if (!editingProduct) return;
 
     if (!editForm.name || !editForm.category || !editForm.price) {
-      toast.error('Veuillez remplir tous les champs obligatoires');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -300,10 +337,10 @@ export const ProjectProductManager = () => {
       setEditingProduct(null);
       setEditImages([]);
       fetchProducts();
-      toast.success('Produit mis à jour avec succès!');
+      toast.success('Product updated successfully!');
     } catch (error) {
       console.error('Error updating product:', error);
-      toast.error('Erreur lors de la mise à jour du produit');
+      toast.error('Error updating product');
     } finally {
       setLoading(false);
     }
@@ -323,10 +360,10 @@ export const ProjectProductManager = () => {
       if (error) throw error;
 
       setEditingProduct({ ...editingProduct, images: updatedImages });
-      toast.success('Image supprimée');
+      toast.success('Image removed');
     } catch (error) {
       console.error('Error removing image:', error);
-      toast.error('Erreur lors de la suppression de l\'image');
+      toast.error('Error removing image');
     }
   };
 
@@ -340,22 +377,22 @@ export const ProjectProductManager = () => {
       if (error) throw error;
 
       setProducts(prev => prev.filter(p => p.id !== productId));
-      toast.success('Produit supprimé');
+      toast.success('Product deleted');
     } catch (error) {
       console.error('Error deleting product:', error);
-      toast.error('Erreur lors de la suppression');
+      toast.error('Error deleting product');
     }
   };
 
   if (loading && products.length === 0) {
-    return <div className="text-center p-4">Chargement...</div>;
+    return <div className="text-center p-4">Loading...</div>;
   }
 
-  if (projects.length === 0) {
+  if (projects.length === 0 && !isAdminView) {
     return (
       <div className="text-center p-8">
         <p className="text-muted-foreground mb-4">
-          Vous devez d'abord créer un projet dans l'onglet "Mes Projets" pour pouvoir ajouter des produits.
+          You must first create a project in the "My Projects" tab to add products.
         </p>
       </div>
     );
@@ -363,122 +400,124 @@ export const ProjectProductManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Ajouter un produit
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Select value={selectedProject} onValueChange={setSelectedProject} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un projet" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {!isAdminView && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add a product
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Select value={selectedProject} onValueChange={setSelectedProject} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Input
-              placeholder="Nom du produit"
-              value={newProduct.name}
-              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-              required
-            />
+              <Input
+                placeholder="Product name"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                required
+              />
 
-            <Select value={newProduct.category} onValueChange={(value) => setNewProduct({ ...newProduct, category: value })} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une catégorie" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select value={newProduct.category} onValueChange={(value) => setNewProduct({ ...newProduct, category: value })} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="Prix (€)"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-              required
-            />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Price (€)"
+                value={newProduct.price}
+                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                required
+              />
 
-            <Textarea
-              placeholder="Description"
-              value={newProduct.description}
-              onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-            />
+              <Textarea
+                placeholder="Description"
+                value={newProduct.description}
+                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+              />
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Images (max 5)</label>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md hover:border-primary">
-                      <Upload className="h-4 w-4" />
-                      <span>Choisir des images</span>
-                    </div>
-                  </label>
-                </div>
-
-                {selectedImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {selectedImages.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-md border"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
+              <div>
+                <label className="block text-sm font-medium mb-2">Images (max 5)</label>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md hover:border-primary">
+                        <Upload className="h-4 w-4" />
+                        <span>Choose images</span>
                       </div>
-                    ))}
+                    </label>
                   </div>
-                )}
-              </div>
-            </div>
 
-            <Button type="submit" disabled={loading || projects.length === 0}>
-              {loading ? 'Ajout...' : 'Ajouter le produit'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+                  {selectedImages.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {selectedImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-md border"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Button type="submit" disabled={loading || projects.length === 0}>
+                {loading ? 'Adding...' : 'Add product'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Mes produits</CardTitle>
+          <CardTitle>{isAdminView ? 'All products' : 'My products'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {products.filter(product => 
+            {(isAdminView ? products : products.filter(product => 
               projects.some(project => project.id === product.project_id)
-            ).map((product) => (
+            )).map((product) => (
               <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-4">
                   {product.images && product.images.length > 0 && (
@@ -514,11 +553,11 @@ export const ProjectProductManager = () => {
               </div>
             ))}
             
-            {products.filter(product => 
+            {(isAdminView ? products : products.filter(product => 
               projects.some(project => project.id === product.project_id)
-            ).length === 0 && (
+            )).length === 0 && (
               <p className="text-center text-muted-foreground py-8">
-                Aucun produit trouvé
+                No products found
               </p>
             )}
           </div>
@@ -529,12 +568,12 @@ export const ProjectProductManager = () => {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Modifier le produit</DialogTitle>
+            <DialogTitle>Edit product</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpdateProduct} className="space-y-4">
             <Select value={editForm.project_id} onValueChange={(value) => setEditForm({ ...editForm, project_id: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un projet" />
+                <SelectValue placeholder="Select a project" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((project) => (
@@ -546,7 +585,7 @@ export const ProjectProductManager = () => {
             </Select>
 
             <Input
-              placeholder="Nom du produit"
+              placeholder="Product name"
               value={editForm.name}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
               required
@@ -554,7 +593,7 @@ export const ProjectProductManager = () => {
 
             <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une catégorie" />
+                <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
@@ -568,7 +607,7 @@ export const ProjectProductManager = () => {
             <Input
               type="number"
               step="0.01"
-              placeholder="Prix (€)"
+              placeholder="Price (€)"
               value={editForm.price}
               onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
               required
@@ -583,7 +622,7 @@ export const ProjectProductManager = () => {
             {/* Existing Images */}
             {editingProduct?.images && editingProduct.images.length > 0 && (
               <div>
-                <label className="block text-sm font-medium mb-2">Images actuelles</label>
+                <label className="block text-sm font-medium mb-2">Current images</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {editingProduct.images.map((imageUrl, index) => (
                     <div key={index} className="relative">
@@ -607,7 +646,7 @@ export const ProjectProductManager = () => {
 
             {/* New Images Upload */}
             <div>
-              <label className="block text-sm font-medium mb-2">Ajouter des images</label>
+              <label className="block text-sm font-medium mb-2">Add images</label>
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Input
@@ -621,7 +660,7 @@ export const ProjectProductManager = () => {
                   <label htmlFor="edit-image-upload" className="cursor-pointer">
                     <div className="flex items-center gap-2 px-4 py-2 border border-dashed border-border rounded-md hover:border-primary">
                       <Upload className="h-4 w-4" />
-                      <span>Choisir des images</span>
+                      <span>Choose images</span>
                     </div>
                   </label>
                 </div>
@@ -651,10 +690,10 @@ export const ProjectProductManager = () => {
 
             <div className="flex gap-2 justify-end">
               <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-                Annuler
+                Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? 'Mise à jour...' : 'Enregistrer'}
+                {loading ? 'Updating...' : 'Save'}
               </Button>
             </div>
           </form>

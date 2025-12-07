@@ -4,8 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ArrowLeft, Store, Mail } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Heart, ArrowLeft, Store, Mail, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
 
@@ -34,11 +43,15 @@ const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [sellerProfile, setSellerProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [contactMessage, setContactMessage] = useState("");
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -73,12 +86,69 @@ const ProductDetails = () => {
     } catch (error: any) {
       console.error("Error fetching product:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les détails du produit",
+        title: "Error",
+        description: "Unable to load product details",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to contact the seller",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!contactMessage.trim()) {
+      toast({
+        title: "Message required",
+        description: "Please enter a message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!sellerProfile || !product) return;
+
+    setSendingMessage(true);
+    try {
+      // Create notification for the seller
+      const { error } = await supabase.from("notifications").insert({
+        user_id: sellerProfile.user_id,
+        title: "New message about your product",
+        message: contactMessage.trim(),
+        type: "contact",
+        data: {
+          product_id: product.id,
+          product_name: product.name,
+          sender_id: user.id,
+          sender_email: user.email,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent!",
+        description: "The seller will receive your message in their notifications.",
+      });
+      setContactMessage("");
+      setContactDialogOpen(false);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Unable to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -90,7 +160,7 @@ const ProductDetails = () => {
           <div className="flex items-center justify-center" style={{minHeight: '60vh'}}>
             <div className="text-center">
               <div className="animate-spin rounded-full border-b-2 border-primary mx-auto" style={{height: '3vw', width: '3vw', minHeight: '48px', minWidth: '48px', marginBottom: '2%'}}></div>
-              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement...</p>
+              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Loading...</p>
             </div>
           </div>
         </div>
@@ -104,7 +174,7 @@ const ProductDetails = () => {
         <BrandNavbar />
         <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
           <div className="text-center">
-            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>Produit non trouvé</h1>
+            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>Product not found</h1>
             <Button onClick={() => navigate("/")} variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to home
@@ -188,7 +258,7 @@ const ProductDetails = () => {
                   >
                     <img
                       src={image}
-                      alt={`${product.name} - Miniature ${index + 1}`}
+                      alt={`${product.name} - Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -197,62 +267,96 @@ const ProductDetails = () => {
             )}
           </div>
 
-          {/* Product Info */}
+          {/* Product Info - Enhanced with better contrast */}
           <div className="space-y-6">
-            <div>
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h1 className="text-3xl font-bold">{product.name}</h1>
-                  <p className="text-lg text-muted-foreground">{product.brand}</p>
+            <Card className="bg-card/95 backdrop-blur border-border/50">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+                    <p className="text-lg text-muted-foreground font-medium">{product.brand}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`rounded-full transition-colors ${
+                      isLiked ? 'text-red-500' : 'text-muted-foreground'
+                    }`}
+                    onClick={() => setIsLiked(!isLiked)}
+                  >
+                    <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`rounded-full transition-colors ${
-                    isLiked ? 'text-red-500' : 'text-muted-foreground'
-                  }`}
-                  onClick={() => setIsLiked(!isLiked)}
-                >
-                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-                </Button>
-              </div>
-              
-              <Badge variant="secondary" className="mb-4">
-                {product.category}
-              </Badge>
-              
-              <div className="text-3xl font-bold text-primary">
-                €{product.price}
-              </div>
-            </div>
+                
+                <Badge variant="secondary" className="text-sm">
+                  {product.category}
+                </Badge>
+                
+                <div className="text-3xl font-bold text-primary">
+                  €{product.price}
+                </div>
+              </CardContent>
+            </Card>
 
             {product.description && (
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
-              </div>
+              <Card className="bg-card/95 backdrop-blur border-border/50">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-foreground mb-3">Description</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {product.description}
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
-            <div className="pt-4 border-t">
-              <Button size="lg" className="w-full">
-                Contact seller
-              </Button>
-            </div>
+            <Card className="bg-card/95 backdrop-blur border-border/50">
+              <CardContent className="p-6">
+                <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="w-full">
+                      <MessageSquare className="mr-2 h-5 w-5" />
+                      Contact seller
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Contact the seller</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Send a message to {sellerProfile?.full_name || "the seller"} about "{product.name}"
+                      </p>
+                      <Textarea
+                        placeholder="Write your message here..."
+                        value={contactMessage}
+                        onChange={(e) => setContactMessage(e.target.value)}
+                        rows={4}
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={sendingMessage || !contactMessage.trim()}
+                        className="w-full"
+                      >
+                        {sendingMessage ? "Sending..." : "Send message"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         {/* Seller Profile */}
         {sellerProfile && (
-          <Card className="bg-background/80 backdrop-blur border rounded-3xl">
+          <Card className="bg-card/95 backdrop-blur border-border/50 rounded-3xl">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
                   {sellerProfile.avatar_url ? (
                     <img
                       src={sellerProfile.avatar_url}
-                      alt={sellerProfile.full_name || "Vendeur"}
+                      alt={sellerProfile.full_name || "Seller"}
                       className="w-16 h-16 rounded-full object-cover border"
                     />
                   ) : (
@@ -264,7 +368,7 @@ const ProductDetails = () => {
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-lg">
+                    <h3 className="font-semibold text-lg text-foreground">
                       {sellerProfile.full_name || "Seller"}
                     </h3>
                     {sellerProfile.is_seller && (
@@ -285,15 +389,6 @@ const ProductDetails = () => {
                         View all products
                       </Button>
                     </Link>
-                    
-                    {sellerProfile.email && (
-                      <Button variant="ghost" size="sm" asChild>
-                        <a href={`mailto:${sellerProfile.email}`}>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Contact
-                        </a>
-                      </Button>
-                    )}
                   </div>
                 </div>
               </div>
