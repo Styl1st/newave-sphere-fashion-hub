@@ -29,61 +29,85 @@ const Index = () => {
       name: "Plum",
       backgroundImage: `linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(126, 34, 206, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(40, 20, 50, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#E9D5FF",
     },
     {
       name: "Deep Plum",
       backgroundImage: `linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(88, 28, 135, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(30, 15, 40, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#F3E8FF",
     },
     {
       name: "Bright Plum",
       backgroundImage: `linear-gradient(135deg, rgba(196, 123, 255, 0.3), rgba(147, 51, 234, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.25) 0%, rgba(50, 25, 60, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FAF5FF",
     },
     {
       name: "Plum Rose",
       backgroundImage: `linear-gradient(135deg, rgba(186, 85, 211, 0.3), rgba(153, 50, 204, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(45, 20, 50, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FCE7F3",
     },
     {
       name: "Plum Midnight",
       backgroundImage: `linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(75, 0, 130, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(25, 10, 35, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#F5F3FF",
     },
     {
       name: "Plum Soft",
       backgroundImage: `linear-gradient(135deg, rgba(177, 106, 242, 0.3), rgba(138, 43, 226, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.28) 0%, rgba(42, 22, 52, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#EDE9FE",
     },
     {
       name: "Plum Silk",
       backgroundImage: `linear-gradient(135deg, rgba(200, 130, 250, 0.3), rgba(160, 50, 220, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.27) 0%, rgba(48, 23, 58, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#F5F3FF",
     },
     {
       name: "Plum Velvet",
       backgroundImage: `linear-gradient(135deg, rgba(155, 70, 240, 0.3), rgba(100, 20, 150, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.38) 0%, rgba(35, 12, 45, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FAF5FF",
     },
     {
       name: "Plum Twilight",
       backgroundImage: `linear-gradient(135deg, rgba(172, 95, 250, 0.3), rgba(120, 30, 180, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.32) 0%, rgba(38, 18, 48, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#F3E8FF",
     },
     {
       name: "Plum Amethyst",
       backgroundImage: `linear-gradient(135deg, rgba(180, 100, 245, 0.3), rgba(135, 40, 210, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.29) 0%, rgba(44, 21, 54, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#EDE9FE",
     },
     {
       name: "Plum Berry",
       backgroundImage: `linear-gradient(135deg, rgba(175, 80, 245, 0.3), rgba(110, 25, 165, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.36) 0%, rgba(32, 12, 42, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FCE7F3",
     },
     {
       name: "Plum Orchid",
       backgroundImage: `linear-gradient(135deg, rgba(190, 110, 250, 0.3), rgba(145, 60, 215, 0.9)),
 linear-gradient(rgba(0, 0, 0, 0.26) 0%, rgba(52, 26, 62, 1) 100%)`,
+      textColor: "#FFFFFF",
+      mutedTextColor: "#FAF5FF",
     }
   ];
 
@@ -151,11 +175,11 @@ linear-gradient(rgba(0, 0, 0, 0.26) 0%, rgba(52, 26, 62, 1) 100%)`,
               >
                 {gradients[gradientIndex].name} ▶
               </button>
-              <h1 className="flex font-semibold tracking-tight justify-center" style={{fontSize: '2.5vw', gap: '2%'}}>
+              <h1 className="flex font-semibold tracking-tight justify-center" style={{fontSize: '2.5vw', gap: '2%', color: gradients[gradientIndex].textColor}}>
                 <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
                 Independent Fashion Marketplace
               </h1>
-            <p className="text-muted-foreground mx-auto" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
+            <p className="mx-auto" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%', color: gradients[gradientIndex].mutedTextColor}}>
               Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
             </p>
             <div className="flex justify-center" style={{marginTop: '5%', gap: '2%'}}>
