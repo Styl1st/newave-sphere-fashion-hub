@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Users, Plus, Mail, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Users, Plus, Mail, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Project {
@@ -32,55 +34,72 @@ interface ProjectMember {
 
 interface ProjectManagerProps {
   onProjectsChange?: () => void;
+  isAdminView?: boolean;
 }
 
-export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
+export const ProjectManager = ({ onProjectsChange, isAdminView = false }: ProjectManagerProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useRole();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const [inviteEmail, setInviteEmail] = useState('');
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', description: '' });
 
   useEffect(() => {
     if (user) {
       fetchProjects();
     }
-  }, [user]);
+  }, [user, isAdminView]);
 
   const fetchProjects = async () => {
     try {
-      // Fetch projects where user is creator or member
-      const [createdProjects, memberProjects] = await Promise.all([
-        supabase
+      let allProjects: Project[] = [];
+
+      if (isAdminView && isAdmin) {
+        // Admin can see all projects
+        const { data, error } = await supabase
           .from('projects')
           .select('*')
-          .eq('creator_id', user?.id),
-        supabase
-          .from('project_members')
-          .select('project_id')
-          .eq('user_id', user?.id)
-      ]);
-
-      if (createdProjects.error) throw createdProjects.error;
-      if (memberProjects.error) throw memberProjects.error;
-
-      const memberProjectIds = memberProjects.data?.map(m => m.project_id) || [];
-      
-      let allProjects = [...(createdProjects.data || [])];
-      
-      // Only fetch member projects that are not already in created projects
-      const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
-      const uniqueMemberProjectIds = memberProjectIds.filter(id => !createdProjectIds.includes(id));
-      
-      if (uniqueMemberProjectIds.length > 0) {
-        const { data: memberProjectsData, error } = await supabase
-          .from('projects')
-          .select('*')
-          .in('id', uniqueMemberProjectIds);
+          .order('created_at', { ascending: false });
         
-        if (!error && memberProjectsData) {
-          allProjects = [...allProjects, ...memberProjectsData];
+        if (error) throw error;
+        allProjects = data || [];
+      } else {
+        // Fetch projects where user is creator or member
+        const [createdProjects, memberProjects] = await Promise.all([
+          supabase
+            .from('projects')
+            .select('*')
+            .eq('creator_id', user?.id),
+          supabase
+            .from('project_members')
+            .select('project_id')
+            .eq('user_id', user?.id)
+        ]);
+
+        if (createdProjects.error) throw createdProjects.error;
+        if (memberProjects.error) throw memberProjects.error;
+
+        const memberProjectIds = memberProjects.data?.map(m => m.project_id) || [];
+        
+        allProjects = [...(createdProjects.data || [])];
+        
+        // Only fetch member projects that are not already in created projects
+        const createdProjectIds = createdProjects.data?.map(p => p.id) || [];
+        const uniqueMemberProjectIds = memberProjectIds.filter(id => !createdProjectIds.includes(id));
+        
+        if (uniqueMemberProjectIds.length > 0) {
+          const { data: memberProjectsData, error } = await supabase
+            .from('projects')
+            .select('*')
+            .in('id', uniqueMemberProjectIds);
+          
+          if (!error && memberProjectsData) {
+            allProjects = [...allProjects, ...memberProjectsData];
+          }
         }
       }
 
@@ -145,6 +164,34 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
     }
   };
 
+  const updateProject = async () => {
+    if (!editingProject || !editForm.name.trim()) {
+      toast.error('Project name is required');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          name: editForm.name,
+          description: editForm.description
+        })
+        .eq('id', editingProject.id);
+
+      if (error) throw error;
+
+      toast.success('Project updated successfully!');
+      setEditingProject(null);
+      setEditForm({ name: '', description: '' });
+      fetchProjects();
+      onProjectsChange?.();
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast.error('Error updating project');
+    }
+  };
+
   const inviteUser = async (projectId: string) => {
     if (!inviteEmail.trim()) {
       toast.error('Email required');
@@ -190,8 +237,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       const { error } = await supabase
         .from('projects')
         .delete()
-        .eq('id', projectId)
-        .eq('creator_id', user?.id);
+        .eq('id', projectId);
 
       if (error) throw error;
 
@@ -204,33 +250,47 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
     }
   };
 
+  const canEditProject = (project: Project) => {
+    if (isAdmin) return true;
+    if (project.creator_id === user?.id) return true;
+    // Check if user is a member of the project
+    return project.members?.some(m => m.user_id === user?.id) || false;
+  };
+
+  const canDeleteProject = (project: Project) => {
+    if (isAdmin) return true;
+    return project.creator_id === user?.id;
+  };
+
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Create a new project
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Project name (brand name)"
-            value={newProject.name}
-            onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-          />
-          <Textarea
-            placeholder="Project description"
-            value={newProject.description}
-            onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-          />
-          <Button onClick={createProject}>Create project</Button>
-        </CardContent>
-      </Card>
+      {!isAdminView && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create a new project
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input
+              placeholder="Project name (brand name)"
+              value={newProject.name}
+              onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+            />
+            <Textarea
+              placeholder="Project description"
+              value={newProject.description}
+              onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+            />
+            <Button onClick={createProject}>Create project</Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4">
         {projects.map((project) => (
@@ -243,7 +303,45 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
                     <Users className="h-3 w-3" />
                     {project.members?.length || 0}
                   </Badge>
-                  {project.creator_id === user?.id && (
+                  
+                  {canEditProject(project) && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setEditingProject(project);
+                            setEditForm({ name: project.name, description: project.description || '' });
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit project</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            placeholder="Project name"
+                            value={editForm.name}
+                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          />
+                          <Textarea
+                            placeholder="Project description"
+                            value={editForm.description}
+                            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                          />
+                          <Button onClick={updateProject} className="w-full">
+                            Save changes
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  
+                  {canDeleteProject(project) && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
@@ -291,7 +389,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
                 </div>
               </div>
 
-              {project.creator_id === user?.id && (
+              {(project.creator_id === user?.id || isAdmin) && (
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-2">Invite a collaborator:</h4>
                   <div className="flex gap-2">
@@ -321,7 +419,9 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       {projects.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">No projects found. Create your first project!</p>
+            <p className="text-muted-foreground">
+              {isAdminView ? 'No projects found.' : 'No projects found. Create your first project!'}
+            </p>
           </CardContent>
         </Card>
       )}

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import BrandNavbar from "@/components/BrandNavbar";
+import { ProjectManager } from "@/components/ProjectManager";
+import { ProjectProductManager } from "@/components/ProjectProductManager";
 import {
   Settings,
   Edit,
-  Ban,
-  UserCheck,
   Users,
   Package,
   ShoppingBag,
+  FolderOpen,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -126,8 +128,8 @@ const AdminDashboard = () => {
       if (error) throw error;
 
       toast({
-        title: "Nom de marque mis à jour",
-        description: `Le nom a été changé pour "${newBrandName}".`,
+        title: "Brand name updated",
+        description: `The name has been changed to "${newBrandName}".`,
       });
 
       setEditingProfile(null);
@@ -136,8 +138,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error updating brand name:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le nom de marque.",
+        title: "Error",
+        description: "Unable to update the brand name.",
         variant: "destructive",
       });
     }
@@ -159,16 +161,16 @@ const AdminDashboard = () => {
       if (error) throw error;
 
       toast({
-        title: "Rôle mis à jour",
-        description: `Le rôle a été changé pour ${newRole}.`,
+        title: "Role updated",
+        description: `The role has been changed to ${newRole}.`,
       });
 
       fetchProfiles();
     } catch (error) {
       console.error("Error updating role:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le rôle.",
+        title: "Error",
+        description: "Unable to update the role.",
         variant: "destructive",
       });
     }
@@ -183,7 +185,6 @@ const AdminDashboard = () => {
 
     const filePath = `public/${profileId}`;
     try {
-      // Essayer d'uploader (si le fichier existe déjà, update le)
       let uploadError = null;
       let uploadResult = await supabase.storage
         .from("profile-pictures")
@@ -192,13 +193,11 @@ const AdminDashboard = () => {
 
       if (uploadError) throw uploadError;
 
-      // Récupérer l'URL publique
       const { data } = supabase.storage
         .from("profile-pictures")
         .getPublicUrl(filePath);
       const publicUrl = data.publicUrl;
 
-      // Mettre à jour le champ avatar_url dans la table profiles
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl })
@@ -207,16 +206,16 @@ const AdminDashboard = () => {
       if (updateError) throw updateError;
 
       toast({
-        title: "Photo de profil mise à jour",
-        description: `La photo de profil de ${profileId} a été mise à jour.`,
+        title: "Profile picture updated",
+        description: `The profile picture has been updated.`,
       });
 
       fetchProfiles();
     } catch (error) {
       console.error("Error updating profile picture:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour la photo de profil.",
+        title: "Error",
+        description: "Unable to update the profile picture.",
         variant: "destructive",
       });
     }
@@ -248,11 +247,10 @@ const AdminDashboard = () => {
           <div style={{marginBottom: '4%'}}>
             <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
               <Settings style={{height: '2vw', width: '2vw'}} />
-              Panneau d'Administration
+              Admin Dashboard
             </h1>
             <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
-              Gérez les utilisateurs, les marques et les paramètres de la
-              plateforme.
+              Manage users, brands, and platform settings.
             </p>
           </div>
 
@@ -262,7 +260,7 @@ const AdminDashboard = () => {
               <CardHeader style={{paddingBottom: '1%'}}>
                 <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
                   <Users style={{height: '1vw', width: '1vw'}} />
-                  Total Utilisateurs
+                  Total Users
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -273,8 +271,8 @@ const AdminDashboard = () => {
             <Card>
               <CardHeader style={{paddingBottom: '1%'}}>
                 <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
-                  <UserCheck style={{height: '1vw', width: '1vw'}} />
-                  Vendeurs/Marques
+                  <Users style={{height: '1vw', width: '1vw'}} />
+                  Sellers/Brands
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -286,7 +284,7 @@ const AdminDashboard = () => {
               <CardHeader style={{paddingBottom: '1%'}}>
                 <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
                   <Package style={{height: '1vw', width: '1vw'}} />
-                  Produits
+                  Products
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -298,141 +296,158 @@ const AdminDashboard = () => {
               <CardHeader style={{paddingBottom: '1%'}}>
                 <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
                   <ShoppingBag style={{height: '1vw', width: '1vw'}} />
-                  Achats
+                  Purchases
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalPurchases}</div>
+                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalPurchases}</div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Users Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Gestion des Utilisateurs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-8">Chargement...</div>
-              ) : (
-                <div className="space-y-4">
-                  {profiles.map((profile) => (
-                    <div
-                      key={profile.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        {profile.avatar_url ? (
-                          <img
-                            src={profile.avatar_url}
-                            alt={profile.full_name || "Avatar"}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <Users className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
+          {/* Tabs for different admin sections */}
+          <Tabs defaultValue="users" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+              <TabsTrigger value="products">Products</TabsTrigger>
+            </TabsList>
 
-                        <div>
-                          <div className="font-medium">
-                            {profile.full_name || "Nom non défini"}
+            <TabsContent value="users">
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="text-center py-8">Loading...</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {profiles.map((profile) => (
+                        <div
+                          key={profile.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center gap-4">
+                            {profile.avatar_url ? (
+                              <img
+                                src={profile.avatar_url}
+                                alt={profile.full_name || "Avatar"}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Users className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+
+                            <div>
+                              <div className="font-medium">
+                                {profile.full_name || "Name not set"}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {profile.email}
+                              </div>
+                            </div>
+
+                            <Badge className={getRoleColor(profile.role)}>
+                              {profile.role}
+                            </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {profile.email}
+
+                          <div className="flex items-center gap-2">
+                            {profile.role != "admin" && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingProfile(profile);
+                                      setNewBrandName(profile.full_name || "");
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      Edit profile of {profile.full_name}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <Label htmlFor="brandName">
+                                        New brand name
+                                      </Label>
+                                      <Input
+                                        id="brandName"
+                                        value={newBrandName}
+                                        onChange={(e) =>
+                                          setNewBrandName(e.target.value)
+                                        }
+                                        placeholder="Brand name"
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <Label>
+                                        Update profile picture of{" "}
+                                        {profile.full_name}
+                                      </Label>
+                                      <Input
+                                        id="profilePicture"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                          handleProfilePictureChange(e, profile.id)
+                                        }
+                                      />
+                                    </div>
+                                    <Button
+                                      onClick={handleUpdateBrandName}
+                                      className="w-full"
+                                    >
+                                      Update
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+
+                            {profile.role != "admin" && (
+                              <select
+                                value={profile.role}
+                                onChange={(e) =>
+                                  handleRoleChange(
+                                    profile.id,
+                                    e.target.value as any
+                                  )
+                                }
+                                className="text-sm border rounded px-2 py-1"
+                              >
+                                <option value="buyer">Buyer</option>
+                                <option value="seller">Seller</option>
+                              </select>
+                            )}
                           </div>
                         </div>
-
-                        <Badge className={getRoleColor(profile.role)}>
-                          {profile.role}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {profile.role != "admin" && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setEditingProfile(profile);
-                                  setNewBrandName(profile.full_name || "");
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Modifier le profil de {profile.full_name}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label htmlFor="brandName">
-                                    Nouveau nom de marque
-                                  </Label>
-                                  <Input
-                                    id="brandName"
-                                    value={newBrandName}
-                                    onChange={(e) =>
-                                      setNewBrandName(e.target.value)
-                                    }
-                                    placeholder="Nom de la marque"
-                                  />
-                                </div>
-
-                                <div>
-                                  <Label>
-                                    Modifier la photo de profil de{" "}
-                                    {profile.full_name}
-                                  </Label>
-                                  <Input
-                                    id="profilePicture"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                      handleProfilePictureChange(e, profile.id)
-                                    }
-                                  />
-                                </div>
-                                <Button
-                                  onClick={handleUpdateBrandName}
-                                  className="w-full"
-                                >
-                                  Mettre à jour
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-
-                        {profile.role != "admin" && (
-                          <select
-                            value={profile.role}
-                            onChange={(e) =>
-                              handleRoleChange(
-                                profile.id,
-                                e.target.value as any
-                              )
-                            }
-                            className="text-sm border rounded px-2 py-1"
-                          >
-                            <option value="buyer">Acheteur</option>
-                            <option value="seller">Vendeur</option>
-                            {/* <option value="admin">Admin</option> */}
-                          </select>
-                        )}
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="projects">
+              <ProjectManager isAdminView={true} />
+            </TabsContent>
+
+            <TabsContent value="products">
+              <ProjectProductManager isAdminView={true} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProtectedRoute>
