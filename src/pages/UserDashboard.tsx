@@ -139,13 +139,13 @@ const UserDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
         
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
-              <User className="h-8 w-8" />
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+          <div style={{marginBottom: '4%'}}>
+            <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
+              <User style={{height: '2vw', width: '2vw'}} />
               Mon Espace Personnel
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
               Gérez votre profil, vos achats et vos articles favoris.
             </p>
           </div>
@@ -157,22 +157,22 @@ const UserDashboard = () => {
               <TabsTrigger value="settings">Paramètres</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="activity" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <TabsContent value="activity" style={{marginTop: '3%'}}>
+              <div className="grid grid-cols-1 lg:grid-cols-2" style={{gap: '4%'}}>
             {/* Liked Products Section */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-red-500" />
+                <CardTitle className="flex items-center" style={{gap: '1%'}}>
+                  <Heart style={{height: '1.2vw', width: '1.2vw'}} className="text-red-500" />
                   Articles Aimés ({likedProducts.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8">Chargement...</div>
+                  <div className="text-center" style={{padding: '4% 0'}}>Chargement...</div>
                 ) : likedProducts.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Heart className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                  <div className="text-center text-muted-foreground" style={{padding: '4% 0'}}>
+                    <Heart className="mx-auto text-muted-foreground/50" style={{height: '3vw', width: '3vw', marginBottom: '2%'}} />
                     <p>Aucun article aimé pour le moment.</p>
                     <p className="text-sm">Explorez notre catalogue pour découvrir des pièces uniques !</p>
                   </div>

@@ -10,17 +10,17 @@ const BrandNavbar = () => {
   const { role } = useRole();
 
   return (
-    <header className="sticky top-4 z-30 px-4">
-      <nav className="max-w-6xl mx-auto flex items-center justify-between h-16 bg-background/90 backdrop-blur border rounded-2xl px-6 shadow-elegant">
+    <header className="sticky z-30" style={{top: '1%', padding: '0 2%'}}>
+      <nav className="mx-auto flex items-center justify-between bg-background/90 backdrop-blur border rounded-2xl shadow-elegant" style={{maxWidth: '90%', height: '4vw', minHeight: '60px', padding: '0 3%'}}>
         {/* <Link to="/" className="flex items-center gap-2">
           <span className="text-lg font-semibold tracking-tight">
             NeWave Sphere
           </span>
         </Link> */}
 
-        <img src={logoTransparent} alt="logo" className="h-10 w-auto" />
+        <img src={logoTransparent} alt="logo" className="w-auto" style={{height: '2.5vw', minHeight: '40px'}} />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center" style={{gap: '2%'}}>
           <Link to="/">
             <Button variant="ghost">Home</Button>
           </Link>

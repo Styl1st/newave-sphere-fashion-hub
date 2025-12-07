@@ -74,47 +74,49 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-animated-fade">
-      <BrandNavbar />
+      <BrandNavbar  />
       <main className="relative z-10">
         {/* Hero */}
-        <section className="relative overflow-hidden px-4">
-          <div className="max-w-4xl mx-auto py-16 text-center">
-            <h1 className="flex text-4xl md:text-5xl font-semibold tracking-tight justify-center gap-2">
-              <img src={logoTransparent} alt="logo" className="flex h-[80px] items-center" />
+        <section className="relative overflow-hidden" style={{padding: '5% 4%'}}>
+          <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
+            <div className="bg-white/80 backdrop-blur rounded-3xl" style={{padding: '7%'}}>
+            <h1 className="flex font-semibold tracking-tight justify-center" style={{fontSize: '2.5vw', gap: '2%'}}>
+              <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
               - Independent Fashion Marketplace
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground mx-auto" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
               Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
             </p>
-            <div className="mt-8 flex justify-center gap-4">
+            <div className="flex justify-center" style={{marginTop: '5%', gap: '2%'}}>
               <Button variant="hero" size="lg">Explore drops</Button>
               <a href="/auth">
                 <Button variant="secondary" size="lg">Become a seller</Button>
               </a>
             </div>
           </div>
+          </div>
         </section>
 
         {/* Filters */}
-        <section className="px-4">
-          <div className="max-w-6xl mx-auto py-6 bg-background/60 backdrop-blur rounded-2xl border shadow-sm">
-            <div className="px-6 flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
-              <div className="flex flex-wrap gap-4 items-center">
-                <span className="text-sm text-muted-foreground">Categories:</span>
+        <section style={{padding: '2% 4%', marginTop: '-3%'}}>
+          <div className="mx-auto bg-background/60 backdrop-blur rounded-2xl border shadow-sm" style={{maxWidth: '90%', padding: '2% 0'}}>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between" style={{padding: '0 3%', gap: '2%'}}>
+              <div className="flex flex-wrap items-center" style={{gap: '2%'}}>
+                <span className="text-muted-foreground whitespace-nowrap" style={{fontSize: '0.9vw'}}>Categories:</span>
                 {CATEGORIES.map((c) => (
-                  <label key={c} className="flex items-center gap-2">
+                  <label key={c} className="flex items-center" style={{gap: '1%'}}>
                     <Checkbox id={c} checked={selected.has(c)} onCheckedChange={() => toggleCategory(c)} />
-                    <Label htmlFor={c} className="cursor-pointer">{c}</Label>
+                    <Label htmlFor={c} className="cursor-pointer" style={{fontSize: '0.9vw'}}>{c}</Label>
                   </label>
                 ))}
               </div>
-              <div className="flex items-center gap-6">
-                <div className="w-56">
-                  <Label className="text-sm">Max price: €{maxPrice}</Label>
+              <div className="flex flex-col md:flex-row" style={{gap: '3%', width: '100%', maxWidth: '50%'}}>
+                <div style={{width: '100%'}}>
+                  <Label style={{fontSize: '0.9vw'}}>Max price: €{maxPrice}</Label>
                   <Slider value={[maxPrice]} min={20} max={500} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 300)} />
                 </div>
-                <div className="w-44">
-                  <Label className="text-sm">Sort</Label>
+                <div style={{width: '100%'}}>
+                  <Label style={{fontSize: '0.9vw'}}>Sort</Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sort by" />
@@ -132,15 +134,15 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section className="px-4 py-10">
-          <div className="max-w-6xl mx-auto">
+        <section style={{padding: '3% 4%'}}>
+          <div className="mx-auto" style={{maxWidth: '90%'}}>
             {loading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Chargement des produits...</p>
+              <div className="text-center" style={{padding: '5% 0'}}>
+                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement des produits...</p>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
+              <div className="text-center" style={{padding: '5% 0'}}>
+                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
                   {products.length === 0 
                     ? "Aucun produit disponible pour le moment." 
                     : "Aucun produit ne correspond à vos critères de recherche."
@@ -148,7 +150,7 @@ const Index = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{gap: '2%'}}>
                 {filtered.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}

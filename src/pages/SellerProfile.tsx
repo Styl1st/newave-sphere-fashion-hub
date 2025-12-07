@@ -88,11 +88,11 @@ const SellerProfile = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+          <div className="flex items-center justify-center" style={{minHeight: '60vh'}}>
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement...</p>
+              <div className="animate-spin rounded-full border-b-2 border-primary mx-auto" style={{height: '3vw', width: '3vw', minHeight: '48px', minWidth: '48px', marginBottom: '2%'}}></div>
+              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement...</p>
             </div>
           </div>
         </div>
@@ -104,10 +104,10 @@ const SellerProfile = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Profil vendeur non trouvé</h1>
-            <p className="text-muted-foreground">
+            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>Profil vendeur non trouvé</h1>
+            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
               Ce vendeur n'existe pas ou n'est pas encore activé.
             </p>
           </div>
@@ -125,28 +125,29 @@ const SellerProfile = () => {
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
         {/* Seller Header */}
-        <Card className="mb-8 bg-background/80 backdrop-blur border rounded-3xl">
-          <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row items-start gap-6">
+        <Card className="bg-background/80 backdrop-blur border rounded-3xl" style={{marginBottom: '4%'}}>
+          <CardContent style={{padding: '4%'}}>
+            <div className="flex flex-col md:flex-row items-start" style={{gap: '3%'}}>
               <div className="flex-shrink-0">
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
                     alt={profile.full_name || "Vendeur"}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-elegant"
+                    className="rounded-full object-cover border-4 border-background shadow-elegant"
+                    style={{width: '6vw', height: '6vw', minWidth: '96px', minHeight: '96px'}}
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-muted border-4 border-background shadow-elegant flex items-center justify-center">
-                    <Store className="h-10 w-10 text-muted-foreground" />
+                  <div className="rounded-full bg-muted border-4 border-background shadow-elegant flex items-center justify-center" style={{width: '6vw', height: '6vw', minWidth: '96px', minHeight: '96px'}}>
+                    <Store className="text-muted-foreground" style={{height: '2.5vw', width: '2.5vw'}} />
                   </div>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-3 mb-3">
-                  <h1 className="text-3xl font-bold">
+                <div className="flex flex-wrap items-center" style={{gap: '2%', marginBottom: '2%'}}>
+                  <h1 className="font-bold" style={{fontSize: '2.5vw'}}>
                     {profile.full_name || "Vendeur"}
                   </h1>
                   <Badge variant="outline" className="bg-primary/10 text-primary">

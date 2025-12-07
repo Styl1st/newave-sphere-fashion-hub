@@ -34,9 +34,9 @@ const MyProfile = () => {
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-foreground mb-8">
+      <main className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+        <div className="mx-auto" style={{maxWidth: '80%'}}>
+          <h1 className="font-bold text-foreground" style={{fontSize: '2.5vw', marginBottom: '4%'}}>
             Mon Profil
           </h1>
           <SellerProfileManager />

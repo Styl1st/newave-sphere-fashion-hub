@@ -244,60 +244,60 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
 
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
-              <Settings className="h-8 w-8" />
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+          <div style={{marginBottom: '4%'}}>
+            <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
+              <Settings style={{height: '2vw', width: '2vw'}} />
               Panneau d'Administration
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
               Gérez les utilisateurs, les marques et les paramètres de la
               plateforme.
             </p>
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4" style={{gap: '3%', marginBottom: '4%'}}>
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Users className="h-4 w-4" />
+              <CardHeader style={{paddingBottom: '1%'}}>
+                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
+                  <Users style={{height: '1vw', width: '1vw'}} />
                   Total Utilisateurs
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalUsers}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
+              <CardHeader style={{paddingBottom: '1%'}}>
+                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
+                  <UserCheck style={{height: '1vw', width: '1vw'}} />
                   Vendeurs/Marques
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalSellers}</div>
+                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalSellers}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Package className="h-4 w-4" />
+              <CardHeader style={{paddingBottom: '1%'}}>
+                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
+                  <Package style={{height: '1vw', width: '1vw'}} />
                   Produits
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalProducts}</div>
+                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalProducts}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4" />
+              <CardHeader style={{paddingBottom: '1%'}}>
+                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
+                  <ShoppingBag style={{height: '1vw', width: '1vw'}} />
                   Achats
                 </CardTitle>
               </CardHeader>

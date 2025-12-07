@@ -86,11 +86,11 @@ const ProductDetails = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+          <div className="flex items-center justify-center" style={{minHeight: '60vh'}}>
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Chargement...</p>
+              <div className="animate-spin rounded-full border-b-2 border-primary mx-auto" style={{height: '3vw', width: '3vw', minHeight: '48px', minWidth: '48px', marginBottom: '2%'}}></div>
+              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement...</p>
             </div>
           </div>
         </div>
@@ -102,9 +102,9 @@ const ProductDetails = () => {
     return (
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Produit non trouvé</h1>
+            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>Produit non trouvé</h1>
             <Button onClick={() => navigate("/")} variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Retour à l'accueil
@@ -133,11 +133,11 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
         <Button 
           onClick={() => navigate("/")} 
           variant="ghost" 
-          className="mb-6"
+          style={{marginBottom: '3%'}}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour

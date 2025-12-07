@@ -87,10 +87,10 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
-      <main className="container mx-auto py-16 flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <main className="mx-auto flex items-center justify-center" style={{maxWidth: '90%', padding: '10% 0'}}>
+        <Card className="w-full" style={{maxWidth: '90%'}}>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Authentification</CardTitle>
+            <CardTitle style={{fontSize: '2vw'}}>Authentification</CardTitle>
             <CardDescription>
               Connectez-vous ou créez votre compte marque
             </CardDescription>
@@ -102,8 +102,8 @@ const Auth = () => {
                 <TabsTrigger value="signup">S'inscrire</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="signin" className="space-y-4 mt-6">
-                <form onSubmit={handleSignIn} className="space-y-4">
+              <TabsContent value="signin" style={{marginTop: '3%'}}>
+                <form onSubmit={handleSignIn} style={{display: 'flex', flexDirection: 'column', gap: '2%'}}>
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
                     <Input

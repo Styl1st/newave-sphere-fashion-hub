@@ -53,11 +53,11 @@ const SellerDashboard = () => {
     <ProtectedRoute allowedRoles={["seller"]}>
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Tableau de bord vendeur</h1>
+        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
+          <div className="mx-auto" style={{maxWidth: '95%'}}>
+            <h1 className="font-bold" style={{fontSize: '2.5vw', marginBottom: '4%'}}>Tableau de bord vendeur</h1>
 
-            <Tabs defaultValue="projects" className="space-y-6">
+            <Tabs defaultValue="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
               <TabsList
                 className={`grid w-full ${
                   hasProjects ? "grid-cols-3" : "grid-cols-2"
@@ -70,7 +70,7 @@ const SellerDashboard = () => {
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="projects" className="space-y-6">
+              <TabsContent value="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
                 <ProjectManager onProjectsChange={checkUserProjects} />
               </TabsContent>
 
