@@ -101,7 +101,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       setProjects(allProjects);
     } catch (error) {
       console.error('Error fetching projects:', error);
-      toast.error('Erreur lors du chargement des projets');
+      toast.error('Error loading projects');
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
 
   const createProject = async () => {
     if (!newProject.name.trim()) {
-      toast.error('Le nom du projet est requis');
+      toast.error('Project name is required');
       return;
     }
 
@@ -138,16 +138,16 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       setNewProject({ name: '', description: '' });
       fetchProjects();
       onProjectsChange?.();
-      toast.success('Projet créé avec succès!');
+      toast.success('Project created successfully!');
     } catch (error) {
       console.error('Error creating project:', error);
-      toast.error('Erreur lors de la création du projet');
+      toast.error('Error creating project');
     }
   };
 
   const inviteUser = async (projectId: string) => {
     if (!inviteEmail.trim()) {
-      toast.error('Email requis');
+      toast.error('Email required');
       return;
     }
 
@@ -163,18 +163,18 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       if (data && typeof data === 'object' && 'success' in data) {
         const result = data as { success: boolean; message: string };
         if (result.success) {
-          toast.success('Invitation envoyée!');
+          toast.success('Invitation sent!');
           setInviteEmail('');
           fetchProjects();
         } else {
           toast.error(result.message);
         }
       } else {
-        toast.error('Erreur lors de l\'invitation');
+        toast.error('Error sending invitation');
       }
     } catch (error) {
       console.error('Error inviting user:', error);
-      toast.error('Erreur lors de l\'invitation');
+      toast.error('Error sending invitation');
     }
   };
 
@@ -195,17 +195,17 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
 
       if (error) throw error;
 
-      toast.success('Projet supprimé avec succès!');
+      toast.success('Project deleted successfully!');
       fetchProjects();
       onProjectsChange?.();
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error('Erreur lors de la suppression du projet');
+      toast.error('Error deleting project');
     }
   };
 
   if (loading) {
-    return <div className="text-center p-4">Chargement...</div>;
+    return <div className="text-center p-4">Loading...</div>;
   }
 
   return (
@@ -214,21 +214,21 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5" />
-            Créer un nouveau projet
+            Create a new project
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
-            placeholder="Nom du projet (nom de la marque)"
+            placeholder="Project name (brand name)"
             value={newProject.name}
             onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
           />
           <Textarea
-            placeholder="Description du projet"
+            placeholder="Project description"
             value={newProject.description}
             onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
           />
-          <Button onClick={createProject}>Créer le projet</Button>
+          <Button onClick={createProject}>Create project</Button>
         </CardContent>
       </Card>
 
@@ -252,19 +252,19 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Supprimer le projet</AlertDialogTitle>
+                          <AlertDialogTitle>Delete project</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Êtes-vous sûr de vouloir supprimer le projet "{project.name}" ? 
-                            Cette action est irréversible et supprimera tous les produits associés.
+                            Are you sure you want to delete the project "{project.name}"? 
+                            This action is irreversible and will delete all associated products.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => deleteProject(project.id)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Supprimer
+                            Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -278,13 +278,13 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-medium mb-2">Membres:</h4>
+                <h4 className="font-medium mb-2">Members:</h4>
                 <div className="space-y-1">
                   {project.members?.map((member) => (
                     <div key={member.id} className="flex items-center justify-between text-sm">
                       <span>{member.user_id}</span>
                       <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
-                        {member.role === 'owner' ? 'Propriétaire' : 'Collaborateur'}
+                        {member.role === 'owner' ? 'Owner' : 'Collaborator'}
                       </Badge>
                     </div>
                   ))}
@@ -293,10 +293,10 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
 
               {project.creator_id === user?.id && (
                 <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Inviter un collaborateur:</h4>
+                  <h4 className="font-medium mb-2">Invite a collaborator:</h4>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Email de l'utilisateur"
+                      placeholder="User email"
                       value={selectedProject === project.id ? inviteEmail : ''}
                       onChange={(e) => {
                         setInviteEmail(e.target.value);
@@ -321,7 +321,7 @@ export const ProjectManager = ({ onProjectsChange }: ProjectManagerProps) => {
       {projects.length === 0 && (
         <Card>
           <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">Aucun projet trouvé. Créez votre premier projet!</p>
+            <p className="text-muted-foreground">No projects found. Create your first project!</p>
           </CardContent>
         </Card>
       )}

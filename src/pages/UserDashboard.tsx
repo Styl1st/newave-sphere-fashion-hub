@@ -78,7 +78,7 @@ const UserDashboard = () => {
           ...like,
           products: productsData?.find(p => p.id === like.product_id) || {
             id: like.product_id,
-            name: "Produit supprimé",
+            name: "Deleted product",
             brand: "",
             category: "",
             price: 0,
@@ -111,7 +111,7 @@ const UserDashboard = () => {
           ...purchase,
           products: productsData?.find(p => p.id === purchase.product_id) || {
             id: purchase.product_id,
-            name: "Produit supprimé",
+            name: "Deleted product",
             brand: "",
             category: "",
             images: []
@@ -139,22 +139,22 @@ const UserDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
         
-        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
-          <div style={{marginBottom: '4%'}}>
-            <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
-              <User style={{height: '2vw', width: '2vw'}} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold flex items-center gap-2 mb-2">
+              <User className="h-8 w-8" />
               Mon Espace Personnel
             </h1>
-            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
+            <p className="text-muted-foreground">
               Gérez votre profil, vos achats et vos articles favoris.
             </p>
           </div>
 
           <Tabs defaultValue="activity" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="activity">Activité</TabsTrigger>
-              <TabsTrigger value="profile">Profil</TabsTrigger>
-              <TabsTrigger value="settings">Paramètres</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="activity" style={{marginTop: '3%'}}>
@@ -216,17 +216,17 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingBag className="h-5 w-5 text-green-600" />
-                  Historique des Achats ({purchases.length})
+                  Purchase History ({purchases.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8">Chargement...</div>
+                  <div className="text-center py-8">Loading...</div>
                 ) : purchases.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Aucun achat effectué pour le moment.</p>
-                    <p className="text-sm">Découvrez notre sélection de vêtements de seconde main !</p>
+                    <p>No purchases yet.</p>
+                    <p className="text-sm">Discover our selection of second-hand clothing!</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -253,12 +253,12 @@ const UserDashboard = () => {
                           <p className="text-sm text-muted-foreground">{purchase.products.brand}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-muted-foreground">
-                              Quantité: {purchase.quantity}
+                              Quantity: {purchase.quantity}
                             </span>
                             <span className="font-semibold">{purchase.price_paid}€</span>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Acheté le {new Date(purchase.purchased_at).toLocaleDateString()}
+                            Purchased on {new Date(purchase.purchased_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -279,15 +279,15 @@ const UserDashboard = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Paramètres du compte
+                    Account Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8 text-muted-foreground">
                     <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Paramètres avancés à venir</p>
+                    <p>Advanced settings coming soon</p>
                     <p className="text-sm">
-                      Préférences de notification, confidentialité, etc.
+                      Notification preferences, privacy, etc.
                     </p>
                   </div>
                 </CardContent>

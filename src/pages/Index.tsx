@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState, useEffect } from "react";
 
-const CATEGORIES = ["Streetwear", "Denim", "Grunge", "Goth", "Alternative"] as const;
+const CATEGORIES = ["Chaussures", "Sweats", "Vestes", "Pantalons", "T-shirts", "Sous-vêtements", "Accessoires", "Robes", "Jupes"] as const;
 
 type Category = typeof CATEGORIES[number];
 
@@ -137,15 +137,15 @@ const Index = () => {
         <section style={{padding: '3% 4%'}}>
           <div className="mx-auto" style={{maxWidth: '90%'}}>
             {loading ? (
-              <div className="text-center" style={{padding: '5% 0'}}>
-                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement des produits...</p>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Chargement des produits...</p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center" style={{padding: '5% 0'}}>
                 <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
                   {products.length === 0 
-                    ? "Aucun produit disponible pour le moment." 
-                    : "Aucun produit ne correspond à vos critères de recherche."
+                    ? "No products available at the moment." 
+                    : "No products match your search criteria."
                   }
                 </p>
               </div>

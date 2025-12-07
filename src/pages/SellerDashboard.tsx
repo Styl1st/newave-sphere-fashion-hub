@@ -44,7 +44,7 @@ const SellerDashboard = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Veuillez vous connecter pour accéder au tableau de bord vendeur.</p>
+        <p>Please sign in to access the seller dashboard.</p>
       </div>
     );
   }
@@ -63,9 +63,9 @@ const SellerDashboard = () => {
                   hasProjects ? "grid-cols-3" : "grid-cols-2"
                 }`}
               >
-                <TabsTrigger value="projects">Mes Projets</TabsTrigger>
+                <TabsTrigger value="projects">My Projects</TabsTrigger>
                 {hasProjects && (
-                  <TabsTrigger value="products">Produits</TabsTrigger>
+                  <TabsTrigger value="products">Products</TabsTrigger>
                 )}
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
