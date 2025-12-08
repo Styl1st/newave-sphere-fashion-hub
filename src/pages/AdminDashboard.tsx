@@ -352,125 +352,132 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
 
-        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
-          <div style={{marginBottom: '4%'}}>
-            <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
-              <Settings style={{height: '2vw', width: '2vw'}} />
+        <div className="mx-auto max-w-[95%] sm:max-w-[90%] px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="font-bold flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl lg:text-3xl mb-2">
+              <Settings className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
               Admin Dashboard
             </h1>
-            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
+            <p className="text-muted-foreground text-sm sm:text-base">
               Manage users, brands, and platform settings.
             </p>
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4" style={{gap: '3%', marginBottom: '4%'}}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
             <Card>
-              <CardHeader style={{paddingBottom: '1%'}}>
-                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
-                  <Users style={{height: '1vw', width: '1vw'}} />
+              <CardHeader className="pb-2">
+                <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
+                  <Users className="h-4 w-4" />
                   Total Users
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalUsers}</div>
+                <div className="font-bold text-2xl sm:text-3xl lg:text-4xl">{stats.totalUsers}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader style={{paddingBottom: '1%'}}>
-                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
-                  <Users style={{height: '1vw', width: '1vw'}} />
+              <CardHeader className="pb-2">
+                <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
+                  <Users className="h-4 w-4" />
                   Sellers/Brands
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalSellers}</div>
+                <div className="font-bold text-2xl sm:text-3xl lg:text-4xl">{stats.totalSellers}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader style={{paddingBottom: '1%'}}>
-                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
-                  <Package style={{height: '1vw', width: '1vw'}} />
+              <CardHeader className="pb-2">
+                <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
+                  <Package className="h-4 w-4" />
                   Products
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalProducts}</div>
+                <div className="font-bold text-2xl sm:text-3xl lg:text-4xl">{stats.totalProducts}</div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader style={{paddingBottom: '1%'}}>
-                <CardTitle className="font-medium flex items-center" style={{fontSize: '0.9vw', gap: '1%'}}>
-                  <ShoppingBag style={{height: '1vw', width: '1vw'}} />
+              <CardHeader className="pb-2">
+                <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
+                  <ShoppingBag className="h-4 w-4" />
                   Purchases
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-bold" style={{fontSize: '2vw'}}>{stats.totalPurchases}</div>
+                <div className="font-bold text-2xl sm:text-3xl lg:text-4xl">{stats.totalPurchases}</div>
               </CardContent>
             </Card>
           </div>
 
           {/* Tabs for different admin sections */}
-          <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="purchases">Purchases</TabsTrigger>
-              <TabsTrigger value="support">Support</TabsTrigger>
-              <TabsTrigger value="projects">Projects</TabsTrigger>
-              <TabsTrigger value="products">Products</TabsTrigger>
+          <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
+              <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Users</TabsTrigger>
+              <TabsTrigger value="purchases" className="text-xs sm:text-sm py-2">Purchases</TabsTrigger>
+              <TabsTrigger value="support" className="text-xs sm:text-sm py-2">Support</TabsTrigger>
+              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2 hidden sm:flex">Projects</TabsTrigger>
+              <TabsTrigger value="products" className="text-xs sm:text-sm py-2 hidden sm:flex">Products</TabsTrigger>
+            </TabsList>
+            {/* Mobile additional tabs */}
+            <TabsList className="grid w-full grid-cols-2 sm:hidden h-auto">
+              <TabsTrigger value="projects" className="text-xs py-2">Projects</TabsTrigger>
+              <TabsTrigger value="products" className="text-xs py-2">Products</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
               <Card>
                 <CardHeader>
-                  <CardTitle>User Management</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
                     <div className="text-center py-8">Loading...</div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {profiles.map((profile) => (
                         <div
                           key={profile.id}
-                          className="flex items-center justify-between p-4 border rounded-lg"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                             {profile.avatar_url ? (
                               <img
                                 src={profile.avatar_url}
                                 alt={profile.full_name || "Avatar"}
-                                className="w-10 h-10 rounded-full object-cover"
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                <Users className="h-5 w-5 text-muted-foreground" />
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                               </div>
                             )}
 
-                            <div>
-                              <div className="font-medium">
+                            <div className="min-w-0 flex-1 sm:flex-none">
+                              <div className="font-medium text-sm sm:text-base truncate">
                                 {profile.full_name || "Name not set"}
                               </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs sm:text-sm text-muted-foreground truncate">
                                 {profile.email}
                               </div>
                             </div>
 
-                            <Badge className={getRoleColor(profile.role)}>
-                              {profile.role}
-                            </Badge>
-                            
-                            {profile.purchase_count !== undefined && profile.purchase_count > 0 && (
-                              <Badge variant="outline" className="ml-2">
-                                <ShoppingBag className="h-3 w-3 mr-1" />
-                                {profile.purchase_count} achat{profile.purchase_count > 1 ? 's' : ''}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge className={`${getRoleColor(profile.role)} text-xs`}>
+                                {profile.role}
                               </Badge>
-                            )}
+                              
+                              {profile.purchase_count !== undefined && profile.purchase_count > 0 && (
+                                <Badge variant="outline" className="text-xs">
+                                  <ShoppingBag className="h-3 w-3 mr-1" />
+                                  {profile.purchase_count} achat{profile.purchase_count > 1 ? 's' : ''}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -598,48 +605,48 @@ const AdminDashboard = () => {
             <TabsContent value="purchases">
               <Card>
                 <CardHeader>
-                  <CardTitle>Toutes les transactions ({purchases.length})</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Toutes les transactions ({purchases.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loadingPurchases ? (
                     <div className="text-center py-8">Chargement...</div>
                   ) : purchases.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucune transaction pour le moment</p>
+                      <ShoppingBag className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm sm:text-base">Aucune transaction pour le moment</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {purchases.map((purchase) => (
                         <div
                           key={purchase.id}
-                          className="flex items-center justify-between p-4 border rounded-lg"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg gap-3"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 sm:gap-4">
                             {purchase.product?.images?.[0] ? (
                               <img
                                 src={purchase.product.images[0]}
                                 alt={purchase.product.name}
-                                className="w-12 h-12 rounded-lg object-cover"
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                               />
                             ) : (
-                              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                                <Package className="h-5 w-5 text-muted-foreground" />
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                                <Package className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                               </div>
                             )}
-                            <div>
-                              <p className="font-medium">{purchase.product?.name || 'Produit supprimé'}</p>
-                              <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm sm:text-base truncate">{purchase.product?.name || 'Produit supprimé'}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                                 Acheteur: {purchase.buyer?.full_name || purchase.buyer?.email || 'Inconnu'}
                               </p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                                 Vendeur: {purchase.seller?.full_name || purchase.seller?.email || 'Inconnu'}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-primary">{purchase.price_paid.toFixed(2)} €</p>
-                            <p className="text-sm text-muted-foreground">x{purchase.quantity}</p>
+                          <div className="text-left sm:text-right flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0">
+                            <p className="font-bold text-primary text-sm sm:text-base">{purchase.price_paid.toFixed(2)} €</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">x{purchase.quantity}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(purchase.purchased_at).toLocaleDateString('fr-FR', {
                                 day: 'numeric',
@@ -659,8 +666,8 @@ const AdminDashboard = () => {
             <TabsContent value="support">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
                     Support & Signalements
                   </CardTitle>
                 </CardHeader>
