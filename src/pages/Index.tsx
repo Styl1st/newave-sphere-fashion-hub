@@ -164,7 +164,7 @@ const Index = () => {
           <div className="mx-auto text-center px-4 sm:px-0 flex items-center justify-center" style={{width: '100%', height: '100vh', padding: '5vh 0'}}>
             <div 
               ref={heroRef}
-              className="rounded-3xl border border-white/20 overflow-hidden cursor-pointer" 
+              className="relative rounded-3xl border border-white/20 overflow-hidden cursor-pointer"
               style={{
                 ...heroStyle,
                 position: isExpanding ? 'fixed' : 'relative',
