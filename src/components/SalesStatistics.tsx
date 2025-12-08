@@ -139,7 +139,21 @@ export const SalesStatistics = () => {
                 <ShoppingCart className="h-6 w-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Ventes totales</p>
+                <p className="text-sm text-muted-foreground">Commandes</p>
+                <p className="text-2xl font-bold">{sales.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/10 rounded-full">
+                <Package className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Articles vendus</p>
                 <p className="text-2xl font-bold">{totalSales}</p>
               </div>
             </div>
@@ -155,20 +169,6 @@ export const SalesStatistics = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Panier moyen</p>
                 <p className="text-2xl font-bold">{averageOrderValue.toFixed(2)} €</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-500/10 rounded-full">
-                <Package className="h-6 w-6 text-purple-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Produits vendus</p>
-                <p className="text-2xl font-bold">{productStats.length}</p>
               </div>
             </div>
           </CardContent>
