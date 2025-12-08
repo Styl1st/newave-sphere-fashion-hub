@@ -4,18 +4,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/hooks/useI18n";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu, Home, LayoutDashboard, User, Shield, Heart, LogOut, Store, LogIn } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SupportDialog } from "@/components/SupportDialog";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
   const { role } = useRole();
   const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
+  const { t } = useI18n();
   const { getUnreadCount } = useMessages();
   const unreadCount = user ? getUnreadCount() : 0;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,17 +38,17 @@ const BrandNavbar = () => {
         {/* Desktop Navigation Links - Center */}
         <div className="hidden md:flex items-center justify-center gap-1 lg:gap-2">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-sm font-medium">Home</Button>
+            <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.home}</Button>
           </Link>
           {user && (
             <>
               {role === 'seller' && (
                 <>
                   <Link to="/seller">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Dashboard</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.dashboard}</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.profile}</Button>
                   </Link>
                 </>
               )}
@@ -53,17 +56,17 @@ const BrandNavbar = () => {
               {role === 'admin' && (
                 <>
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Admin</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.admin}</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.profile}</Button>
                   </Link>
                 </>
               )}
               
               {role === 'buyer' && (
                 <Link to="/user">
-                  <Button variant="ghost" size="sm" className="text-sm font-medium">My Space</Button>
+                  <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.mySpace}</Button>
                 </Link>
               )}
             </>
@@ -91,7 +94,7 @@ const BrandNavbar = () => {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-3" align="end">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Theme Color</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{t.nav.themeColor}</p>
                 <div className="grid grid-cols-4 gap-2">
                   {themes.map((theme) => (
                     <button
@@ -107,6 +110,10 @@ const BrandNavbar = () => {
                 </div>
               </PopoverContent>
             </Popover>
+
+            <div className="w-px h-4 bg-border" />
+
+            <LanguageSwitcher />
           </div>
 
           {/* Mobile Theme Toggle */}
@@ -148,15 +155,15 @@ const BrandNavbar = () => {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <Button onClick={signOut} variant="outline" size="sm" className="text-sm">
-                Sign out
+                {t.nav.signOut}
               </Button>
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="ghost" size="sm" className="text-sm">Become a seller</Button>
+                  <Button variant="ghost" size="sm" className="text-sm">{t.nav.becomeSeller}</Button>
                 </Link>
                 <Link to="/auth">
-                  <Button variant="hero" size="sm" className="text-sm">Sign in</Button>
+                  <Button variant="hero" size="sm" className="text-sm">{t.nav.signIn}</Button>
                 </Link>
               </>
             )}
@@ -171,12 +178,12 @@ const BrandNavbar = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex flex-col gap-2 mt-8">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Navigation</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">{t.nav.navigation}</p>
                 
                 <Link to="/" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                     <Home className="h-5 w-5" />
-                    Home
+                    {t.nav.home}
                   </Button>
                 </Link>
                 
@@ -187,13 +194,13 @@ const BrandNavbar = () => {
                         <Link to="/seller" onClick={closeMobileMenu}>
                           <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                             <LayoutDashboard className="h-5 w-5" />
-                            Dashboard
+                            {t.nav.dashboard}
                           </Button>
                         </Link>
                         <Link to="/my-profile" onClick={closeMobileMenu}>
                           <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                             <User className="h-5 w-5" />
-                            Profile
+                            {t.nav.profile}
                           </Button>
                         </Link>
                       </>
@@ -204,13 +211,13 @@ const BrandNavbar = () => {
                         <Link to="/admin" onClick={closeMobileMenu}>
                           <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                             <Shield className="h-5 w-5" />
-                            Admin
+                            {t.nav.admin}
                           </Button>
                         </Link>
                         <Link to="/my-profile" onClick={closeMobileMenu}>
                           <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                             <User className="h-5 w-5" />
-                            Profile
+                            {t.nav.profile}
                           </Button>
                         </Link>
                       </>
@@ -220,7 +227,7 @@ const BrandNavbar = () => {
                       <Link to="/user" onClick={closeMobileMenu}>
                         <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                           <Heart className="h-5 w-5" />
-                          My Space
+                          {t.nav.mySpace}
                         </Button>
                       </Link>
                     )}
@@ -228,7 +235,7 @@ const BrandNavbar = () => {
                     <Link to="/inbox" onClick={closeMobileMenu}>
                       <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                         <MessageCircle className="h-5 w-5" />
-                        Messages
+                        {t.nav.messages}
                         {unreadCount > 0 && (
                           <span className="ml-auto px-2 py-0.5 bg-destructive text-destructive-foreground text-xs rounded-full">
                             {unreadCount}
@@ -241,7 +248,7 @@ const BrandNavbar = () => {
                       trigger={
                         <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                           <HelpCircle className="h-5 w-5" />
-                          Support
+                          {t.nav.support}
                         </Button>
                       }
                     />
@@ -252,20 +259,20 @@ const BrandNavbar = () => {
                   {user ? (
                     <Button onClick={() => { signOut(); closeMobileMenu(); }} variant="outline" className="w-full gap-3 h-11">
                       <LogOut className="h-5 w-5" />
-                      Sign out
+                      {t.nav.signOut}
                     </Button>
                   ) : (
                     <div className="flex flex-col gap-2">
                       <Link to="/auth" onClick={closeMobileMenu}>
                         <Button variant="ghost" className="w-full gap-3 h-11">
                           <Store className="h-5 w-5" />
-                          Become a seller
+                          {t.nav.becomeSeller}
                         </Button>
                       </Link>
                       <Link to="/auth" onClick={closeMobileMenu}>
                         <Button variant="hero" className="w-full gap-3 h-11">
                           <LogIn className="h-5 w-5" />
-                          Sign in
+                          {t.nav.signIn}
                         </Button>
                       </Link>
                     </div>
