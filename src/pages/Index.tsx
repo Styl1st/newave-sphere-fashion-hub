@@ -200,6 +200,7 @@ const Index = () => {
                 <PopoverTrigger asChild>
                   <button 
                     className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
                     <div 
@@ -283,7 +284,24 @@ const Index = () => {
                       animationFillMode: 'both',
                     }}
                   >
-                    <a href="/auth">
+                    <Button 
+                      variant="hero" 
+                      size="lg" 
+                      className="hover:scale-105 transition-transform"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const filtersSection = document.getElementById('filters');
+                        if (filtersSection) {
+                          filtersSection.scrollIntoView({ behavior: 'instant' });
+                          filtersSection.classList.remove('animate-filters-in');
+                          void filtersSection.offsetWidth;
+                          filtersSection.classList.add('animate-filters-in');
+                        }
+                      }}
+                    >
+                      Explore drops
+                    </Button>
+                    <a href="/auth" onClick={(e) => e.stopPropagation()}>
                       <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
                         Become a seller
                       </Button>
