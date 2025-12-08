@@ -1,0 +1,339 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, Package, Euro, ShoppingCart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+type Sale = {
+  id: string;
+  quantity: number;
+  price_paid: number;
+  purchased_at: string;
+  product: {
+    id: string;
+    name: string;
+    images: string[] | null;
+  } | null;
+};
+
+type ProductStats = {
+  name: string;
+  totalSales: number;
+  totalRevenue: number;
+  image?: string;
+};
+
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+
+export const SalesStatistics = () => {
+  const { user } = useAuth();
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [productStats, setProductStats] = useState<ProductStats[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchSales();
+    }
+  }, [user]);
+
+  const fetchSales = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          id,
+          quantity,
+          price_paid,
+          purchased_at,
+          product_id,
+          products (id, name, images)
+        `)
+        .eq('seller_id', user?.id)
+        .order('purchased_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedSales = (data || []).map((sale: any) => ({
+        ...sale,
+        product: sale.products,
+      }));
+
+      setSales(formattedSales);
+      calculateProductStats(formattedSales);
+    } catch (error) {
+      console.error('Error fetching sales:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateProductStats = (salesData: Sale[]) => {
+    const statsMap = new Map<string, ProductStats>();
+
+    salesData.forEach((sale) => {
+      if (!sale.product) return;
+      const key = sale.product.id;
+      const existing = statsMap.get(key);
+
+      if (existing) {
+        existing.totalSales += sale.quantity;
+        existing.totalRevenue += sale.price_paid;
+      } else {
+        statsMap.set(key, {
+          name: sale.product.name,
+          totalSales: sale.quantity,
+          totalRevenue: sale.price_paid,
+          image: sale.product.images?.[0],
+        });
+      }
+    });
+
+    const sorted = Array.from(statsMap.values()).sort((a, b) => b.totalRevenue - a.totalRevenue);
+    setProductStats(sorted);
+  };
+
+  const totalRevenue = sales.reduce((sum, sale) => sum + sale.price_paid, 0);
+  const totalSales = sales.reduce((sum, sale) => sum + sale.quantity, 0);
+  const averageOrderValue = sales.length > 0 ? totalRevenue / sales.length : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Euro className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Revenus totaux</p>
+                <p className="text-2xl font-bold">{totalRevenue.toFixed(2)} €</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-green-500/10 rounded-full">
+                <ShoppingCart className="h-6 w-6 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Ventes totales</p>
+                <p className="text-2xl font-bold">{totalSales}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-500/10 rounded-full">
+                <TrendingUp className="h-6 w-6 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Panier moyen</p>
+                <p className="text-2xl font-bold">{averageOrderValue.toFixed(2)} €</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/10 rounded-full">
+                <Package className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Produits vendus</p>
+                <p className="text-2xl font-bold">{productStats.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {sales.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-lg font-semibold mb-2">Aucune vente pour le moment</h3>
+            <p className="text-muted-foreground">Vos statistiques de vente apparaîtront ici</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Bar Chart - Top Products by Revenue */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Top produits par revenus</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={productStats.slice(0, 5)} layout="vertical">
+                  <XAxis type="number" tickFormatter={(value) => `${value}€`} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    width={100}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`${value.toFixed(2)} €`, 'Revenus']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="totalRevenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Pie Chart - Sales Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Répartition des ventes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={productStats.slice(0, 5)}
+                    dataKey="totalSales"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={({ name, percent }) => `${name.slice(0, 10)}${name.length > 10 ? '...' : ''} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    {productStats.slice(0, 5).map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => [value, 'Ventes']}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Best Sellers List */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg">Meilleures ventes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {productStats.map((product, index) => (
+                    <div
+                      key={product.name}
+                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
+                    >
+                      <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                        {index + 1}
+                      </Badge>
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Package className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{product.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {product.totalSales} vente{product.totalSales > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-primary">{product.totalRevenue.toFixed(2)} €</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Recent Sales */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg">Ventes récentes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {sales.slice(0, 20).map((sale) => (
+                    <div
+                      key={sale.id}
+                      className="flex items-center gap-4 p-3 rounded-lg border"
+                    >
+                      {sale.product?.images?.[0] ? (
+                        <img
+                          src={sale.product.images[0]}
+                          alt={sale.product.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{sale.product?.name || 'Produit supprimé'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(sale.purchased_at).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{sale.price_paid.toFixed(2)} €</p>
+                        <p className="text-xs text-muted-foreground">x{sale.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
