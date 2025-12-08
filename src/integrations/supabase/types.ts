@@ -103,6 +103,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          product_id: string | null
           read: boolean
           sender_id: string
         }
@@ -111,6 +112,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          product_id?: string | null
           read?: boolean
           sender_id: string
         }
@@ -119,6 +121,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          product_id?: string | null
           read?: boolean
           sender_id?: string
         }
@@ -128,6 +131,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

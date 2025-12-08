@@ -201,9 +201,9 @@ const SellerProfile = () => {
                         });
                         return;
                       }
-                      const conversationId = await startConversation(profile.user_id);
-                      if (conversationId) {
-                        navigate('/inbox');
+                      const result = await startConversation(profile.user_id);
+                      if (result) {
+                        navigate(`/inbox?conversationId=${result.conversationId}`);
                       }
                     }}
                   >

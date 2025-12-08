@@ -9,6 +9,13 @@ export interface Message {
   content: string;
   read: boolean;
   created_at: string;
+  product_id?: string | null;
+  product?: {
+    id: string;
+    name: string;
+    images: string[] | null;
+    price: number;
+  } | null;
 }
 
 export interface Conversation {
@@ -22,11 +29,6 @@ export interface Conversation {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
-  };
-  product?: {
-    id: string;
-    name: string;
-    images: string[] | null;
   };
   last_message?: Message;
   unread_count?: number;
@@ -59,16 +61,6 @@ export const useMessages = () => {
             .eq('user_id', otherUserId)
             .maybeSingle();
 
-          let product = null;
-          if (convo.product_id) {
-            const { data: prod } = await supabase
-              .from('products')
-              .select('id, name, images')
-              .eq('id', convo.product_id)
-              .maybeSingle();
-            product = prod;
-          }
-
           const { data: lastMsg } = await supabase
             .from('messages')
             .select('*')
@@ -91,7 +83,6 @@ export const useMessages = () => {
               full_name: profile.full_name,
               avatar_url: profile.avatar_url,
             } : undefined,
-            product,
             last_message: lastMsg,
             unread_count: count || 0,
           };
@@ -134,24 +125,28 @@ export const useMessages = () => {
     };
   }, [user, fetchConversations]);
 
-  const startConversation = async (sellerId: string, productId?: string) => {
+  // Start or get existing conversation - ONE conversation per buyer-seller pair
+  const startConversation = async (sellerId: string, initialProductId?: string) => {
     if (!user) return null;
 
+    // Check if conversation already exists between these two users (ignore product_id)
     const { data: existing } = await supabase
       .from('conversations')
       .select('id')
       .or(`and(participant_1.eq.${user.id},participant_2.eq.${sellerId}),and(participant_1.eq.${sellerId},participant_2.eq.${user.id})`)
-      .eq('product_id', productId || null)
       .maybeSingle();
 
-    if (existing) return existing.id;
+    if (existing) {
+      return { conversationId: existing.id, isNew: false, productId: initialProductId };
+    }
 
+    // Create new conversation (without product_id - products are now in messages)
     const { data, error } = await supabase
       .from('conversations')
       .insert({
         participant_1: user.id,
         participant_2: sellerId,
-        product_id: productId || null,
+        product_id: null,
       })
       .select('id')
       .single();
@@ -162,7 +157,7 @@ export const useMessages = () => {
     }
 
     await fetchConversations();
-    return data.id;
+    return { conversationId: data.id, isNew: true, productId: initialProductId };
   };
 
   const getUnreadCount = useCallback(() => {
@@ -194,7 +189,23 @@ export const useConversation = (conversationId: string | null) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+
+      // Fetch product details for messages that have a product_id
+      const messagesWithProducts = await Promise.all(
+        (data || []).map(async (msg) => {
+          if (msg.product_id) {
+            const { data: product } = await supabase
+              .from('products')
+              .select('id, name, images, price')
+              .eq('id', msg.product_id)
+              .maybeSingle();
+            return { ...msg, product };
+          }
+          return msg;
+        })
+      );
+
+      setMessages(messagesWithProducts);
 
       // Mark messages as read
       if (user) {
@@ -230,11 +241,23 @@ export const useConversation = (conversationId: string | null) => {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        async (payload) => {
           const newMessage = payload.new as Message;
+          
+          // Fetch product if exists
+          let messageWithProduct = newMessage;
+          if (newMessage.product_id) {
+            const { data: product } = await supabase
+              .from('products')
+              .select('id, name, images, price')
+              .eq('id', newMessage.product_id)
+              .maybeSingle();
+            messageWithProduct = { ...newMessage, product };
+          }
+          
           setMessages((prev) => {
             if (prev.some(m => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
+            return [...prev, messageWithProduct];
           });
           
           if (user && newMessage.sender_id !== user.id) {
@@ -252,7 +275,7 @@ export const useConversation = (conversationId: string | null) => {
     };
   }, [conversationId, user]);
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, productId?: string | null) => {
     if (!user || !conversationId || !content.trim()) return;
 
     // Optimistic update
@@ -264,6 +287,7 @@ export const useConversation = (conversationId: string | null) => {
       content: content.trim(),
       read: false,
       created_at: new Date().toISOString(),
+      product_id: productId || null,
     };
     
     setMessages((prev) => [...prev, optimisticMessage]);
@@ -274,6 +298,7 @@ export const useConversation = (conversationId: string | null) => {
         conversation_id: conversationId,
         sender_id: user.id,
         content: content.trim(),
+        product_id: productId || null,
       })
       .select()
       .single();
@@ -284,8 +309,18 @@ export const useConversation = (conversationId: string | null) => {
       return false;
     }
 
-    // Replace optimistic message with real one
-    setMessages((prev) => prev.map(m => m.id === tempId ? data : m));
+    // Replace optimistic message with real one (fetch product if needed)
+    let messageWithProduct: Message = { ...data, product: null };
+    if (data.product_id) {
+      const { data: product } = await supabase
+        .from('products')
+        .select('id, name, images, price')
+        .eq('id', data.product_id)
+        .maybeSingle();
+      messageWithProduct = { ...data, product };
+    }
+    
+    setMessages((prev) => prev.map(m => m.id === tempId ? messageWithProduct : m));
 
     await supabase
       .from('conversations')

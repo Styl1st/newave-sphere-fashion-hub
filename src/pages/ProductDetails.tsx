@@ -115,9 +115,9 @@ const ProductDetails = () => {
       return;
     }
 
-    const conversationId = await startConversation(sellerProfile.user_id, product.id);
-    if (conversationId) {
-      navigate('/inbox');
+    const result = await startConversation(sellerProfile.user_id, product.id);
+    if (result) {
+      navigate(`/inbox?conversationId=${result.conversationId}&productId=${product.id}`);
     }
   };
 
