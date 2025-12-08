@@ -145,7 +145,7 @@ const Index = () => {
               </Popover>
               
               <h1 className="flex font-semibold tracking-tight justify-center text-white drop-shadow-md" style={{fontSize: '2.5vw', gap: '2%'}}>
-                <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
+                <img src={logoTransparent} alt="logo" className="flex items-center invert" style={{height: '4vw', maxHeight: '80px'}} />
                 Independent Fashion Marketplace
               </h1>
               <p className="mx-auto text-white/85 drop-shadow-sm" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
