@@ -1,21 +1,34 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import BrandNavbar from '@/components/BrandNavbar';
-import { useMessages, useConversation, Conversation } from '@/hooks/useMessages';
+import { useMessages, useConversation, Conversation, Message } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, Send, ArrowLeft, User } from 'lucide-react';
+import { MessageCircle, Send, ArrowLeft, User, Package } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 const Inbox = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { conversations, loading } = useMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  
+  // Get productId from URL params (when coming from product page)
+  const initialProductId = searchParams.get('productId');
+
+  useEffect(() => {
+    // Auto-select conversation if coming from a product page with a specific conversation
+    const conversationId = searchParams.get('conversationId');
+    if (conversationId && conversations.length > 0) {
+      const convo = conversations.find(c => c.id === conversationId);
+      if (convo) setSelectedConversation(convo);
+    }
+  }, [searchParams, conversations]);
 
   if (!user) {
     navigate('/auth');
@@ -62,6 +75,7 @@ const Inbox = () => {
                 conversation={selectedConversation}
                 currentUserId={user.id}
                 onBack={() => setSelectedConversation(null)}
+                initialProductId={initialProductId}
               />
             ) : (
               <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -111,11 +125,6 @@ const ConversationItem = ({
             </span>
           ) : null}
         </div>
-        {conversation.product && (
-          <p className="text-xs text-muted-foreground truncate">
-            À propos de: {conversation.product.name}
-          </p>
-        )}
         {conversation.last_message && (
           <p className="text-sm text-muted-foreground truncate">
             {conversation.last_message.content}
@@ -132,24 +141,89 @@ const ConversationItem = ({
   );
 };
 
+const ProductCard = ({ product, isOwn }: { product: Message['product']; isOwn: boolean }) => {
+  if (!product) return null;
+  
+  return (
+    <Link 
+      to={`/product/${product.id}`}
+      className={`flex items-center gap-3 p-2 rounded-lg mb-2 transition-colors ${
+        isOwn ? 'bg-primary-foreground/10 hover:bg-primary-foreground/20' : 'bg-background/50 hover:bg-background/80'
+      }`}
+    >
+      {product.images?.[0] ? (
+        <img 
+          src={product.images[0]} 
+          alt={product.name} 
+          className="w-12 h-12 object-cover rounded-md"
+        />
+      ) : (
+        <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+          <Package className="w-6 h-6 text-muted-foreground" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className={`text-xs font-medium truncate ${isOwn ? 'text-primary-foreground' : 'text-foreground'}`}>
+          {product.name}
+        </p>
+        <p className={`text-xs ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+          {product.price?.toFixed(2)} €
+        </p>
+      </div>
+    </Link>
+  );
+};
+
 const ChatArea = ({
   conversation,
   currentUserId,
   onBack,
+  initialProductId,
 }: {
   conversation: Conversation;
   currentUserId: string;
   onBack: () => void;
+  initialProductId?: string | null;
 }) => {
   const { messages, loading, sendMessage } = useConversation(conversation.id);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [pendingProductId, setPendingProductId] = useState<string | null>(initialProductId || null);
+  const [pendingProduct, setPendingProduct] = useState<Message['product']>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch pending product details
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (pendingProductId) {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data } = await supabase
+          .from('products')
+          .select('id, name, images, price')
+          .eq('id', pendingProductId)
+          .maybeSingle();
+        setPendingProduct(data);
+      } else {
+        setPendingProduct(null);
+      }
+    };
+    fetchProduct();
+  }, [pendingProductId]);
+
+  // Auto scroll to bottom on new messages
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleSend = async () => {
     if (!newMessage.trim() || sending) return;
     setSending(true);
-    await sendMessage(newMessage);
+    await sendMessage(newMessage, pendingProductId);
     setNewMessage('');
+    setPendingProductId(null);
+    setPendingProduct(null);
     setSending(false);
   };
 
@@ -176,17 +250,12 @@ const ChatArea = ({
           </Avatar>
           <div>
             <p className="font-medium hover:underline">{conversation.other_user?.full_name || 'Utilisateur'}</p>
-            {conversation.product && (
-              <p className="text-xs text-muted-foreground">
-                À propos de: {conversation.product.name}
-              </p>
-            )}
           </div>
         </Link>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         {loading ? (
           <div className="text-center text-muted-foreground">Chargement...</div>
         ) : messages.length === 0 ? (
@@ -207,6 +276,9 @@ const ChatArea = ({
                       : 'bg-muted'
                   }`}
                 >
+                  {msg.product && (
+                    <ProductCard product={msg.product} isOwn={msg.sender_id === currentUserId} />
+                  )}
                   <p className="text-sm">{msg.content}</p>
                   <p className={`text-xs mt-1 ${
                     msg.sender_id === currentUserId ? 'text-primary-foreground/70' : 'text-muted-foreground'
@@ -222,6 +294,28 @@ const ChatArea = ({
           </div>
         )}
       </ScrollArea>
+
+      {/* Pending Product Preview */}
+      {pendingProduct && (
+        <div className="px-4 py-2 border-t bg-muted/30">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Produit attaché:</span>
+            <div className="flex items-center gap-2 flex-1">
+              {pendingProduct.images?.[0] && (
+                <img src={pendingProduct.images[0]} alt="" className="w-8 h-8 object-cover rounded" />
+              )}
+              <span className="text-sm font-medium truncate">{pendingProduct.name}</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setPendingProductId(null); setPendingProduct(null); }}
+            >
+              ✕
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Input */}
       <div className="p-4 border-t">
