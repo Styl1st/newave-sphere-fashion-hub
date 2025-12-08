@@ -168,11 +168,11 @@ const UserDashboard = () => {
           </div>
 
           <Tabs defaultValue="orders" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="orders">Commandes</TabsTrigger>
-              <TabsTrigger value="activity">Favoris</TabsTrigger>
-              <TabsTrigger value="profile">Profil</TabsTrigger>
-              <TabsTrigger value="settings">Paramètres</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto gap-1 p-1">
+              <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">Commandes</TabsTrigger>
+              <TabsTrigger value="activity" className="text-xs sm:text-sm py-2">Favoris</TabsTrigger>
+              <TabsTrigger value="profile" className="text-xs sm:text-sm py-2">Profil</TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs sm:text-sm py-2">Paramètres</TabsTrigger>
             </TabsList>
 
             {/* Orders History Tab */}

@@ -30,7 +30,7 @@ const Index = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   
-  const { currentTheme, themes, nextTheme, setTheme } = useTheme();
+  const { currentTheme, themes, setTheme } = useTheme();
 
   // Parallax scroll effect
   useEffect(() => {
@@ -66,7 +66,6 @@ const Index = () => {
 
       if (error) throw error;
       
-      // Transform database products to match ProductCard type
       const transformedProducts: Product[] = (data || []).map(product => ({
         id: product.id,
         name: product.name,
@@ -102,29 +101,25 @@ const Index = () => {
     });
   };
 
-  // Generate hero style based on current theme - matches background with slight contrast
-  const heroStyle = {
-    padding: '10%',
-    background: `linear-gradient(135deg, 
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 0%, 
-      hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / 0.8) 50%,
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 100%)`,
-    boxShadow: `0 8px 32px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25),
-                inset 0 0 60px hsl(0 0% 100% / 0.15)`,
-    backdropFilter: 'blur(12px)',
-  };
-
   return (
     <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       <main className="">
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
+          <div className="mx-auto text-center px-4 sm:px-0" style={{width: '90%', padding: '6% 0'}}>
             <div 
               ref={heroRef}
-              className="rounded-3xl relative border border-white/20 overflow-hidden" 
-              style={heroStyle}
+              className="rounded-2xl sm:rounded-3xl relative border border-white/20 overflow-hidden p-6 sm:p-8 md:p-[10%]" 
+              style={{
+                background: `linear-gradient(135deg, 
+                  hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 0%, 
+                  hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / 0.8) 50%,
+                  hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 100%)`,
+                boxShadow: `0 8px 32px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25),
+                            inset 0 0 60px hsl(0 0% 100% / 0.15)`,
+                backdropFilter: 'blur(12px)',
+              }}
             >
               {/* Animated particles */}
               <ParticlesBackground 
@@ -136,14 +131,14 @@ const Index = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
-                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
+                    className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
                   >
-                    <Palette className="w-4 h-4" />
+                    <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
                     <div 
-                      className="w-5 h-5 rounded-full border-2 border-white/50 shadow-sm"
+                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white/50 shadow-sm"
                       style={{ backgroundColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}%)` }}
                     />
-                    <span className="text-sm font-medium">{currentTheme.name}</span>
+                    <span className="text-xs sm:text-sm font-medium hidden sm:inline">{currentTheme.name}</span>
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-4 bg-card border shadow-lg z-50" align="end">
@@ -188,10 +183,8 @@ const Index = () => {
                 }}
               >
                 <h1 
-                  className="flex font-semibold tracking-tight justify-center text-white drop-shadow-md animate-fade-in"
+                  className="flex flex-col sm:flex-row font-semibold tracking-tight justify-center items-center text-white drop-shadow-md animate-fade-in text-xl sm:text-2xl md:text-3xl lg:text-4xl gap-2 sm:gap-4"
                   style={{
-                    fontSize: '2.5vw', 
-                    gap: '2%',
                     animationDelay: '0.1s',
                     animationFillMode: 'both',
                   }}
@@ -199,20 +192,13 @@ const Index = () => {
                   <img 
                     src={logoTransparent} 
                     alt="logo" 
-                    className="flex items-center invert"
-                    style={{
-                      height: '4vw', 
-                      maxHeight: '80px',
-                    }} 
+                    className="flex items-center invert h-8 sm:h-10 md:h-12 lg:h-16"
                   />
-                  Independent Fashion Marketplace
+                  <span>Independent Fashion Marketplace</span>
                 </h1>
                 <p 
-                  className="mx-auto text-white/85 drop-shadow-sm animate-fade-in" 
+                  className="mx-auto text-white/85 drop-shadow-sm animate-fade-in mt-4 sm:mt-6 text-sm sm:text-base md:text-lg max-w-[90%] sm:max-w-[80%]" 
                   style={{
-                    marginTop: '3%', 
-                    fontSize: '1.2vw', 
-                    maxWidth: '80%',
                     animationDelay: '0.3s',
                     animationFillMode: 'both',
                   }}
@@ -220,10 +206,8 @@ const Index = () => {
                   Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
                 </p>
                 <div 
-                  className="flex justify-center animate-fade-in" 
+                  className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
                   style={{
-                    marginTop: '5%', 
-                    gap: '2%',
                     animationDelay: '0.5s',
                     animationFillMode: 'both',
                   }}
@@ -232,7 +216,7 @@ const Index = () => {
                     Explore drops
                   </Button>
                   <a href="/auth">
-                    <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform">
+                    <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
                       Become a seller
                     </Button>
                   </a>
@@ -298,15 +282,15 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section style={{padding: '3% 4%'}}>
-          <div className="mx-auto" style={{maxWidth: '90%'}}>
+        <section className="px-4 sm:px-6 py-6 sm:py-8">
+          <div className="mx-auto max-w-[95%] sm:max-w-[90%]">
             {loading ? (
-              <div className="text-center" style={{padding: '5% 0'}}>
-                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement des produits...</p>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm sm:text-base">Chargement des produits...</p>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center" style={{padding: '5% 0'}}>
-                <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm sm:text-base">
                   {products.length === 0 
                     ? "No products available at the moment." 
                     : "No products match your search criteria."
@@ -314,7 +298,7 @@ const Index = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{gap: '2%'}}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {filtered.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
