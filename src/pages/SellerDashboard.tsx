@@ -54,43 +54,41 @@ const SellerDashboard = () => {
     <ProtectedRoute allowedRoles={["seller"]}>
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
-          <div className="mx-auto" style={{maxWidth: '95%'}}>
-            <h1 className="font-bold" style={{fontSize: '2.5vw', marginBottom: '4%'}}>Tableau de bord vendeur</h1>
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Tableau de bord vendeur</h1>
 
-            <Tabs defaultValue="sales" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
-              <TabsList
-                className={`grid w-full ${
-                  hasProjects ? "grid-cols-4" : "grid-cols-3"
-                }`}
-              >
-                <TabsTrigger value="sales">Ventes</TabsTrigger>
-                <TabsTrigger value="projects">Mes Projets</TabsTrigger>
-                {hasProjects && (
-                  <TabsTrigger value="products">Produits</TabsTrigger>
-                )}
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="sales" className="space-y-6">
-                <SalesStatistics />
-              </TabsContent>
-
-              <TabsContent value="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
-                <ProjectManager onProjectsChange={checkUserProjects} />
-              </TabsContent>
-
+          <Tabs defaultValue="sales" className="space-y-6">
+            <TabsList
+              className={`grid w-full h-auto gap-1 p-1 ${
+                hasProjects ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"
+              }`}
+            >
+              <TabsTrigger value="sales" className="text-xs sm:text-sm py-2">Ventes</TabsTrigger>
+              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2">Mes Projets</TabsTrigger>
               {hasProjects && (
-                <TabsContent value="products" className="space-y-6">
-                  <ProjectProductManager />
-                </TabsContent>
+                <TabsTrigger value="products" className="text-xs sm:text-sm py-2">Produits</TabsTrigger>
               )}
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2">Notifications</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="notifications" className="space-y-6">
-                <NotificationCenter />
+            <TabsContent value="sales" className="space-y-6">
+              <SalesStatistics />
+            </TabsContent>
+
+            <TabsContent value="projects" className="space-y-6">
+              <ProjectManager onProjectsChange={checkUserProjects} />
+            </TabsContent>
+
+            {hasProjects && (
+              <TabsContent value="products" className="space-y-6">
+                <ProjectProductManager />
               </TabsContent>
-            </Tabs>
-          </div>
+            )}
+
+            <TabsContent value="notifications" className="space-y-6">
+              <NotificationCenter />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProtectedRoute>
