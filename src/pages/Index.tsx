@@ -109,9 +109,12 @@ const Index = () => {
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 0%, 
       hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / 0.8) 50%,
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 100%)`,
-    boxShadow: `0 8px 32px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25),
-                inset 0 0 60px hsl(0 0% 100% / 0.15)`,
+    boxShadow: `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
+                0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
+                inset 0 0 60px hsl(0 0% 100% / 0.18)`,
     backdropFilter: 'blur(12px)',
+    transform: 'scale(1)',
+    transition: 'box-shadow 0.35s ease, transform 0.35s ease',
   };
 
   return (
@@ -125,6 +128,14 @@ const Index = () => {
               ref={heroRef}
               className="rounded-3xl relative border border-white/20 overflow-hidden" 
               style={heroStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.01)';
+                e.currentTarget.style.boxShadow = `0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.5), 0 0 5vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35), inset 0 0 70px hsl(0 0% 100% / 0.2)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), inset 0 0 60px hsl(0 0% 100% / 0.18)`;
+              }}
             >
               {/* Animated particles */}
               <ParticlesBackground 
@@ -243,22 +254,54 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section className="px-4 md:px-8 -mt-6 relative z-10">
-          <div className="mx-auto max-w-[90%] bg-card/95 backdrop-blur-md rounded-2xl border border-border shadow-lg p-4 md:p-6">
-            <div className="flex flex-col gap-4">
+        <section style={{padding: '0 4%', marginTop: '-3%', position: 'relative', zIndex: 10}}>
+          <div
+            className="mx-auto bg-card/95 backdrop-blur-md rounded-2xl border shadow-lg"
+            style={{
+              maxWidth: '90%',
+              padding: '2%',
+              borderColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`,
+              boxShadow: `0 0 1.4vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3)`,
+              transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 1.7vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.38)`;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 1.4vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3)`;
+            }}
+          >
+            <div className="flex flex-col" style={{gap: '2%'}}>
               {/* Categories - Pill Style */}
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-foreground">Categories</span>
-                <div className="flex flex-wrap gap-2">
+              <div style={{marginBottom: '2%'}}>
+                <span className="font-medium text-foreground" style={{fontSize: '0.9vw'}}>Categories</span>
+                <div className="flex flex-wrap" style={{gap: '1.5%', marginTop: '1%'}}>
                   {CATEGORIES.map((c) => (
                     <button
                       key={c}
                       onClick={() => toggleCategory(c)}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-all border ${
+                      className={`rounded-full transition-all border ${
                         selected.has(c)
-                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
                       }`}
+                      style={{
+                        padding: '0.8% 2%',
+                        fontSize: '0.85vw',
+                        boxShadow: selected.has(c)
+                          ? `0 0 1.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35)`
+                          : `0 0 0.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`,
+                        transform: selected.has(c) ? 'translateY(-2%)' : 'none',
+                        transition: 'box-shadow 0.25s ease, transform 0.2s ease, background-color 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 1.4vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.6), 0 0 2.4vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.4)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow = selected.has(c)
+                          ? `0 0 1.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35)`
+                          : `0 0 0.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`;
+                      }}
                     >
                       {c}
                     </button>
@@ -267,20 +310,21 @@ const Index = () => {
               </div>
               
               {/* Price and Sort */}
-              <div className="flex flex-col md:flex-row gap-4 md:gap-6 pt-2 border-t border-border">
-                <div className="flex-1 space-y-2">
-                  <Label className="text-sm font-medium">Max price: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
+              <div className="flex flex-col md:flex-row border-t border-border" style={{gap: '3%', paddingTop: '2%'}}>
+                <div className="flex-1" style={{marginBottom: '1%'}}>
+                  <Label className="font-medium" style={{fontSize: '0.9vw'}}>Max price: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
                   <Slider 
                     value={[maxPrice]} 
                     min={20} 
                     max={500} 
                     step={5} 
                     onValueChange={(v) => setMaxPrice(v[0] ?? 300)}
-                    className="py-2"
+                    style={{marginTop: '1%'}}
+                    className="glow-slider"
                   />
                 </div>
-                <div className="w-full md:w-48 space-y-2">
-                  <Label className="text-sm font-medium">Sort by</Label>
+                <div className="w-full" style={{maxWidth: '30%', minWidth: '200px'}}>
+                  <Label className="font-medium" style={{fontSize: '0.9vw'}}>Sort by</Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
                     <SelectTrigger className="bg-background border-border">
                       <SelectValue placeholder="Sort by" />

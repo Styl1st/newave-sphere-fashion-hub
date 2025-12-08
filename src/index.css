@@ -150,6 +150,35 @@ All colors MUST be HSL.
   .bg-gradient-primary {
     background-image: var(--gradient-primary);
   }
+    /* Animated glow slider styling */
+    .glow-slider .relative.h-2.w-full.grow {
+      height: 0.8vw;
+      min-height: 10px;
+      background: linear-gradient(90deg, hsl(var(--brand) / 0.12), hsl(var(--brand-2) / 0.12));
+      background-size: 200% 200%;
+      box-shadow: 0 0 1.2vw hsl(var(--brand) / 0.35);
+      animation: glow-move 6s ease infinite;
+    }
+    .glow-slider .absolute.h-full.bg-primary {
+      background: linear-gradient(90deg, hsl(var(--brand)) 0%, hsl(var(--brand-2)) 100%);
+      background-size: 200% 200%;
+      animation: glow-move 3s ease infinite;
+      box-shadow: 0 0 1vw hsl(var(--brand) / 0.45);
+    }
+    .glow-slider .block.h-5.w-5.rounded-full {
+      width: 1vw;
+      height: 1vw;
+      min-width: 16px;
+      min-height: 16px;
+      border-color: hsl(var(--brand));
+      box-shadow: 0 0 0.8vw hsl(var(--brand) / 0.6);
+    }
+
+    @keyframes glow-move {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   .shadow-elegant {
     box-shadow: var(--shadow-elegant);
   }

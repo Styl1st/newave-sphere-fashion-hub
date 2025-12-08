@@ -17,29 +17,29 @@ const BrandNavbar = () => {
   const unreadCount = user ? getUnreadCount() : 0;
 
   return (
-    <header className="sticky z-30 top-4 px-4 md:px-8">
-      <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-6xl h-16 px-6">
+    <header className="sticky z-30" style={{top: '1%', padding: '0 4%'}}>
+      <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant" style={{maxWidth: '90%', height: '4vw', minHeight: '60px', padding: '0 3%'}}>
         {/* Logo - Left */}
         <div className="flex justify-start">
           <Link to="/" className="flex-shrink-0">
-            <img src={logoTransparent} alt="logo" className="h-9 w-auto dark:invert" />
+            <img src={logoTransparent} alt="logo" className="w-auto dark:invert" style={{height: '2.5vw', minHeight: '36px'}} />
           </Link>
         </div>
 
         {/* Navigation Links - Center */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center" style={{gap: '3%'}}>
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-sm font-medium">Home</Button>
+            <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Home</Button>
           </Link>
           {user && (
             <>
               {role !== 'seller' || (
                 <>
                   <Link to="/seller">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Dashboard</Button>
+                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Dashboard</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
+                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Profile</Button>
                   </Link>
                 </>
               )}
@@ -47,17 +47,17 @@ const BrandNavbar = () => {
               {role === 'admin' && (
                 <>
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Admin</Button>
+                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Admin</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
+                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Profile</Button>
                   </Link>
                 </>
               )}
               
               {role === 'buyer' && (
                 <Link to="/user">
-                  <Button variant="ghost" size="sm" className="text-sm font-medium">My Space</Button>
+                  <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>My Space</Button>
                 </Link>
               )}
             </>
@@ -65,42 +65,42 @@ const BrandNavbar = () => {
         </div>
 
         {/* Actions - Right */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end" style={{gap: '2%'}}>
           {/* Theme Controls */}
-          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/50">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMode}>
+          <div className="flex items-center rounded-lg bg-muted/50" style={{gap: '0.5%', padding: '0.5% 1%'}}>
+            <Button variant="ghost" size="icon" className="relative" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}} onClick={toggleMode}>
               {mode === 'dark' ? (
-                <Sun className="h-4 w-4" />
+                <Sun style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Moon style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
               )}
             </Button>
 
-            <div className="w-px h-4 bg-border" />
+            <div className="bg-border" style={{width: '1px', height: '1vw', minHeight: '16px'}} />
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 relative">
-                  <Palette className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="relative" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}}>
+                  <Palette style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
                   <span 
-                    className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background"
-                    style={{ backgroundColor: `hsl(${currentTheme.hue}, ${currentTheme.saturation}%, ${currentTheme.lightness}%)` }}
+                    className="absolute rounded-full border-2 border-background"
+                    style={{ bottom: '-2px', right: '-2px', width: '0.6vw', height: '0.6vw', minWidth: '10px', minHeight: '10px', backgroundColor: `hsl(${currentTheme.hue}, ${currentTheme.saturation}%, ${currentTheme.lightness}%)` }}
                   />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 p-3" align="end">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Theme Color</p>
-                <div className="grid grid-cols-4 gap-2">
+              <PopoverContent className="bg-popover border-border" style={{width: '12vw', minWidth: '192px', padding: '2%'}} align="end">
+                <p className="font-medium text-muted-foreground" style={{fontSize: '0.75vw', marginBottom: '1%'}}>Theme Color</p>
+                <div className="grid grid-cols-4" style={{gap: '1.5%'}}>
                   {themes.map((theme) => (
                     <button
                       key={theme.name}
                       onClick={() => setTheme(theme)}
-                      className={`w-8 h-8 rounded-full transition-all hover:scale-110 ${
+                      className={`rounded-full transition-all hover:scale-110 ${
                         currentTheme.name === theme.name 
                           ? 'ring-2 ring-offset-2 ring-foreground' 
                           : ''
                       }`}
-                      style={{ backgroundColor: `hsl(${theme.hue}, ${theme.saturation}%, ${theme.lightness}%)` }}
+                      style={{ width: '2vw', height: '2vw', minWidth: '32px', minHeight: '32px', backgroundColor: `hsl(${theme.hue}, ${theme.saturation}%, ${theme.lightness}%)` }}
                       title={theme.name}
                     />
                   ))}
@@ -115,10 +115,10 @@ const BrandNavbar = () => {
           {/* Messages */}
           {user && (
             <Link to="/inbox" className="relative">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MessageCircle className="h-4 w-4" />
+              <Button variant="ghost" size="icon" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}}>
+                <MessageCircle style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-lg">
+                  <span className="absolute bg-destructive text-destructive-foreground font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg" style={{top: '-4px', right: '-4px', width: '1.2vw', height: '1.2vw', minWidth: '20px', minHeight: '20px', fontSize: '0.7vw'}}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -128,16 +128,16 @@ const BrandNavbar = () => {
 
           {/* Auth Buttons */}
           {user ? (
-            <Button onClick={signOut} variant="outline" size="sm">
+            <Button onClick={signOut} variant="outline" size="sm" style={{fontSize: '0.85vw'}}>
               Sign out
             </Button>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center" style={{gap: '1.5%'}}>
               <Link to="/auth">
-                <Button variant="ghost" size="sm" className="text-sm">Become a seller</Button>
+                <Button variant="ghost" size="sm" style={{fontSize: '0.85vw'}}>Become a seller</Button>
               </Link>
               <Link to="/auth">
-                <Button variant="hero" size="sm">Sign in</Button>
+                <Button variant="hero" size="sm" style={{fontSize: '0.85vw'}}>Sign in</Button>
               </Link>
             </div>
           )}
