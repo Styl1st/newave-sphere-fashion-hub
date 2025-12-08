@@ -127,6 +127,14 @@ const Index = () => {
               ref={heroRef}
               className="rounded-3xl relative border border-white/20 overflow-hidden" 
               style={heroStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.01)';
+                e.currentTarget.style.boxShadow = `0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.5), 0 0 5vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35), inset 0 0 70px hsl(0 0% 100% / 0.2)`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), inset 0 0 60px hsl(0 0% 100% / 0.18)`;
+              }}
             >
               {/* Animated particles */}
               <ParticlesBackground 
