@@ -187,20 +187,28 @@ export const SalesStatistics = () => {
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={productStats.slice(0, 5)} layout="vertical">
-                  <XAxis type="number" tickFormatter={(value) => `${value}€`} />
+                  <XAxis 
+                    type="number" 
+                    tickFormatter={(value) => `${value}€`}
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
                   <YAxis 
                     type="category" 
                     dataKey="name" 
                     width={100}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+                    stroke="hsl(var(--muted-foreground))"
                   />
                   <Tooltip 
                     formatter={(value: number) => [`${value.toFixed(2)} €`, 'Revenus']}
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
                     }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                   />
                   <Bar dataKey="totalRevenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 </BarChart>
@@ -225,6 +233,7 @@ export const SalesStatistics = () => {
                     outerRadius={100}
                     label={({ name, percent }) => `${name.slice(0, 10)}${name.length > 10 ? '...' : ''} (${(percent * 100).toFixed(0)}%)`}
                     labelLine={false}
+                    style={{ fill: 'hsl(var(--foreground))' }}
                   >
                     {productStats.slice(0, 5).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -235,8 +244,10 @@ export const SalesStatistics = () => {
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: 'hsl(var(--foreground))'
                     }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
