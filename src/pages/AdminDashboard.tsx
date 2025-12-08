@@ -534,21 +534,20 @@ const AdminDashboard = () => {
                               </Dialog>
                             )}
 
-                            {profile.role != "admin" && (
-                              <select
-                                value={profile.role}
-                                onChange={(e) =>
-                                  handleRoleChange(
-                                    profile.id,
-                                    e.target.value as any
-                                  )
-                                }
-                                className="text-sm border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                              >
-                                <option value="buyer">Buyer</option>
-                                <option value="seller">Seller</option>
-                              </select>
-                            )}
+                            <select
+                              value={profile.role}
+                              onChange={(e) =>
+                                handleRoleChange(
+                                  profile.id,
+                                  e.target.value as any
+                                )
+                              }
+                              className="text-sm border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                              <option value="buyer">Buyer</option>
+                              <option value="seller">Seller</option>
+                              <option value="admin">Admin</option>
+                            </select>
 
                             {profile.role != "admin" && (
                               <AlertDialog>
