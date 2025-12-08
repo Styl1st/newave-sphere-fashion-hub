@@ -269,9 +269,9 @@ const ChatArea = ({
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b flex items-center gap-3">
+      <div className="p-4 border-b flex items-center gap-3 flex-shrink-0">
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -309,50 +309,52 @@ const ChatArea = ({
         </AlertDialog>
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        {loading ? (
-          <div className="text-center text-muted-foreground">Chargement...</div>
-        ) : messages.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
-            <p>Aucun message. Commencez la conversation !</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
-              >
+      {/* Messages - scrollable area */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full p-4" ref={scrollRef}>
+          {loading ? (
+            <div className="text-center text-muted-foreground">Chargement...</div>
+          ) : messages.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              <p>Aucun message. Commencez la conversation !</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((msg) => (
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                    msg.sender_id === currentUserId
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
+                  key={msg.id}
+                  className={`flex ${msg.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}
                 >
-                  {msg.product && (
-                    <ProductCard product={msg.product} isOwn={msg.sender_id === currentUserId} />
-                  )}
-                  <p className="text-sm">{msg.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.sender_id === currentUserId ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}>
-                    {formatDistanceToNow(new Date(msg.created_at), {
-                      addSuffix: true,
-                      locale: fr,
-                    })}
-                  </p>
+                  <div
+                    className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                      msg.sender_id === currentUserId
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    {msg.product && (
+                      <ProductCard product={msg.product} isOwn={msg.sender_id === currentUserId} />
+                    )}
+                    <p className="text-sm">{msg.content}</p>
+                    <p className={`text-xs mt-1 ${
+                      msg.sender_id === currentUserId ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    }`}>
+                      {formatDistanceToNow(new Date(msg.created_at), {
+                        addSuffix: true,
+                        locale: fr,
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
 
       {/* Pending Product Preview */}
       {pendingProduct && (
-        <div className="px-4 py-2 border-t bg-muted/30">
+        <div className="px-4 py-2 border-t bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Produit attaché:</span>
             <div className="flex items-center gap-2 flex-1">
@@ -372,8 +374,8 @@ const ChatArea = ({
         </div>
       )}
 
-      {/* Input */}
-      <div className="p-4 border-t">
+      {/* Input - fixed at bottom */}
+      <div className="p-4 border-t flex-shrink-0">
         <div className="flex gap-2">
           <Input
             value={newMessage}
@@ -387,7 +389,7 @@ const ChatArea = ({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
