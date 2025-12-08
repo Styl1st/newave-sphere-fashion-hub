@@ -1,4 +1,5 @@
 import BrandNavbar from "@/components/BrandNavbar";
+import ParticlesBackground from "@/components/ParticlesBackground";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -125,6 +126,12 @@ const Index = () => {
               className="rounded-3xl relative border border-white/20 overflow-hidden" 
               style={heroStyle}
             >
+              {/* Animated particles */}
+              <ParticlesBackground 
+                particleCount={60} 
+                color="rgb(255, 255, 255)" 
+              />
+
               {/* Parallax floating shapes */}
               <div 
                 className="absolute w-32 h-32 rounded-full bg-white/10 blur-2xl"
