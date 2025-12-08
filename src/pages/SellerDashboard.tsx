@@ -4,6 +4,7 @@ import { ProjectProductManager } from "@/components/ProjectProductManager";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { SalesStatistics } from "@/components/SalesStatistics";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 const SellerDashboard = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [hasProjects, setHasProjects] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +47,7 @@ const SellerDashboard = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Veuillez vous connecter pour accéder au tableau de bord vendeur.</p>
+        <p>{t.common.loading}</p>
       </div>
     );
   }
@@ -55,16 +57,16 @@ const SellerDashboard = () => {
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
         <div className="mx-auto max-w-[95%] sm:max-w-[90%] px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
-          <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl mb-6 sm:mb-8">Tableau de bord vendeur</h1>
+          <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl mb-6 sm:mb-8">{t.nav.dashboard}</h1>
 
           <Tabs defaultValue="projects" className="space-y-4 sm:space-y-6">
             <TabsList className={`grid w-full h-auto ${hasProjects ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3"}`}>
-              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2">Mes Projets</TabsTrigger>
+              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2">{t.sellerDashboard.myProjects}</TabsTrigger>
               {hasProjects && (
-                <TabsTrigger value="products" className="text-xs sm:text-sm py-2">Produits</TabsTrigger>
+                <TabsTrigger value="products" className="text-xs sm:text-sm py-2">{t.sellerDashboard.products}</TabsTrigger>
               )}
-              <TabsTrigger value="statistics" className="text-xs sm:text-sm py-2">Statistiques</TabsTrigger>
-              <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2">Notifications</TabsTrigger>
+              <TabsTrigger value="statistics" className="text-xs sm:text-sm py-2">{t.sellerDashboard.statistics}</TabsTrigger>
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2">{t.sellerDashboard.notifications}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="projects" className="space-y-4 sm:space-y-6">

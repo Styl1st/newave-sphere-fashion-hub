@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,6 +75,7 @@ type Purchase = {
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -356,11 +358,8 @@ const AdminDashboard = () => {
           <div className="mb-6 sm:mb-8">
             <h1 className="font-bold flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl lg:text-3xl mb-2">
               <Settings className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
-              Admin Dashboard
+              {t.nav.admin} {t.nav.dashboard}
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Manage users, brands, and platform settings.
-            </p>
           </div>
 
           {/* Statistics Cards */}
@@ -369,7 +368,7 @@ const AdminDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
                   <Users className="h-4 w-4" />
-                  Total Users
+                  {t.adminDashboard.users}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -381,7 +380,7 @@ const AdminDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
                   <Users className="h-4 w-4" />
-                  Sellers/Brands
+                  Sellers
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -393,7 +392,7 @@ const AdminDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
                   <Package className="h-4 w-4" />
-                  Products
+                  {t.sellerDashboard.products}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -405,7 +404,7 @@ const AdminDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="font-medium flex items-center gap-2 text-xs sm:text-sm">
                   <ShoppingBag className="h-4 w-4" />
-                  Purchases
+                  {t.statistics.orders}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -417,26 +416,26 @@ const AdminDashboard = () => {
           {/* Tabs for different admin sections */}
           <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
             <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
-              <TabsTrigger value="users" className="text-xs sm:text-sm py-2">Users</TabsTrigger>
-              <TabsTrigger value="purchases" className="text-xs sm:text-sm py-2">Purchases</TabsTrigger>
-              <TabsTrigger value="support" className="text-xs sm:text-sm py-2">Support</TabsTrigger>
-              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2 hidden sm:flex">Projects</TabsTrigger>
-              <TabsTrigger value="products" className="text-xs sm:text-sm py-2 hidden sm:flex">Products</TabsTrigger>
+              <TabsTrigger value="users" className="text-xs sm:text-sm py-2">{t.adminDashboard.users}</TabsTrigger>
+              <TabsTrigger value="purchases" className="text-xs sm:text-sm py-2">{t.statistics.orders}</TabsTrigger>
+              <TabsTrigger value="support" className="text-xs sm:text-sm py-2">{t.nav.support}</TabsTrigger>
+              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2 hidden sm:flex">{t.sellerDashboard.myProjects}</TabsTrigger>
+              <TabsTrigger value="products" className="text-xs sm:text-sm py-2 hidden sm:flex">{t.sellerDashboard.products}</TabsTrigger>
             </TabsList>
             {/* Mobile additional tabs */}
             <TabsList className="grid w-full grid-cols-2 sm:hidden h-auto">
-              <TabsTrigger value="projects" className="text-xs py-2">Projects</TabsTrigger>
-              <TabsTrigger value="products" className="text-xs py-2">Products</TabsTrigger>
+              <TabsTrigger value="projects" className="text-xs py-2">{t.sellerDashboard.myProjects}</TabsTrigger>
+              <TabsTrigger value="products" className="text-xs py-2">{t.sellerDashboard.products}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">{t.adminDashboard.users}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
-                    <div className="text-center py-8">Loading...</div>
+                    <div className="text-center py-8">{t.common.loading}</div>
                   ) : (
                     <div className="space-y-3 sm:space-y-4">
                       {profiles.map((profile) => (

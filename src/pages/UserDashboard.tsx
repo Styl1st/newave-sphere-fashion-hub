@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,7 @@ type Purchase = {
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [likedProducts, setLikedProducts] = useState<LikedProduct[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -78,7 +80,7 @@ const UserDashboard = () => {
           ...like,
           products: productsData?.find(p => p.id === like.product_id) || {
             id: like.product_id,
-            name: "Produit supprimé",
+            name: "Deleted product",
             brand: "",
             category: "",
             price: 0,
@@ -111,7 +113,7 @@ const UserDashboard = () => {
           ...purchase,
           products: productsData?.find(p => p.id === purchase.product_id) || {
             id: purchase.product_id,
-            name: "Produit supprimé",
+            name: "Deleted product",
             brand: "",
             category: "",
             images: []
@@ -143,18 +145,15 @@ const UserDashboard = () => {
           <div style={{marginBottom: '4%'}}>
             <h1 className="font-bold flex items-center" style={{fontSize: '2.5vw', gap: '1%', marginBottom: '1%'}}>
               <User style={{height: '2vw', width: '2vw'}} />
-              Mon Espace Personnel
+              {t.userDashboard.myPersonalSpace}
             </h1>
-            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
-              Gérez votre profil, vos achats et vos articles favoris.
-            </p>
           </div>
 
           <Tabs defaultValue="activity" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="activity">Activité</TabsTrigger>
-              <TabsTrigger value="profile">Profil</TabsTrigger>
-              <TabsTrigger value="settings">Paramètres</TabsTrigger>
+              <TabsTrigger value="activity">{t.userDashboard.activity}</TabsTrigger>
+              <TabsTrigger value="profile">{t.userDashboard.profile}</TabsTrigger>
+              <TabsTrigger value="settings">{t.userDashboard.settings}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="activity" style={{marginTop: '3%'}}>
@@ -164,17 +163,16 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center" style={{gap: '1%'}}>
                   <Heart style={{height: '1.2vw', width: '1.2vw'}} className="text-red-500" />
-                  Articles Aimés ({likedProducts.length})
+                  {t.userDashboard.likedItems} ({likedProducts.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center" style={{padding: '4% 0'}}>Chargement...</div>
+                  <div className="text-center" style={{padding: '4% 0'}}>{t.common.loading}</div>
                 ) : likedProducts.length === 0 ? (
                   <div className="text-center text-muted-foreground" style={{padding: '4% 0'}}>
                     <Heart className="mx-auto text-muted-foreground/50" style={{height: '3vw', width: '3vw', marginBottom: '2%'}} />
-                    <p>Aucun article aimé pour le moment.</p>
-                    <p className="text-sm">Explorez notre catalogue pour découvrir des pièces uniques !</p>
+                    <p>{t.userDashboard.noLikes}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -216,17 +214,16 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingBag className="h-5 w-5 text-green-600" />
-                  Historique des Achats ({purchases.length})
+                  {t.userDashboard.purchaseHistory} ({purchases.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8">Chargement...</div>
+                  <div className="text-center py-8">{t.common.loading}</div>
                 ) : purchases.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Aucun achat effectué pour le moment.</p>
-                    <p className="text-sm">Découvrez notre sélection de vêtements de seconde main !</p>
+                    <p>{t.userDashboard.noPurchases}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -253,12 +250,12 @@ const UserDashboard = () => {
                           <p className="text-sm text-muted-foreground">{purchase.products.brand}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-muted-foreground">
-                              Quantité: {purchase.quantity}
+                              x{purchase.quantity}
                             </span>
                             <span className="font-semibold">{purchase.price_paid}€</span>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            Acheté le {new Date(purchase.purchased_at).toLocaleDateString()}
+                            {t.userDashboard.purchased} {new Date(purchase.purchased_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -279,16 +276,13 @@ const UserDashboard = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Paramètres du compte
+                    {t.userDashboard.accountSettings}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8 text-muted-foreground">
                     <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Paramètres avancés à venir</p>
-                    <p className="text-sm">
-                      Préférences de notification, confidentialité, etc.
-                    </p>
+                    <p>{t.common.loading}</p>
                   </div>
                 </CardContent>
               </Card>
