@@ -29,6 +29,7 @@ const Index = () => {
   const [scrollY, setScrollY] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isExpanding, setIsExpanding] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [heroInitialPos, setHeroInitialPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   
@@ -36,7 +37,7 @@ const Index = () => {
 
   // Animate expansion when isExpanding changes
   useEffect(() => {
-    if (isExpanding && heroRef.current && heroInitialPos) {
+    if (isExpanding && heroRef.current && heroInitialPos && !isClosing) {
       // Trigger transition to fullscreen after initial position is set
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -50,7 +51,28 @@ const Index = () => {
         });
       });
     }
-  }, [isExpanding, heroInitialPos]);
+  }, [isExpanding, heroInitialPos, isClosing]);
+
+  // Handle closing animation
+  useEffect(() => {
+    if (isClosing && heroRef.current && heroInitialPos) {
+      // Animate back to original position
+      heroRef.current.style.top = `${heroInitialPos.top}px`;
+      heroRef.current.style.left = `${heroInitialPos.left}px`;
+      heroRef.current.style.width = `${heroInitialPos.width}px`;
+      heroRef.current.style.height = `${heroInitialPos.height}px`;
+      heroRef.current.style.borderRadius = '1.5rem';
+      
+      // Wait for transition to complete before resetting
+      const timeout = setTimeout(() => {
+        setIsExpanding(false);
+        setIsClosing(false);
+        setHeroInitialPos(null);
+      }, 800);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isClosing, heroInitialPos]);
 
   // Parallax scroll effect
   useEffect(() => {
@@ -136,7 +158,7 @@ const Index = () => {
   };
 
   const handleHeroClick = () => {
-    if (!isExpanding && heroRef.current) {
+    if (!isExpanding && !isClosing && heroRef.current) {
       // Capture position before expanding
       const rect = heroRef.current.getBoundingClientRect();
       setHeroInitialPos({
@@ -149,9 +171,9 @@ const Index = () => {
       requestAnimationFrame(() => {
         setIsExpanding(true);
       });
-    } else {
-      setIsExpanding(false);
-      setHeroInitialPos(null);
+    } else if (isExpanding && !isClosing) {
+      // Start closing animation
+      setIsClosing(true);
     }
   };
 
@@ -314,7 +336,8 @@ const Index = () => {
                 {/* About Us - only when expanded */}
                 {isExpanding && (
                   <div 
-                    className="mt-12 max-w-3xl mx-auto"
+                    className="mt-12 max-w-3xl mx-auto transition-opacity duration-500"
+                    style={{ opacity: isClosing ? 0 : 1 }}
                   >
                     <h2 
                       className="text-2xl sm:text-3xl font-bold text-white mb-6 animate-fade-in"
