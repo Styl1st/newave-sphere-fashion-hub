@@ -233,25 +233,27 @@ const ChatArea = ({
   const [pendingProductId, setPendingProductId] = useState<string | null>(initialProductId || null);
   const [pendingProduct, setPendingProduct] = useState<Message['product']>(null);
   const [showProductPicker, setShowProductPicker] = useState(false);
-  const [sellerProducts, setSellerProducts] = useState<Array<{ id: string; name: string; images: string[] | null; price: number }>>([]);
+  // myProducts is now fetched dynamically in the useEffect below
   const [loadingProducts, setLoadingProducts] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch seller's products for the picker
+  // Fetch current user's products for the picker (their own products they sell)
+  const [myProducts, setMyProducts] = useState<Array<{ id: string; name: string; images: string[] | null; price: number }>>([]);
+  
   useEffect(() => {
-    const fetchSellerProducts = async () => {
-      if (!conversation.other_user?.id) return;
+    const fetchMyProducts = async () => {
+      if (!currentUserId) return;
       setLoadingProducts(true);
       const { data } = await supabase
         .from('products')
         .select('id, name, images, price')
-        .eq('user_id', conversation.other_user.id)
+        .eq('user_id', currentUserId)
         .order('created_at', { ascending: false });
-      setSellerProducts(data || []);
+      setMyProducts(data || []);
       setLoadingProducts(false);
     };
-    fetchSellerProducts();
-  }, [conversation.other_user?.id]);
+    fetchMyProducts();
+  }, [currentUserId]);
 
   // Fetch pending product details
   useEffect(() => {
@@ -418,14 +420,14 @@ const ChatArea = ({
               <ScrollArea className="max-h-[60vh]">
                 {loadingProducts ? (
                   <div className="text-center py-8 text-muted-foreground">Chargement...</div>
-                ) : sellerProducts.length === 0 ? (
+                ) : myProducts.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>Aucun produit disponible</p>
+                    <p>Vous n'avez aucun produit en vente</p>
                   </div>
                 ) : (
                   <div className="space-y-2 p-1">
-                    {sellerProducts.map((product) => (
+                    {myProducts.map((product) => (
                       <button
                         key={product.id}
                         onClick={() => {
