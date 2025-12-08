@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Package, Euro, ShoppingCart } from 'lucide-react';
+import { TrendingUp, Package, Euro, ShoppingCart, Heart } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 type Sale = {
@@ -24,6 +24,15 @@ type ProductStats = {
   totalSales: number;
   totalRevenue: number;
   image?: string;
+  likes?: number;
+  productId?: string;
+};
+
+type LikeStats = {
+  productId: string;
+  productName: string;
+  likes: number;
+  image?: string;
 };
 
 const COLORS = [
@@ -39,10 +48,13 @@ export const SalesStatistics = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [productStats, setProductStats] = useState<ProductStats[]>([]);
+  const [likeStats, setLikeStats] = useState<LikeStats[]>([]);
+  const [totalLikes, setTotalLikes] = useState(0);
 
   useEffect(() => {
     if (user) {
       fetchSales();
+      fetchLikeStats();
     }
   }, [user]);
 
@@ -74,6 +86,55 @@ export const SalesStatistics = () => {
       console.error('Error fetching sales:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLikeStats = async () => {
+    try {
+      // First get all products by the seller
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('id, name, images')
+        .eq('user_id', user?.id);
+
+      if (productsError) throw productsError;
+
+      if (!products || products.length === 0) {
+        setLikeStats([]);
+        setTotalLikes(0);
+        return;
+      }
+
+      // Then get likes for these products
+      const productIds = products.map(p => p.id);
+      const { data: likes, error: likesError } = await supabase
+        .from('likes')
+        .select('product_id')
+        .in('product_id', productIds);
+
+      if (likesError) throw likesError;
+
+      // Count likes per product
+      const likesMap = new Map<string, number>();
+      (likes || []).forEach(like => {
+        likesMap.set(like.product_id, (likesMap.get(like.product_id) || 0) + 1);
+      });
+
+      // Build stats
+      const stats: LikeStats[] = products
+        .map(product => ({
+          productId: product.id,
+          productName: product.name,
+          likes: likesMap.get(product.id) || 0,
+          image: product.images?.[0],
+        }))
+        .filter(s => s.likes > 0)
+        .sort((a, b) => b.likes - a.likes);
+
+      setLikeStats(stats);
+      setTotalLikes(stats.reduce((sum, s) => sum + s.likes, 0));
+    } catch (error) {
+      console.error('Error fetching like stats:', error);
     }
   };
 
@@ -163,12 +224,12 @@ export const SalesStatistics = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <TrendingUp className="h-6 w-6 text-blue-500" />
+              <div className="p-3 bg-red-500/10 rounded-full">
+                <Heart className="h-6 w-6 text-red-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Panier moyen</p>
-                <p className="text-2xl font-bold">{averageOrderValue.toFixed(2)} €</p>
+                <p className="text-sm text-muted-foreground">Total likes</p>
+                <p className="text-2xl font-bold">{totalLikes}</p>
               </div>
             </div>
           </CardContent>
@@ -356,6 +417,52 @@ export const SalesStatistics = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+
+          {/* Likes Statistics */}
+          {likeStats.length > 0 && (
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-red-500" />
+                  Produits les plus aimés
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-3">
+                    {likeStats.map((product, index) => (
+                      <div
+                        key={product.productId}
+                        className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
+                      >
+                        <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                          {index + 1}
+                        </Badge>
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.productName}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{product.productName}</p>
+                        </div>
+                        <div className="text-right flex items-center gap-2">
+                          <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                          <p className="font-bold">{product.likes}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Recent Sales */}
           <Card className="lg:col-span-2">

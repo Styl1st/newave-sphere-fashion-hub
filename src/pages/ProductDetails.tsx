@@ -4,20 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Heart, ArrowLeft, Store, MessageSquare, ShoppingCart } from "lucide-react";
+import { Heart, ArrowLeft, Store, MessageSquare, ShoppingCart, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
 import { useCart } from "@/hooks/useCart";
+import { SupportDialog } from "@/components/SupportDialog";
+import { useLikes } from "@/hooks/useLikes";
 
 type Product = {
   id: string;
@@ -48,10 +43,32 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [sellerProfile, setSellerProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { startConversation } = useMessages();
   const { addToCart } = useCart();
+  const { isLiked, toggleLike, fetchLikeCount, getLikeCount } = useLikes();
+  const [likeCount, setLikeCount] = useState(0);
+
+  useEffect(() => {
+    if (id) {
+      fetchLikeCount(id).then(count => setLikeCount(count));
+    }
+  }, [id, fetchLikeCount]);
+
+  // Update local count when global state changes
+  useEffect(() => {
+    if (id) {
+      const count = getLikeCount(id);
+      if (count > 0) setLikeCount(count);
+    }
+  }, [getLikeCount, id]);
+
+  const handleLikeClick = async () => {
+    if (!id) return;
+    const wasLiked = isLiked(id);
+    await toggleLike(id);
+    setLikeCount(prev => wasLiked ? Math.max(0, prev - 1) : prev + 1);
+  };
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -263,16 +280,21 @@ const ProductDetails = () => {
                     <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
                     <p className="text-lg text-muted-foreground font-medium">{product.brand}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`rounded-full transition-colors ${
-                      isLiked ? 'text-red-500' : 'text-muted-foreground'
-                    }`}
-                    onClick={() => setIsLiked(!isLiked)}
-                  >
-                    <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-                  </Button>
+                  <div className="flex flex-col items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`rounded-full transition-colors ${
+                        isLiked(product.id) ? 'text-red-500' : 'text-muted-foreground'
+                      }`}
+                      onClick={handleLikeClick}
+                    >
+                      <Heart className={`h-5 w-5 ${isLiked(product.id) ? 'fill-current' : ''}`} />
+                    </Button>
+                    {likeCount > 0 && (
+                      <span className="text-sm font-medium text-muted-foreground">{likeCount}</span>
+                    )}
+                  </div>
                 </div>
                 
                 <Badge variant="secondary" className="text-sm">
@@ -317,6 +339,23 @@ const ProductDetails = () => {
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Contacter le vendeur
                 </Button>
+                {user && user.id !== product.user_id && (
+                  <SupportDialog
+                    defaultType="report_product"
+                    reportedProductId={product.id}
+                    reportedProductName={product.name}
+                    trigger={
+                      <Button 
+                        size="lg" 
+                        className="w-full" 
+                        variant="ghost"
+                      >
+                        <Flag className="mr-2 h-5 w-5" />
+                        Signaler ce produit
+                      </Button>
+                    }
+                  />
+                )}
               </CardContent>
             </Card>
           </div>

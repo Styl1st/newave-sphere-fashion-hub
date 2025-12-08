@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Palette, Sun, Moon, MessageCircle } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu, X } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { CartDrawer } from "@/components/CartDrawer";
+import { SupportDialog } from "@/components/SupportDialog";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
@@ -15,6 +18,16 @@ const BrandNavbar = () => {
   const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
   const { getUnreadCount } = useMessages();
   const unreadCount = user ? getUnreadCount() : 0;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const NavLinks = ({ mobile = false, onClose }: { mobile?: boolean; onClose?: () => void }) => {
+    const linkClass = mobile 
+      ? "w-full justify-start text-lg py-3" 
+      : "text-sm font-medium";
+    
+    const handleClick = () => {
+      if (onClose) onClose();
+    };
 
   return (
     <header className="sticky z-30" style={{top: '1%', padding: '0 4%'}}>
@@ -76,7 +89,7 @@ const BrandNavbar = () => {
               )}
             </Button>
 
-            <div className="bg-border" style={{width: '1px', height: '1vw', minHeight: '16px'}} />
+            <div className="w-px h-4 bg-border" />
 
             <Popover>
               <PopoverTrigger asChild>
@@ -109,8 +122,26 @@ const BrandNavbar = () => {
             </Popover>
           </div>
 
+          {/* Mobile Theme Toggle Only */}
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden" onClick={toggleMode}>
+            {mode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+
           {/* Cart */}
           <CartDrawer />
+
+          {/* Support - Hidden on mobile, shown in menu */}
+          {user && (
+            <div className="hidden sm:block">
+              <SupportDialog
+                trigger={
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                }
+              />
+            </div>
+          )}
 
           {/* Messages */}
           {user && (
@@ -128,16 +159,16 @@ const BrandNavbar = () => {
 
           {/* Auth Buttons */}
           {user ? (
-            <Button onClick={signOut} variant="outline" size="sm" style={{fontSize: '0.85vw'}}>
+            <Button onClick={signOut} variant="outline" size="sm">
               Sign out
             </Button>
           ) : (
-            <div className="flex items-center" style={{gap: '1.5%'}}>
+            <div className="flex items-center gap-2">
               <Link to="/auth">
-                <Button variant="ghost" size="sm" style={{fontSize: '0.85vw'}}>Become a seller</Button>
+                <Button variant="ghost" size="sm" className="text-sm">Become a seller</Button>
               </Link>
               <Link to="/auth">
-                <Button variant="hero" size="sm" style={{fontSize: '0.85vw'}}>Sign in</Button>
+                <Button variant="hero" size="sm">Sign in</Button>
               </Link>
             </div>
           )}
