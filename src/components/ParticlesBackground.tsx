@@ -52,10 +52,10 @@ const ParticlesBackground = ({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
           size: Math.random() * 3 + 1,
-          speedX: (Math.random() - 0.5) * 0.5,
-          speedY: (Math.random() - 0.5) * 0.5,
+          speedX: (Math.random() - 0.5) * 0.15,
+          speedY: (Math.random() - 0.5) * 0.15,
           opacity: Math.random() * 0.5 + 0.2,
-          opacitySpeed: (Math.random() - 0.5) * 0.01,
+          opacitySpeed: (Math.random() - 0.5) * 0.005,
         });
       }
     };
@@ -89,12 +89,12 @@ const ParticlesBackground = ({
         
         if (distance < 150) {
           const force = (150 - distance) / 150;
-          particle.speedX += (dx / distance) * force * 0.01;
-          particle.speedY += (dy / distance) * force * 0.01;
+          particle.speedX += (dx / distance) * force * 0.003;
+          particle.speedY += (dy / distance) * force * 0.003;
         }
 
         // Limit speed
-        const maxSpeed = 1.5;
+        const maxSpeed = 0.5;
         const speed = Math.sqrt(particle.speedX ** 2 + particle.speedY ** 2);
         if (speed > maxSpeed) {
           particle.speedX = (particle.speedX / speed) * maxSpeed;
