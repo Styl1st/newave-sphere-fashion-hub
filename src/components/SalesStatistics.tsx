@@ -207,16 +207,36 @@ export const SalesStatistics = () => {
                     stroke="hsl(var(--muted-foreground))"
                   />
                   <Tooltip 
-                    formatter={(value: number) => [`${value.toFixed(2)} €`, 'Revenus']}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      color: 'hsl(var(--foreground))'
+                    cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        const maxRevenue = Math.max(...productStats.slice(0, 5).map(p => p.totalRevenue));
+                        const percent = ((data.totalRevenue / maxRevenue) * 100).toFixed(0);
+                        return (
+                          <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+                            <p className="font-semibold text-foreground">{data.name}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Revenus: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Ventes: <span className="text-foreground font-medium">{data.totalSales} unité{data.totalSales > 1 ? 's' : ''}</span>
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Prix moyen: <span className="text-foreground font-medium">{(data.totalRevenue / data.totalSales).toFixed(2)} €</span>
+                            </p>
+                            <div className="mt-2 pt-2 border-t border-border">
+                              <p className="text-xs text-muted-foreground">
+                                {percent}% du top produit
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
                     }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                   />
-                  <Bar dataKey="totalRevenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="totalRevenue" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
