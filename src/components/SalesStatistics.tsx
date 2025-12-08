@@ -26,7 +26,13 @@ type ProductStats = {
   image?: string;
 };
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+const COLORS = [
+  'hsl(var(--chart-1))', 
+  'hsl(var(--chart-2))', 
+  'hsl(var(--chart-3))', 
+  'hsl(var(--chart-4))', 
+  'hsl(var(--chart-5))'
+];
 
 export const SalesStatistics = () => {
   const { user } = useAuth();
@@ -231,9 +237,29 @@ export const SalesStatistics = () => {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={({ name, percent }) => `${name.slice(0, 10)}${name.length > 10 ? '...' : ''} (${(percent * 100).toFixed(0)}%)`}
+                    innerRadius={40}
+                    paddingAngle={3}
+                    stroke="hsl(var(--background))"
+                    strokeWidth={2}
+                    label={({ cx, cy, midAngle, outerRadius, percent, name }) => {
+                      const RADIAN = Math.PI / 180;
+                      const radius = outerRadius * 1.2;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text
+                          x={x}
+                          y={y}
+                          fill="hsl(var(--foreground))"
+                          textAnchor={x > cx ? 'start' : 'end'}
+                          dominantBaseline="central"
+                          fontSize={12}
+                        >
+                          {`${name.slice(0, 8)}${name.length > 8 ? '..' : ''} (${(percent * 100).toFixed(0)}%)`}
+                        </text>
+                      );
+                    }}
                     labelLine={false}
-                    style={{ fill: 'hsl(var(--foreground))' }}
                   >
                     {productStats.slice(0, 5).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
