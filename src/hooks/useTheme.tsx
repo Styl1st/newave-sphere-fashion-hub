@@ -22,16 +22,22 @@ const THEMES: ThemeConfig[] = [
   { name: "Teal", hue: 175, saturation: 65, lightness: 40 },
 ];
 
+type Mode = 'light' | 'dark';
+
 interface ThemeContextType {
   currentTheme: ThemeConfig;
   themes: ThemeConfig[];
   setTheme: (theme: ThemeConfig) => void;
   nextTheme: () => void;
+  mode: Mode;
+  toggleMode: () => void;
+  setMode: (mode: Mode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'newave-color-theme';
+const MODE_STORAGE_KEY = 'newave-mode';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(() => {
@@ -44,6 +50,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     return THEMES[0];
+  });
+
+  const [mode, setModeState] = useState<Mode>(() => {
+    const saved = localStorage.getItem(MODE_STORAGE_KEY);
+    if (saved === 'dark' || saved === 'light') {
+      return saved;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
   const applyTheme = (theme: ThemeConfig) => {
@@ -68,10 +82,24 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     root.style.setProperty('--sidebar-ring', `${theme.hue} ${theme.saturation}% ${theme.lightness + 10}%`);
   };
 
+  const applyMode = (mode: Mode) => {
+    const root = document.documentElement;
+    if (mode === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  };
+
   useEffect(() => {
     applyTheme(currentTheme);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(currentTheme));
   }, [currentTheme]);
+
+  useEffect(() => {
+    applyMode(mode);
+    localStorage.setItem(MODE_STORAGE_KEY, mode);
+  }, [mode]);
 
   const setTheme = (theme: ThemeConfig) => {
     setCurrentTheme(theme);
@@ -83,8 +111,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     setCurrentTheme(THEMES[nextIndex]);
   };
 
+  const toggleMode = () => {
+    setModeState(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  const setMode = (newMode: Mode) => {
+    setModeState(newMode);
+  };
+
   return (
-    <ThemeContext.Provider value={{ currentTheme, themes: THEMES, setTheme, nextTheme }}>
+    <ThemeContext.Provider value={{ currentTheme, themes: THEMES, setTheme, nextTheme, mode, toggleMode, setMode }}>
       {children}
     </ThemeContext.Provider>
   );
