@@ -48,11 +48,23 @@ type Stats = {
   totalPurchases: number;
 };
 
+type Purchase = {
+  id: string;
+  quantity: number;
+  price_paid: number;
+  purchased_at: string;
+  buyer?: { full_name?: string; email?: string };
+  seller?: { full_name?: string; email?: string };
+  product?: { name: string; images?: string[] };
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPurchases, setLoadingPurchases] = useState(true);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [newBrandName, setNewBrandName] = useState("");
   const [stats, setStats] = useState<Stats>({
@@ -65,6 +77,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchProfiles();
     fetchStats();
+    fetchPurchases();
   }, []);
 
   const fetchProfiles = async () => {
@@ -126,6 +139,50 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
+    }
+  };
+
+  const fetchPurchases = async () => {
+    try {
+      setLoadingPurchases(true);
+      const { data, error } = await supabase
+        .from("purchases")
+        .select(`
+          id,
+          quantity,
+          price_paid,
+          purchased_at,
+          user_id,
+          seller_id,
+          product_id,
+          products (name, images)
+        `)
+        .order("purchased_at", { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+
+      // Fetch buyer and seller profiles
+      const purchasesWithProfiles = await Promise.all(
+        (data || []).map(async (purchase: any) => {
+          const [buyerResult, sellerResult] = await Promise.all([
+            supabase.from("profiles").select("full_name, email").eq("user_id", purchase.user_id).maybeSingle(),
+            supabase.from("profiles").select("full_name, email").eq("user_id", purchase.seller_id).maybeSingle(),
+          ]);
+          return {
+            ...purchase,
+            buyer: buyerResult.data,
+            seller: sellerResult.data,
+            product: purchase.products,
+          };
+        })
+      );
+
+      setPurchases(purchasesWithProfiles);
+    } catch (error) {
+      console.error("Error fetching purchases:", error);
+    } finally {
+      setLoadingPurchases(false);
     }
   };
 
@@ -320,8 +377,9 @@ const AdminDashboard = () => {
 
           {/* Tabs for different admin sections */}
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="purchases">Purchases</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
             </TabsList>
@@ -451,6 +509,67 @@ const AdminDashboard = () => {
                                 <option value="seller">Seller</option>
                               </select>
                             )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="purchases">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Toutes les transactions ({purchases.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingPurchases ? (
+                    <div className="text-center py-8">Chargement...</div>
+                  ) : purchases.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <ShoppingBag className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucune transaction pour le moment</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {purchases.map((purchase) => (
+                        <div
+                          key={purchase.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center gap-4">
+                            {purchase.product?.images?.[0] ? (
+                              <img
+                                src={purchase.product.images[0]}
+                                alt={purchase.product.name}
+                                className="w-12 h-12 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                                <Package className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium">{purchase.product?.name || 'Produit supprimé'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Acheteur: {purchase.buyer?.full_name || purchase.buyer?.email || 'Inconnu'}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Vendeur: {purchase.seller?.full_name || purchase.seller?.email || 'Inconnu'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-primary">{purchase.price_paid.toFixed(2)} €</p>
+                            <p className="text-sm text-muted-foreground">x{purchase.quantity}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(purchase.purchased_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </p>
                           </div>
                         </div>
                       ))}
