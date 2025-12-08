@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandNavbar from "@/components/BrandNavbar";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { UserProfileManager } from "@/components/UserProfileManager";
-import { Heart, ShoppingBag, User, Package, Settings } from "lucide-react";
+import { Heart, ShoppingBag, User, Package, Settings, Receipt, Calendar, Store } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -27,6 +27,7 @@ type LikedProduct = {
 type Purchase = {
   id: string;
   product_id: string;
+  seller_id: string;
   quantity: number;
   price_paid: number;
   purchased_at: string;
@@ -36,6 +37,10 @@ type Purchase = {
     brand: string;
     category: string;
     images: string[];
+  };
+  seller?: {
+    full_name: string | null;
+    avatar_url: string | null;
   };
 };
 
@@ -97,27 +102,39 @@ const UserDashboard = () => {
 
       if (purchasesError) throw purchasesError;
 
-      // Fetch product details for purchases
+      // Fetch product details and seller info for purchases
       if (purchasesData && purchasesData.length > 0) {
         const productIds = purchasesData.map(purchase => purchase.product_id);
-        const { data: productsData, error: productsError } = await supabase
-          .from("products")
-          .select("id, name, brand, category, images")
-          .in("id", productIds);
+        const sellerIds = [...new Set(purchasesData.map(purchase => purchase.seller_id))];
+        
+        const [productsResult, sellersResult] = await Promise.all([
+          supabase
+            .from("products")
+            .select("id, name, brand, category, images")
+            .in("id", productIds),
+          supabase
+            .from("profiles")
+            .select("user_id, full_name, avatar_url")
+            .in("user_id", sellerIds)
+        ]);
 
-        if (productsError) throw productsError;
+        if (productsResult.error) throw productsResult.error;
 
-        const purchasesWithProducts = purchasesData.map(purchase => ({
+        const purchasesWithDetails = purchasesData.map(purchase => ({
           ...purchase,
-          products: productsData?.find(p => p.id === purchase.product_id) || {
+          products: productsResult.data?.find(p => p.id === purchase.product_id) || {
             id: purchase.product_id,
-            name: "Deleted product",
+            name: "Produit supprimé",
             brand: "",
             category: "",
             images: []
+          },
+          seller: sellersResult.data?.find(s => s.user_id === purchase.seller_id) || {
+            full_name: "Vendeur inconnu",
+            avatar_url: null
           }
         }));
-        setPurchases(purchasesWithProducts);
+        setPurchases(purchasesWithDetails);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -150,12 +167,92 @@ const UserDashboard = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="activity" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+          <Tabs defaultValue="orders" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="orders">Commandes</TabsTrigger>
+              <TabsTrigger value="activity">Favoris</TabsTrigger>
+              <TabsTrigger value="profile">Profil</TabsTrigger>
+              <TabsTrigger value="settings">Paramètres</TabsTrigger>
             </TabsList>
+
+            {/* Orders History Tab */}
+            <TabsContent value="orders" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5 text-primary" />
+                    Historique des Commandes ({purchases.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="text-center py-8">Chargement...</div>
+                  ) : purchases.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                      <p>Aucune commande pour le moment.</p>
+                      <p className="text-sm">Découvrez notre sélection de vêtements de seconde main !</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {purchases.map((purchase) => (
+                        <div
+                          key={purchase.id}
+                          className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => handleProductClick(purchase.products.id)}
+                        >
+                          {purchase.products.images && purchase.products.images.length > 0 ? (
+                            <img
+                              src={purchase.products.images[0]}
+                              alt={purchase.products.name}
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
+                              <Package className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 space-y-2">
+                            <div>
+                              <h3 className="font-semibold text-lg">{purchase.products.name}</h3>
+                              <p className="text-sm text-muted-foreground">{purchase.products.brand}</p>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-3 text-sm">
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Store className="h-4 w-4" />
+                                <span>{purchase.seller?.full_name || "Vendeur inconnu"}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>{new Date(purchase.purchased_at).toLocaleDateString('fr-FR', { 
+                                  day: 'numeric', 
+                                  month: 'long', 
+                                  year: 'numeric' 
+                                })}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline">Qté: {purchase.quantity}</Badge>
+                              <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
+                                Confirmée
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="text-2xl font-bold">{purchase.price_paid}€</p>
+                            <p className="text-xs text-muted-foreground">Total payé</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="activity" style={{marginTop: '3%'}}>
               <div className="grid grid-cols-1 lg:grid-cols-2" style={{gap: '4%'}}>
@@ -210,63 +307,6 @@ const UserDashboard = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Purchase History Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5 text-green-600" />
-                  Purchase History ({purchases.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">Loading...</div>
-                ) : purchases.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>No purchases yet.</p>
-                    <p className="text-sm">Discover our selection of second-hand clothing!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {purchases.map((purchase) => (
-                      <div
-                        key={purchase.id}
-                        className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleProductClick(purchase.products.id)}
-                      >
-                        {purchase.products.images && purchase.products.images.length > 0 ? (
-                          <img
-                            src={purchase.products.images[0]}
-                            alt={purchase.products.name}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                            <Package className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                        
-                        <div className="flex-1">
-                          <h3 className="font-medium">{purchase.products.name}</h3>
-                          <p className="text-sm text-muted-foreground">{purchase.products.brand}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm text-muted-foreground">
-                              Quantity: {purchase.quantity}
-                            </span>
-                            <span className="font-semibold">{purchase.price_paid}€</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Purchased on {new Date(purchase.purchased_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
               </div>
             </TabsContent>
 
@@ -279,15 +319,15 @@ const UserDashboard = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Account Settings
+                    Paramètres du compte
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8 text-muted-foreground">
                     <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Advanced settings coming soon</p>
+                    <p>Paramètres avancés bientôt disponibles</p>
                     <p className="text-sm">
-                      Notification preferences, privacy, etc.
+                      Préférences de notifications, confidentialité, etc.
                     </p>
                   </div>
                 </CardContent>
