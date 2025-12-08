@@ -28,9 +28,29 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isExpanding, setIsExpanding] = useState(false);
+  const [heroInitialPos, setHeroInitialPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   
   const { currentTheme, themes, setTheme } = useTheme();
+
+  // Animate expansion when isExpanding changes
+  useEffect(() => {
+    if (isExpanding && heroRef.current && heroInitialPos) {
+      // Trigger transition to fullscreen after initial position is set
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (heroRef.current) {
+            heroRef.current.style.top = '0';
+            heroRef.current.style.left = '0';
+            heroRef.current.style.width = '100vw';
+            heroRef.current.style.height = '100vh';
+            heroRef.current.style.borderRadius = '0';
+          }
+        });
+      });
+    }
+  }, [isExpanding, heroInitialPos]);
 
   // Parallax scroll effect
   useEffect(() => {
@@ -103,17 +123,36 @@ const Index = () => {
 
   // Generate hero style based on current theme - matches background with slight contrast
   const heroStyle = {
-    padding: '10%',
+    padding: isExpanding ? '15%' : '12%',
     background: `linear-gradient(135deg, 
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 0%, 
-      hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / 0.8) 50%,
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.7) 100%)`,
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 0%, 
+      hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / ${isExpanding ? '1' : '0.8'}) 50%,
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 100%)`,
     boxShadow: `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
                 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
                 inset 0 0 60px hsl(0 0% 100% / 0.18)`,
     backdropFilter: 'blur(12px)',
-    transform: 'scale(1)',
-    transition: 'box-shadow 0.35s ease, transform 0.35s ease',
+    transition: 'all 1.2s ease',
+  };
+
+  const handleHeroClick = () => {
+    if (!isExpanding && heroRef.current) {
+      // Capture position before expanding
+      const rect = heroRef.current.getBoundingClientRect();
+      setHeroInitialPos({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height
+      });
+      // Small delay to allow state update before switching to fixed
+      requestAnimationFrame(() => {
+        setIsExpanding(true);
+      });
+    } else {
+      setIsExpanding(false);
+      setHeroInitialPos(null);
+    }
   };
 
   return (
@@ -121,19 +160,33 @@ const Index = () => {
       <BrandNavbar />
       <main className="">
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="mx-auto text-center px-4 sm:px-0" style={{width: '90%', padding: '6% 0'}}>
+        <section className="relative overflow-hidden" style={{minHeight: '100vh'}}>
+          <div className="mx-auto text-center px-4 sm:px-0 flex items-center justify-center" style={{width: '100%', height: '100vh', padding: '5vh 0'}}>
             <div 
               ref={heroRef}
-              className="rounded-3xl relative border border-white/20 overflow-hidden" 
-              style={heroStyle}
+              className="rounded-3xl border border-white/20 overflow-hidden cursor-pointer" 
+              style={{
+                ...heroStyle,
+                position: isExpanding ? 'fixed' : 'relative',
+                width: isExpanding ? '100vw' : '90%',
+                height: isExpanding ? '100vh' : 'auto',
+                top: isExpanding ? (heroInitialPos ? `${heroInitialPos.top}px` : '0') : 'auto',
+                left: isExpanding ? (heroInitialPos ? `${heroInitialPos.left}px` : '0') : 'auto',
+                borderRadius: isExpanding ? '0' : '1.5rem',
+                zIndex: isExpanding ? 9999 : 'auto',
+              }}
+              onClick={handleHeroClick}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.01)';
-                e.currentTarget.style.boxShadow = `0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.5), 0 0 5vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35), inset 0 0 70px hsl(0 0% 100% / 0.2)`;
+                if (!isExpanding) {
+                  e.currentTarget.style.transform = 'scale(1.01)';
+                  e.currentTarget.style.boxShadow = `0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.5), 0 0 5vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35), inset 0 0 70px hsl(0 0% 100% / 0.2)`;
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), inset 0 0 60px hsl(0 0% 100% / 0.18)`;
+                if (!isExpanding) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), inset 0 0 60px hsl(0 0% 100% / 0.18)`;
+                }
               }}
             >
               {/* Animated particles */}
@@ -242,7 +295,7 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section style={{padding: '0 4%', marginTop: '-3%', position: 'relative', zIndex: 10}}>
+        <section style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block'}}>
           <div
             className="mx-auto bg-card/95 backdrop-blur-md rounded-2xl border shadow-lg"
             style={{
