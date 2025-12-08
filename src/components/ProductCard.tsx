@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLikes } from "@/hooks/useLikes";
+import { useEffect, useState } from "react";
 
 export type Product = {
   id: string;
@@ -16,10 +17,28 @@ export type Product = {
 
 export const ProductCard = ({ product }: { product: Product }) => {
   const navigate = useNavigate();
-  const { isLiked, toggleLike } = useLikes();
+  const { isLiked, toggleLike, fetchLikeCount, getLikeCount } = useLikes();
+  const [likeCount, setLikeCount] = useState(0);
+
+  useEffect(() => {
+    fetchLikeCount(product.id).then(count => setLikeCount(count));
+  }, [product.id, fetchLikeCount]);
+
+  // Update local count when global state changes
+  useEffect(() => {
+    const count = getLikeCount(product.id);
+    if (count > 0) setLikeCount(count);
+  }, [getLikeCount, product.id]);
 
   const handleCardClick = () => {
     navigate(`/product/${product.id}`);
+  };
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    const wasLiked = isLiked(product.id);
+    await toggleLike(product.id, e);
+    // Update local count optimistically
+    setLikeCount(prev => wasLiked ? Math.max(0, prev - 1) : prev + 1);
   };
 
   return (
@@ -38,13 +57,16 @@ export const ProductCard = ({ product }: { product: Product }) => {
           className={`absolute top-3 right-3 rounded-full transition-colors ${
             isLiked(product.id) ? 'text-red-500 bg-background/90' : 'text-muted-foreground bg-background/70 hover:bg-background/90'
           }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleLike(product.id, e);
-          }}
+          onClick={handleLikeClick}
         >
           <Heart className={`h-4 w-4 ${isLiked(product.id) ? 'fill-current' : ''}`} />
         </Button>
+        {likeCount > 0 && (
+          <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <Heart className="h-3 w-3 text-red-500 fill-red-500" />
+            {likeCount}
+          </div>
+        )}
       </div>
       <CardContent className="pt-4">
         <div className="flex items-center justify-between">
