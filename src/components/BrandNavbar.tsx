@@ -4,9 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Palette, Sun, Moon, MessageCircle } from "lucide-react";
+import { Palette, Sun, Moon, MessageCircle, HelpCircle } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { CartDrawer } from "@/components/CartDrawer";
+import { SupportDialog } from "@/components/SupportDialog";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
@@ -111,6 +112,17 @@ const BrandNavbar = () => {
 
           {/* Cart */}
           <CartDrawer />
+
+          {/* Support */}
+          {user && (
+            <SupportDialog
+              trigger={
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              }
+            />
+          )}
 
           {/* Messages */}
           {user && (
