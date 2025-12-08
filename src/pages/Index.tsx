@@ -11,7 +11,7 @@ import { Palette, Check } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 import logoTransparent from "@/assets/newave/logo_transparent.png";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 const CATEGORIES = ["Chaussures", "Sweats", "Vestes", "Pantalons", "T-shirts", "Sous-vêtements", "Accessoires", "Robes", "Jupes"] as const;
 
@@ -25,8 +25,32 @@ const Index = () => {
   const [sort, setSort] = useState<Sort>("relevance");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLDivElement>(null);
   
   const { currentTheme, themes, nextTheme, setTheme } = useTheme();
+
+  // Parallax scroll effect
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Mouse parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (heroRef.current) {
+        const rect = heroRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
+        const y = (e.clientY - rect.top - rect.height / 2) / rect.height;
+        setMousePos({ x, y });
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
@@ -96,12 +120,63 @@ const Index = () => {
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
-            <div className="rounded-3xl relative border border-white/20" style={heroStyle}>
+            <div 
+              ref={heroRef}
+              className="rounded-3xl relative border border-white/20 overflow-hidden" 
+              style={heroStyle}
+            >
+              {/* Parallax floating shapes */}
+              <div 
+                className="absolute w-32 h-32 rounded-full bg-white/10 blur-2xl"
+                style={{
+                  top: '10%',
+                  left: '5%',
+                  transform: `translate(${mousePos.x * 30}px, ${mousePos.y * 30 + scrollY * 0.1}px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              />
+              <div 
+                className="absolute w-48 h-48 rounded-full bg-white/5 blur-3xl"
+                style={{
+                  top: '50%',
+                  right: '10%',
+                  transform: `translate(${mousePos.x * -20}px, ${mousePos.y * -20 + scrollY * 0.15}px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              />
+              <div 
+                className="absolute w-24 h-24 rounded-full bg-white/15 blur-xl"
+                style={{
+                  bottom: '15%',
+                  left: '20%',
+                  transform: `translate(${mousePos.x * 40}px, ${mousePos.y * 40 + scrollY * 0.05}px)`,
+                  transition: 'transform 0.3s ease-out',
+                }}
+              />
+              <div 
+                className="absolute w-16 h-16 rounded-full border border-white/20"
+                style={{
+                  top: '20%',
+                  right: '25%',
+                  transform: `translate(${mousePos.x * -50}px, ${mousePos.y * -50}px) rotate(${scrollY * 0.1}deg)`,
+                  transition: 'transform 0.2s ease-out',
+                }}
+              />
+              <div 
+                className="absolute w-20 h-20 border border-white/10 rotate-45"
+                style={{
+                  bottom: '25%',
+                  right: '15%',
+                  transform: `translate(${mousePos.x * 25}px, ${mousePos.y * 25}px) rotate(${45 + scrollY * 0.05}deg)`,
+                  transition: 'transform 0.2s ease-out',
+                }}
+              />
+
               {/* Color Theme Picker - Intuitive Swatches */}
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
-                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full backdrop-blur transition-all border border-white/30 group"
+                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
                   >
                     <Palette className="w-4 h-4" />
                     <div 
@@ -144,18 +219,73 @@ const Index = () => {
                 </PopoverContent>
               </Popover>
               
-              <h1 className="flex font-semibold tracking-tight justify-center text-white drop-shadow-md" style={{fontSize: '2.5vw', gap: '2%'}}>
-                <img src={logoTransparent} alt="logo" className="flex items-center invert" style={{height: '4vw', maxHeight: '80px'}} />
-                Independent Fashion Marketplace
-              </h1>
-              <p className="mx-auto text-white/85 drop-shadow-sm" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
-                Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
-              </p>
-              <div className="flex justify-center" style={{marginTop: '5%', gap: '2%'}}>
-                <Button variant="hero" size="lg">Explore drops</Button>
-                <a href="/auth">
-                  <Button variant="secondary" size="lg">Become a seller</Button>
-                </a>
+              {/* Animated content with staggered entrance */}
+              <div 
+                className="relative z-10"
+                style={{
+                  transform: `translateY(${scrollY * -0.1}px)`,
+                  transition: 'transform 0.1s linear',
+                }}
+              >
+                <h1 
+                  className="flex font-semibold tracking-tight justify-center text-white drop-shadow-md animate-fade-in"
+                  style={{
+                    fontSize: '2.5vw', 
+                    gap: '2%',
+                    animationDelay: '0.1s',
+                    animationFillMode: 'both',
+                  }}
+                >
+                  <img 
+                    src={logoTransparent} 
+                    alt="logo" 
+                    className="flex items-center invert"
+                    style={{
+                      height: '4vw', 
+                      maxHeight: '80px',
+                      transform: `translateX(${mousePos.x * 10}px)`,
+                      transition: 'transform 0.3s ease-out',
+                    }} 
+                  />
+                  <span
+                    style={{
+                      transform: `translateX(${mousePos.x * -5}px)`,
+                      transition: 'transform 0.3s ease-out',
+                    }}
+                  >
+                    Independent Fashion Marketplace
+                  </span>
+                </h1>
+                <p 
+                  className="mx-auto text-white/85 drop-shadow-sm animate-fade-in" 
+                  style={{
+                    marginTop: '3%', 
+                    fontSize: '1.2vw', 
+                    maxWidth: '80%',
+                    animationDelay: '0.3s',
+                    animationFillMode: 'both',
+                  }}
+                >
+                  Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
+                </p>
+                <div 
+                  className="flex justify-center animate-fade-in" 
+                  style={{
+                    marginTop: '5%', 
+                    gap: '2%',
+                    animationDelay: '0.5s',
+                    animationFillMode: 'both',
+                  }}
+                >
+                  <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
+                    Explore drops
+                  </Button>
+                  <a href="/auth">
+                    <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform">
+                      Become a seller
+                    </Button>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
