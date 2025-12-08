@@ -41,6 +41,41 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          participant_1: string
+          participant_2: string
+          product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          participant_1: string
+          participant_2: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          participant_1?: string
+          participant_2?: string
+          product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -61,6 +96,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read: boolean
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {

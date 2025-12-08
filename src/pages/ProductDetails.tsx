@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +11,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Heart, ArrowLeft, Store, Mail, MessageSquare } from "lucide-react";
+import { Heart, ArrowLeft, Store, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
 
@@ -49,9 +49,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [contactMessage, setContactMessage] = useState("");
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const { startConversation } = useMessages();
 
   useEffect(() => {
     if (id) {
@@ -95,60 +93,31 @@ const ProductDetails = () => {
     }
   };
 
-  const handleSendMessage = async () => {
+  const handleContactSeller = async () => {
     if (!user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to contact the seller",
+        title: "Connexion requise",
+        description: "Veuillez vous connecter pour contacter le vendeur",
         variant: "destructive",
       });
-      return;
-    }
-
-    if (!contactMessage.trim()) {
-      toast({
-        title: "Message required",
-        description: "Please enter a message",
-        variant: "destructive",
-      });
+      navigate('/auth');
       return;
     }
 
     if (!sellerProfile || !product) return;
 
-    setSendingMessage(true);
-    try {
-      // Create notification for the seller
-      const { error } = await supabase.from("notifications").insert({
-        user_id: sellerProfile.user_id,
-        title: "New message about your product",
-        message: contactMessage.trim(),
-        type: "contact",
-        data: {
-          product_id: product.id,
-          product_name: product.name,
-          sender_id: user.id,
-          sender_email: user.email,
-        },
-      });
-
-      if (error) throw error;
-
+    if (user.id === sellerProfile.user_id) {
       toast({
-        title: "Message sent!",
-        description: "The seller will receive your message in their notifications.",
-      });
-      setContactMessage("");
-      setContactDialogOpen(false);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Unable to send message. Please try again.",
+        title: "Action impossible",
+        description: "Vous ne pouvez pas vous envoyer un message",
         variant: "destructive",
       });
-    } finally {
-      setSendingMessage(false);
+      return;
+    }
+
+    const conversationId = await startConversation(sellerProfile.user_id, product.id);
+    if (conversationId) {
+      navigate('/inbox');
     }
   };
 
@@ -311,37 +280,10 @@ const ProductDetails = () => {
 
             <Card className="bg-card/95 backdrop-blur border-border/50">
               <CardContent className="p-6">
-                <Dialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="lg" className="w-full">
-                      <MessageSquare className="mr-2 h-5 w-5" />
-                      Contact seller
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Contact the seller</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        Send a message to {sellerProfile?.full_name || "the seller"} about "{product.name}"
-                      </p>
-                      <Textarea
-                        placeholder="Write your message here..."
-                        value={contactMessage}
-                        onChange={(e) => setContactMessage(e.target.value)}
-                        rows={4}
-                      />
-                      <Button
-                        onClick={handleSendMessage}
-                        disabled={sendingMessage || !contactMessage.trim()}
-                        className="w-full"
-                      >
-                        {sendingMessage ? "Sending..." : "Send message"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button size="lg" className="w-full" onClick={handleContactSeller}>
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Contacter le vendeur
+                </Button>
               </CardContent>
             </Card>
           </div>

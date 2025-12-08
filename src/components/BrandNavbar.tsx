@@ -4,13 +4,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Palette, Sun, Moon } from "lucide-react";
+import { Palette, Sun, Moon, MessageCircle } from "lucide-react";
+import { useMessages } from "@/hooks/useMessages";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
   const { role } = useRole();
   const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
+  const { getUnreadCount } = useMessages();
+  const unreadCount = user ? getUnreadCount() : 0;
 
   return (
     <header className="sticky z-30 top-4 px-4 md:px-8">
@@ -104,6 +107,20 @@ const BrandNavbar = () => {
               </PopoverContent>
             </Popover>
           </div>
+
+          {/* Messages */}
+          {user && (
+            <Link to="/inbox" className="relative">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MessageCircle className="h-4 w-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          )}
 
           {/* Auth Buttons */}
           {user ? (
