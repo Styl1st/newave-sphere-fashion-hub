@@ -314,28 +314,43 @@ const Index = () => {
                 {/* About Us - only when expanded */}
                 {isExpanding && (
                   <div 
-                    className="mt-12 max-w-3xl mx-auto animate-fade-in"
-                    style={{
-                      animationDelay: '0.4s',
-                      animationFillMode: 'both',
-                    }}
+                    className="mt-12 max-w-3xl mx-auto"
                   >
-                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">About Us</h2>
+                    <h2 
+                      className="text-2xl sm:text-3xl font-bold text-white mb-6 animate-fade-in"
+                      style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
+                    >
+                      About Us
+                    </h2>
                     <div className="space-y-4 text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
-                      <p>
+                      <p 
+                        className="animate-fade-in"
+                        style={{ animationDelay: '0.5s', animationFillMode: 'both' }}
+                      >
                         Born from the underground, Newave is more than a marketplace — it is a movement. 
                         We connect independent designers and emerging brands with a global community of fashion rebels.
                       </p>
-                      <p>
+                      <p 
+                        className="animate-fade-in"
+                        style={{ animationDelay: '0.7s', animationFillMode: 'both' }}
+                      >
                         Every piece you find here tells a story. From hand-sewn grunge aesthetics to bold streetwear statements, 
                         we curate collections that challenge the mainstream and celebrate authenticity.
                       </p>
-                      <p>
+                      <p 
+                        className="animate-fade-in"
+                        style={{ animationDelay: '0.9s', animationFillMode: 'both' }}
+                      >
                         Our mission is simple: empower creators, support small businesses, and give you access to 
                         fashion that actually means something. No mass production. No fast fashion. Just raw, real style.
                       </p>
                     </div>
-                    <p className="mt-8 text-white/60 text-sm italic">Click anywhere to close</p>
+                    <p 
+                      className="mt-8 text-white/60 text-sm italic animate-fade-in"
+                      style={{ animationDelay: '1.1s', animationFillMode: 'both' }}
+                    >
+                      Click anywhere to close
+                    </p>
                   </div>
                 )}
               </div>
