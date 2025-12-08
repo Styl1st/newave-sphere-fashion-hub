@@ -23,7 +23,7 @@ const Inbox = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-animated-fade">
       <BrandNavbar />
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <h1 className="text-2xl font-bold mb-6">Messages</h1>
