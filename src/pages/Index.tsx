@@ -37,7 +37,13 @@ const Index = () => {
   // Animate expansion when isExpanding changes
   useEffect(() => {
     if (isExpanding && heroRef.current && heroInitialPos) {
-      // Trigger transition to fullscreen after initial position is set
+      // Start from captured position, then expand to fullscreen
+      heroRef.current.style.position = 'fixed';
+      heroRef.current.style.top = `${heroInitialPos.top}px`;
+      heroRef.current.style.left = `${heroInitialPos.left}px`;
+      heroRef.current.style.width = `${heroInitialPos.width}px`;
+      heroRef.current.style.height = `${heroInitialPos.height}px`;
+      
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (heroRef.current) {
@@ -49,6 +55,26 @@ const Index = () => {
           }
         });
       });
+    } else if (!isExpanding && heroRef.current && heroInitialPos) {
+      // Collapse back to initial position
+      heroRef.current.style.top = `${heroInitialPos.top}px`;
+      heroRef.current.style.left = `${heroInitialPos.left}px`;
+      heroRef.current.style.width = `${heroInitialPos.width}px`;
+      heroRef.current.style.height = `${heroInitialPos.height}px`;
+      heroRef.current.style.borderRadius = '1.5rem';
+      
+      // After collapse animation, switch back to relative
+      setTimeout(() => {
+        if (heroRef.current) {
+          heroRef.current.style.position = '';
+          heroRef.current.style.top = '';
+          heroRef.current.style.left = '';
+          heroRef.current.style.width = '';
+          heroRef.current.style.height = '';
+          heroRef.current.style.borderRadius = '';
+        }
+        setHeroInitialPos(null);
+      }, 1500);
     }
   }, [isExpanding, heroInitialPos]);
 
@@ -132,12 +158,12 @@ const Index = () => {
                 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
                 inset 0 0 60px hsl(0 0% 100% / 0.18)`,
     backdropFilter: 'blur(12px)',
-    transition: 'all 1.2s ease',
+    transition: 'all 1.5s cubic-bezier(0.4, 0.0, 0.2, 1)',
   };
 
   const handleHeroClick = () => {
     if (!isExpanding && heroRef.current) {
-      // Capture position before expanding
+      // Capture exact position and dimensions before expanding
       const rect = heroRef.current.getBoundingClientRect();
       setHeroInitialPos({
         top: rect.top,
@@ -145,13 +171,10 @@ const Index = () => {
         width: rect.width,
         height: rect.height
       });
-      // Small delay to allow state update before switching to fixed
-      requestAnimationFrame(() => {
-        setIsExpanding(true);
-      });
+      setIsExpanding(true);
     } else {
+      // Collapse back to initial position
       setIsExpanding(false);
-      setHeroInitialPos(null);
     }
   };
 
@@ -167,13 +190,8 @@ const Index = () => {
               className="rounded-3xl border border-white/20 overflow-hidden cursor-pointer" 
               style={{
                 ...heroStyle,
-                position: isExpanding ? 'fixed' : 'relative',
-                width: isExpanding ? '100vw' : '90%',
-                height: isExpanding ? '100vh' : 'auto',
-                top: isExpanding ? (heroInitialPos ? `${heroInitialPos.top}px` : '0') : 'auto',
-                left: isExpanding ? (heroInitialPos ? `${heroInitialPos.left}px` : '0') : 'auto',
-                borderRadius: isExpanding ? '0' : '1.5rem',
-                zIndex: isExpanding ? 9999 : 'auto',
+                width: '90%',
+                height: 'auto',
               }}
               onClick={handleHeroClick}
               onMouseEnter={(e) => {
@@ -264,30 +282,66 @@ const Index = () => {
                   />
                   <span>Independent Fashion Marketplace</span>
                 </h1>
-                <p 
-                  className="mx-auto text-white/85 drop-shadow-sm animate-fade-in mt-4 sm:mt-6 text-sm sm:text-base md:text-lg max-w-[90%] sm:max-w-[80%]" 
-                  style={{
-                    animationDelay: '0.3s',
-                    animationFillMode: 'both',
-                  }}
-                >
-                  Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
-                </p>
+                
                 <div 
-                  className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
                   style={{
-                    animationDelay: '0.5s',
-                    animationFillMode: 'both',
+                    opacity: isExpanding ? 0 : 1,
+                    maxHeight: isExpanding ? 0 : '500px',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.6s ease, max-height 0.6s ease',
                   }}
                 >
-                  <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
-                    Explore drops
-                  </Button>
-                  <a href="/auth">
-                    <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
-                      Become a seller
+                  <p 
+                    className="mx-auto text-white/85 drop-shadow-sm animate-fade-in mt-4 sm:mt-6 text-sm sm:text-base md:text-lg max-w-[90%] sm:max-w-[80%]" 
+                    style={{
+                      animationDelay: '0.3s',
+                      animationFillMode: 'both',
+                    }}
+                  >
+                    Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
+                  </p>
+                  <div 
+                    className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
+                    style={{
+                      animationDelay: '0.5s',
+                      animationFillMode: 'both',
+                    }}
+                  >
+                    <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
+                      Explore drops
                     </Button>
-                  </a>
+                    <a href="/auth">
+                      <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
+                        Become a seller
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+
+                <div 
+                  style={{
+                    opacity: isExpanding ? 1 : 0,
+                    maxHeight: isExpanding ? '1000px' : '0',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.8s ease 0.4s, max-height 0.8s ease 0.4s',
+                  }}
+                >
+                  <div className="text-white max-w-4xl mx-auto mt-8">
+                    <div className="space-y-6 text-lg sm:text-xl leading-relaxed">
+                      <p>
+                        <strong>Newave</strong> is an independent fashion marketplace dedicated to connecting emerging brands with a community that values authenticity, creativity, and self-expression.
+                      </p>
+                      <p>
+                        We curate a diverse range of styles—from streetwear and denim to grunge, goth, and everything in between. Our platform empowers independent designers and sellers to showcase their unique pieces directly to fashion enthusiasts who appreciate quality and individuality.
+                      </p>
+                      <p>
+                        At Newave, we believe fashion is more than just clothing—it's a form of art, a statement, and a way to build community. We're committed to fostering a space where creativity thrives and where every piece tells a story.
+                      </p>
+                      <p className="text-center pt-6 text-white/80">
+                        Join us in redefining fashion, one drop at a time.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,7 +432,7 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section className="px-4 sm:px-6 py-6 sm:py-8">
+        <section className="px-4 sm:px-6 py-6 sm:py-8" style={{display: isExpanding ? 'none' : 'block'}}>
           <div className="mx-auto max-w-[95%] sm:max-w-[90%]">
             {loading ? (
               <div className="text-center py-12">
