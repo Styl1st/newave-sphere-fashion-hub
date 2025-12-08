@@ -29,6 +29,7 @@ interface ProjectMember {
   profile?: {
     full_name: string | null;
     email: string | null;
+    avatar_url: string | null;
   };
 }
 
@@ -115,7 +116,7 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
         for (const member of members || []) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('full_name, email')
+            .select('full_name, email, avatar_url')
             .eq('user_id', member.user_id)
             .maybeSingle();
           
@@ -391,9 +392,22 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
                 <div className="space-y-1">
                   {project.members?.map((member) => (
                     <div key={member.id} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">
-                        {member.profile?.full_name || member.profile?.email || 'Unknown user'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {member.profile?.avatar_url ? (
+                          <img
+                            src={member.profile.avatar_url}
+                            alt={member.profile.full_name || 'Member'}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+                            <Users className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        )}
+                        <span className="text-foreground">
+                          {member.profile?.full_name || member.profile?.email || 'Unknown user'}
+                        </span>
+                      </div>
                       <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
                         {member.role === 'owner' ? 'Owner' : 'Collaborator'}
                       </Badge>
