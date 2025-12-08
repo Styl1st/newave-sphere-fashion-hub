@@ -11,12 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Heart, ArrowLeft, Store, MessageSquare } from "lucide-react";
+import { Heart, ArrowLeft, Store, MessageSquare, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
+import { usePurchases } from "@/hooks/usePurchases";
 
 type Product = {
   id: string;
@@ -50,6 +51,7 @@ const ProductDetails = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { startConversation } = useMessages();
+  const { purchaseProduct, purchasing } = usePurchases();
 
   useEffect(() => {
     if (id) {
@@ -279,8 +281,24 @@ const ProductDetails = () => {
             )}
 
             <Card className="bg-card/95 backdrop-blur border-border/50">
-              <CardContent className="p-6">
-                <Button size="lg" className="w-full" onClick={handleContactSeller}>
+              <CardContent className="p-6 space-y-3">
+                {user?.id !== product.user_id && (
+                  <Button 
+                    size="lg" 
+                    className="w-full" 
+                    onClick={() => purchaseProduct(product.id, product.user_id, product.price)}
+                    disabled={purchasing}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    {purchasing ? 'Achat en cours...' : `Acheter - ${product.price} €`}
+                  </Button>
+                )}
+                <Button 
+                  size="lg" 
+                  className="w-full" 
+                  variant={user?.id !== product.user_id ? "outline" : "default"}
+                  onClick={handleContactSeller}
+                >
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Contacter le vendeur
                 </Button>

@@ -2,6 +2,7 @@ import BrandNavbar from "@/components/BrandNavbar";
 import { ProjectManager } from "@/components/ProjectManager";
 import { ProjectProductManager } from "@/components/ProjectProductManager";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { SalesStatistics } from "@/components/SalesStatistics";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
@@ -57,18 +58,23 @@ const SellerDashboard = () => {
           <div className="mx-auto" style={{maxWidth: '95%'}}>
             <h1 className="font-bold" style={{fontSize: '2.5vw', marginBottom: '4%'}}>Tableau de bord vendeur</h1>
 
-            <Tabs defaultValue="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
+            <Tabs defaultValue="sales" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
               <TabsList
                 className={`grid w-full ${
-                  hasProjects ? "grid-cols-3" : "grid-cols-2"
+                  hasProjects ? "grid-cols-4" : "grid-cols-3"
                 }`}
               >
-                <TabsTrigger value="projects">My Projects</TabsTrigger>
+                <TabsTrigger value="sales">Ventes</TabsTrigger>
+                <TabsTrigger value="projects">Mes Projets</TabsTrigger>
                 {hasProjects && (
-                  <TabsTrigger value="products">Products</TabsTrigger>
+                  <TabsTrigger value="products">Produits</TabsTrigger>
                 )}
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="sales" className="space-y-6">
+                <SalesStatistics />
+              </TabsContent>
 
               <TabsContent value="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
                 <ProjectManager onProjectsChange={checkUserProjects} />
