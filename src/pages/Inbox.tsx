@@ -7,15 +7,28 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, Send, ArrowLeft, User, Package } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { MessageCircle, Send, ArrowLeft, User, Package, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 const Inbox = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const { conversations, loading } = useMessages();
+  const { conversations, loading, deleteConversation } = useMessages();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   
   // Get productId from URL params (when coming from product page)
@@ -29,6 +42,24 @@ const Inbox = () => {
       if (convo) setSelectedConversation(convo);
     }
   }, [searchParams, conversations]);
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    const success = await deleteConversation(conversationId);
+    if (success) {
+      setSelectedConversation(null);
+      navigate('/inbox');
+      toast({
+        title: "Conversation supprimée",
+        description: "La conversation a été supprimée avec succès",
+      });
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la conversation",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!user) {
     navigate('/auth');
@@ -75,6 +106,7 @@ const Inbox = () => {
                 conversation={selectedConversation}
                 currentUserId={user.id}
                 onBack={() => setSelectedConversation(null)}
+                onDelete={() => handleDeleteConversation(selectedConversation.id)}
                 initialProductId={initialProductId}
               />
             ) : (
@@ -178,11 +210,13 @@ const ChatArea = ({
   conversation,
   currentUserId,
   onBack,
+  onDelete,
   initialProductId,
 }: {
   conversation: Conversation;
   currentUserId: string;
   onBack: () => void;
+  onDelete: () => void;
   initialProductId?: string | null;
 }) => {
   const { messages, loading, sendMessage } = useConversation(conversation.id);
@@ -241,7 +275,7 @@ const ChatArea = ({
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <Link to={`/seller/${conversation.other_user?.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <Link to={`/seller/${conversation.other_user?.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1">
           <Avatar className="h-10 w-10">
             <AvatarImage src={conversation.other_user?.avatar_url || undefined} />
             <AvatarFallback>
@@ -252,6 +286,27 @@ const ChatArea = ({
             <p className="font-medium hover:underline">{conversation.other_user?.full_name || 'Utilisateur'}</p>
           </div>
         </Link>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+              <Trash2 className="w-5 h-5" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Supprimer la conversation ?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Cette action est irréversible. Tous les messages de cette conversation seront supprimés définitivement.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Supprimer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Messages */}
