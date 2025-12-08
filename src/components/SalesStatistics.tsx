@@ -266,14 +266,28 @@ export const SalesStatistics = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    formatter={(value: number) => [value, 'Ventes']}
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      color: 'hsl(var(--foreground))'
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        const total = productStats.slice(0, 5).reduce((sum, p) => sum + p.totalSales, 0);
+                        const percent = ((data.totalSales / total) * 100).toFixed(1);
+                        return (
+                          <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+                            <p className="font-semibold text-foreground">{data.name}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Ventes: <span className="text-foreground font-medium">{data.totalSales}</span>
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Part: <span className="text-foreground font-medium">{percent}%</span>
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Revenus: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
                     }}
-                    labelStyle={{ color: 'hsl(var(--foreground))' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
