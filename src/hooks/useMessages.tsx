@@ -49,19 +49,16 @@ export const useMessages = () => {
 
       if (error) throw error;
 
-      // Fetch additional data for each conversation
       const enrichedConvos = await Promise.all(
         (convos || []).map(async (convo) => {
           const otherUserId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
 
-          // Fetch other user profile
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id, full_name, avatar_url')
             .eq('user_id', otherUserId)
             .maybeSingle();
 
-          // Fetch product if exists
           let product = null;
           if (convo.product_id) {
             const { data: prod } = await supabase
@@ -72,7 +69,6 @@ export const useMessages = () => {
             product = prod;
           }
 
-          // Fetch last message
           const { data: lastMsg } = await supabase
             .from('messages')
             .select('*')
@@ -81,7 +77,6 @@ export const useMessages = () => {
             .limit(1)
             .maybeSingle();
 
-          // Count unread messages
           const { count } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
@@ -115,10 +110,33 @@ export const useMessages = () => {
     fetchConversations();
   }, [fetchConversations]);
 
+  // Real-time subscription for new messages (to update unread count)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('messages-global')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => {
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchConversations]);
+
   const startConversation = async (sellerId: string, productId?: string) => {
     if (!user) return null;
 
-    // Check if conversation already exists
     const { data: existing } = await supabase
       .from('conversations')
       .select('id')
@@ -128,7 +146,6 @@ export const useMessages = () => {
 
     if (existing) return existing.id;
 
-    // Create new conversation
     const { data, error } = await supabase
       .from('conversations')
       .insert({
@@ -199,7 +216,7 @@ export const useConversation = (conversationId: string | null) => {
     fetchMessages();
   }, [fetchMessages]);
 
-  // Real-time subscription
+  // Real-time subscription for this conversation
   useEffect(() => {
     if (!conversationId) return;
 
@@ -215,9 +232,11 @@ export const useConversation = (conversationId: string | null) => {
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) => {
+            if (prev.some(m => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
           
-          // Mark as read if not sender
           if (user && newMessage.sender_id !== user.id) {
             supabase
               .from('messages')
@@ -236,20 +255,38 @@ export const useConversation = (conversationId: string | null) => {
   const sendMessage = async (content: string) => {
     if (!user || !conversationId || !content.trim()) return;
 
-    const { error } = await supabase
+    // Optimistic update
+    const tempId = crypto.randomUUID();
+    const optimisticMessage: Message = {
+      id: tempId,
+      conversation_id: conversationId,
+      sender_id: user.id,
+      content: content.trim(),
+      read: false,
+      created_at: new Date().toISOString(),
+    };
+    
+    setMessages((prev) => [...prev, optimisticMessage]);
+
+    const { data, error } = await supabase
       .from('messages')
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
         content: content.trim(),
-      });
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error('Error sending message:', error);
+      setMessages((prev) => prev.filter(m => m.id !== tempId));
       return false;
     }
 
-    // Update conversation updated_at
+    // Replace optimistic message with real one
+    setMessages((prev) => prev.map(m => m.id === tempId ? data : m));
+
     await supabase
       .from('conversations')
       .update({ updated_at: new Date().toISOString() })
