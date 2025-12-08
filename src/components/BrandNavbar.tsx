@@ -14,26 +14,28 @@ const BrandNavbar = () => {
 
   return (
     <header className="sticky z-30 top-4 px-4 md:px-8">
-      <nav className="mx-auto flex items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-6xl h-16 px-6">
+      <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-6xl h-16 px-6">
         {/* Logo - Left */}
-        <Link to="/" className="flex-shrink-0">
-          <img src={logoTransparent} alt="logo" className="h-9 w-auto" />
-        </Link>
+        <div className="flex justify-start">
+          <Link to="/" className="flex-shrink-0">
+            <img src={logoTransparent} alt="logo" className="h-9 w-auto" />
+          </Link>
+        </div>
 
         {/* Navigation Links - Center */}
-        <div className="flex-1 flex items-center justify-center gap-1">
+        <div className="flex items-center justify-center gap-6">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="text-sm">Home</Button>
+            <Button variant="ghost" size="sm" className="text-sm font-medium">Home</Button>
           </Link>
           {user && (
             <>
               {role !== 'seller' || (
                 <>
                   <Link to="/seller">
-                    <Button variant="ghost" size="sm" className="text-sm">Dashboard</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Dashboard</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm">Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
                   </Link>
                 </>
               )}
@@ -41,17 +43,17 @@ const BrandNavbar = () => {
               {role === 'admin' && (
                 <>
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-sm">Admin</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Admin</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="text-sm">Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
                   </Link>
                 </>
               )}
               
               {role === 'buyer' && (
                 <Link to="/user">
-                  <Button variant="ghost" size="sm" className="text-sm">My Space</Button>
+                  <Button variant="ghost" size="sm" className="text-sm font-medium">My Space</Button>
                 </Link>
               )}
             </>
@@ -59,7 +61,7 @@ const BrandNavbar = () => {
         </div>
 
         {/* Actions - Right */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3">
           {/* Theme Controls */}
           <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/50">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMode}>
