@@ -164,12 +164,39 @@ export const useMessages = () => {
     return conversations.reduce((acc, convo) => acc + (convo.unread_count || 0), 0);
   }, [conversations]);
 
+  const deleteConversation = async (conversationId: string) => {
+    if (!user) return false;
+
+    try {
+      // Delete all messages first
+      await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      // Then delete the conversation
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      setConversations((prev) => prev.filter(c => c.id !== conversationId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      return false;
+    }
+  };
+
   return {
     conversations,
     loading,
     startConversation,
     fetchConversations,
     getUnreadCount,
+    deleteConversation,
   };
 };
 
