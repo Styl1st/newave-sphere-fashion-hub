@@ -4,8 +4,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ProductCard, type Product } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
+import { Palette, Check } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 import logoTransparent from "@/assets/newave/logo_transparent.png";
@@ -75,9 +77,9 @@ const Index = () => {
     });
   };
 
-  // Generate hero gradient based on current theme
-  const heroGradient = `linear-gradient(135deg, hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness - 15}% / 0.9)),
-    linear-gradient(rgba(0, 0, 0, 0.3) 0%, hsl(${currentTheme.hue} 30% 10%) 100%)`;
+  // Generate hero gradient based on current theme - lighter version
+  const heroGradient = `linear-gradient(135deg, hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.6), hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.85)),
+    linear-gradient(rgba(255, 255, 255, 0.1) 0%, hsl(${currentTheme.hue} 40% 25%) 100%)`;
 
   return (
     <div className="min-h-screen bg-animated-fade">
@@ -87,30 +89,52 @@ const Index = () => {
         <section className="relative overflow-hidden">
           <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
             <div className="backdrop-blur rounded-3xl relative" style={{padding: '10%', backgroundImage: heroGradient, boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'}}>
-              {/* Theme Selector Dropdown */}
-              <div className="absolute top-4 right-4 flex items-center gap-2">
-                <Select value={currentTheme.name} onValueChange={(name) => {
-                  const theme = themes.find(t => t.name === name);
-                  if (theme) setTheme(theme);
-                }}>
-                  <SelectTrigger className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur w-auto min-w-[120px]" style={{fontSize: '0.75vw', padding: '0.5vw 1vw'}}>
-                    <SelectValue>{currentTheme.name}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {themes.map((theme) => (
-                      <SelectItem key={theme.name} value={theme.name}>
-                        <div className="flex items-center gap-2">
+              {/* Color Theme Picker - Intuitive Swatches */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full backdrop-blur transition-all border border-white/30 group"
+                  >
+                    <Palette className="w-4 h-4" />
+                    <div 
+                      className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}%)` }}
+                    />
+                    <span className="text-sm font-medium">{currentTheme.name}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4 bg-card border shadow-lg z-50" align="end">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-foreground">Choose your theme</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {themes.map((theme) => (
+                        <button
+                          key={theme.name}
+                          onClick={() => setTheme(theme)}
+                          className="relative group flex flex-col items-center gap-1"
+                          title={theme.name}
+                        >
                           <div 
-                            className="w-3 h-3 rounded-full" 
+                            className={`w-10 h-10 rounded-full transition-all border-2 ${
+                              currentTheme.name === theme.name 
+                                ? 'border-foreground scale-110 shadow-lg' 
+                                : 'border-transparent hover:scale-105 hover:border-muted-foreground/50'
+                            }`}
                             style={{ backgroundColor: `hsl(${theme.hue} ${theme.saturation}% ${theme.lightness}%)` }}
-                          />
-                          {theme.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                          >
+                            {currentTheme.name === theme.name && (
+                              <Check className="w-4 h-4 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                            )}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[48px]">
+                            {theme.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               
               <h1 className="flex font-semibold tracking-tight justify-center text-white" style={{fontSize: '2.5vw', gap: '2%'}}>
                 <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
@@ -130,30 +154,49 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section style={{padding: '2% 4%', marginTop: '-3%'}}>
-          <div className="mx-auto bg-background/60 backdrop-blur rounded-2xl border shadow-sm" style={{maxWidth: '90%', padding: '2% 0'}}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between" style={{padding: '0 3%', gap: '2%'}}>
-              <div className="flex flex-wrap items-center" style={{gap: '2%'}}>
-                <span className="text-muted-foreground whitespace-nowrap" style={{fontSize: '0.9vw'}}>Categories:</span>
-                {CATEGORIES.map((c) => (
-                  <label key={c} className="flex items-center" style={{gap: '1%'}}>
-                    <Checkbox id={c} checked={selected.has(c)} onCheckedChange={() => toggleCategory(c)} />
-                    <Label htmlFor={c} className="cursor-pointer" style={{fontSize: '0.9vw'}}>{c}</Label>
-                  </label>
-                ))}
-              </div>
-              <div className="flex flex-col md:flex-row" style={{gap: '3%', width: '100%', maxWidth: '50%'}}>
-                <div style={{width: '100%'}}>
-                  <Label style={{fontSize: '0.9vw'}}>Max price: €{maxPrice}</Label>
-                  <Slider value={[maxPrice]} min={20} max={500} step={5} onValueChange={(v) => setMaxPrice(v[0] ?? 300)} />
+        <section className="px-4 md:px-8 -mt-6 relative z-10">
+          <div className="mx-auto max-w-[90%] bg-card/95 backdrop-blur-md rounded-2xl border border-border shadow-lg p-4 md:p-6">
+            <div className="flex flex-col gap-4">
+              {/* Categories - Pill Style */}
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-foreground">Categories</span>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => toggleCategory(c)}
+                      className={`px-3 py-1.5 rounded-full text-sm transition-all border ${
+                        selected.has(c)
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
                 </div>
-                <div style={{width: '100%'}}>
-                  <Label style={{fontSize: '0.9vw'}}>Sort</Label>
+              </div>
+              
+              {/* Price and Sort */}
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6 pt-2 border-t border-border">
+                <div className="flex-1 space-y-2">
+                  <Label className="text-sm font-medium">Max price: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
+                  <Slider 
+                    value={[maxPrice]} 
+                    min={20} 
+                    max={500} 
+                    step={5} 
+                    onValueChange={(v) => setMaxPrice(v[0] ?? 300)}
+                    className="py-2"
+                  />
+                </div>
+                <div className="w-full md:w-48 space-y-2">
+                  <Label className="text-sm font-medium">Sort by</Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background border-border">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border shadow-lg z-50">
                       <SelectItem value="relevance">Relevance</SelectItem>
                       <SelectItem value="price_asc">Price: Low to High</SelectItem>
                       <SelectItem value="price_desc">Price: High to Low</SelectItem>
