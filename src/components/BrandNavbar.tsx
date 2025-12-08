@@ -4,13 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Palette } from "lucide-react";
+import { Palette, Sun, Moon } from "lucide-react";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
   const { user, signOut } = useAuth();
   const { role } = useRole();
-  const { currentTheme, themes, setTheme } = useTheme();
+  const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
 
   return (
     <header className="sticky z-30" style={{top: '1%', padding: '0 2%'}}>
@@ -53,7 +53,16 @@ const BrandNavbar = () => {
             </>
           )}
 
-          {/* Theme Toggle */}
+          {/* Dark/Light Mode Toggle */}
+          <Button variant="ghost" size="icon" onClick={toggleMode}>
+            {mode === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+
+          {/* Theme Color Toggle */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
