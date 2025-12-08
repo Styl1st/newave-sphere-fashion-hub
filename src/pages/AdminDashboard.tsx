@@ -224,13 +224,13 @@ const AdminDashboard = () => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "admin":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/30";
       case "seller":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/30";
       case "buyer":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -425,7 +425,7 @@ const AdminDashboard = () => {
                                     e.target.value as any
                                   )
                                 }
-                                className="text-sm border rounded px-2 py-1"
+                                className="text-sm border border-border rounded-md px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                               >
                                 <option value="buyer">Buyer</option>
                                 <option value="seller">Seller</option>
