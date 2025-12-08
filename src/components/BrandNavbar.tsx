@@ -24,14 +24,16 @@ const BrandNavbar = () => {
 
   return (
     <header className="sticky top-2 z-30 px-2 sm:px-4">
-      <nav className="mx-auto flex items-center justify-between bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-7xl h-14 sm:h-16 px-3 sm:px-6">
+      <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-7xl h-14 sm:h-16 px-3 sm:px-6">
         {/* Logo - Left */}
-        <Link to="/" className="flex-shrink-0">
-          <img src={logoTransparent} alt="logo" className="h-8 sm:h-10 w-auto dark:invert" />
-        </Link>
+        <div className="flex justify-start">
+          <Link to="/" className="flex-shrink-0">
+            <img src={logoTransparent} alt="logo" className="h-8 sm:h-10 w-auto dark:invert" />
+          </Link>
+        </div>
 
         {/* Desktop Navigation Links - Center */}
-        <div className="hidden md:flex items-center gap-1 lg:gap-2">
+        <div className="hidden md:flex items-center justify-center gap-1 lg:gap-2">
           <Link to="/">
             <Button variant="ghost" size="sm" className="text-sm font-medium">Home</Button>
           </Link>
@@ -69,7 +71,7 @@ const BrandNavbar = () => {
         </div>
 
         {/* Actions - Right */}
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center justify-end gap-1 sm:gap-2">
           {/* Theme Controls - Desktop */}
           <div className="hidden sm:flex items-center gap-1 rounded-lg bg-muted/50 p-1">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMode}>
