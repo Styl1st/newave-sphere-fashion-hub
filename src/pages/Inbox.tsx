@@ -18,10 +18,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { MessageCircle, Send, ArrowLeft, User, Package, Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { MessageCircle, Send, ArrowLeft, User, Package, Trash2, Paperclip } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Inbox = () => {
   const { user } = useAuth();
@@ -224,13 +232,31 @@ const ChatArea = ({
   const [sending, setSending] = useState(false);
   const [pendingProductId, setPendingProductId] = useState<string | null>(initialProductId || null);
   const [pendingProduct, setPendingProduct] = useState<Message['product']>(null);
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [sellerProducts, setSellerProducts] = useState<Array<{ id: string; name: string; images: string[] | null; price: number }>>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch seller's products for the picker
+  useEffect(() => {
+    const fetchSellerProducts = async () => {
+      if (!conversation.other_user?.id) return;
+      setLoadingProducts(true);
+      const { data } = await supabase
+        .from('products')
+        .select('id, name, images, price')
+        .eq('user_id', conversation.other_user.id)
+        .order('created_at', { ascending: false });
+      setSellerProducts(data || []);
+      setLoadingProducts(false);
+    };
+    fetchSellerProducts();
+  }, [conversation.other_user?.id]);
 
   // Fetch pending product details
   useEffect(() => {
     const fetchProduct = async () => {
       if (pendingProductId) {
-        const { supabase } = await import('@/integrations/supabase/client');
         const { data } = await supabase
           .from('products')
           .select('id, name, images, price')
@@ -379,6 +405,57 @@ const ChatArea = ({
       {/* Input - fixed at bottom */}
       <div className="p-4 border-t flex-shrink-0">
         <div className="flex gap-2">
+          <Dialog open={showProductPicker} onOpenChange={setShowProductPicker}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" className="flex-shrink-0">
+                <Paperclip className="w-4 h-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Attacher un produit</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                {loadingProducts ? (
+                  <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+                ) : sellerProducts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Aucun produit disponible</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 p-1">
+                    {sellerProducts.map((product) => (
+                      <button
+                        key={product.id}
+                        onClick={() => {
+                          setPendingProductId(product.id);
+                          setShowProductPicker(false);
+                        }}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                      >
+                        {product.images?.[0] ? (
+                          <img 
+                            src={product.images[0]} 
+                            alt={product.name} 
+                            className="w-12 h-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                            <Package className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">{product.price.toFixed(2)} €</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
