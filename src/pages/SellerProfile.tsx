@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductCard, type Product } from "@/components/ProductCard";
-import { Store, Mail, MapPin, Calendar } from "lucide-react";
+import { Store, MessageCircle, Calendar } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 
 type Profile = {
@@ -32,6 +35,10 @@ type DatabaseProduct = {
 
 const SellerProfile = () => {
   const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { startConversation } = useMessages();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -174,14 +181,35 @@ const SellerProfile = () => {
                 </div>
                 
                 <div className="flex gap-3">
-                  {profile.email && (
-                    <Button variant="outline" asChild>
-                      <a href={`mailto:${profile.email}`}>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Contacter
-                      </a>
-                    </Button>
-                  )}
+                  <Button 
+                    variant="default"
+                    onClick={async () => {
+                      if (!user) {
+                        toast({
+                          title: "Connexion requise",
+                          description: "Veuillez vous connecter pour contacter le vendeur",
+                          variant: "destructive",
+                        });
+                        navigate('/auth');
+                        return;
+                      }
+                      if (user.id === profile.user_id) {
+                        toast({
+                          title: "Action impossible",
+                          description: "Vous ne pouvez pas vous envoyer un message",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const conversationId = await startConversation(profile.user_id);
+                      if (conversationId) {
+                        navigate('/inbox');
+                      }
+                    }}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Contacter
+                  </Button>
                 </div>
               </div>
             </div>
