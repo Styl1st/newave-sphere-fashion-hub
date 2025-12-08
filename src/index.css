@@ -47,6 +47,13 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
+    /* Chart colors */
+    --chart-1: 221 83% 53%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 60%;
+
     /* NeWave brand tokens */
     --brand: 300 30% 30%;
     --brand-2: 240 70% 30%;
@@ -101,6 +108,13 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Chart colors for dark mode */
+    --chart-1: 221 83% 63%;
+    --chart-2: 142 71% 55%;
+    --chart-3: 38 92% 60%;
+    --chart-4: 280 65% 70%;
+    --chart-5: 0 84% 65%;
 
     /* Brand tweaks for dark */
     --brand: 267 84% 60%;
