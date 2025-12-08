@@ -21,7 +21,7 @@ const BrandNavbar = () => {
         {/* Logo - Left */}
         <div className="flex justify-start">
           <Link to="/" className="flex-shrink-0">
-            <img src={logoTransparent} alt="logo" className="h-9 w-auto" />
+            <img src={logoTransparent} alt="logo" className="h-9 w-auto dark:invert" />
           </Link>
         </div>
 
