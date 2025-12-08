@@ -280,7 +280,15 @@ const Index = () => {
                     animationFillMode: 'both',
                   }}
                 >
-                  <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    className="hover:scale-105 transition-transform"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.getElementById('products')?.scrollIntoView({ behavior: 'instant' });
+                    }}
+                  >
                     Explore drops
                   </Button>
                   <a href="/auth">
@@ -378,7 +386,7 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section className="px-4 sm:px-6 py-6 sm:py-8">
+        <section id="products" className="px-4 sm:px-6 py-6 sm:py-8">
           <div className="mx-auto max-w-[95%] sm:max-w-[90%]">
             {loading ? (
               <div className="text-center py-12">
