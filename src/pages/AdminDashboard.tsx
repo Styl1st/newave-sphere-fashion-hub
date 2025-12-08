@@ -14,6 +14,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import BrandNavbar from "@/components/BrandNavbar";
 import { ProjectManager } from "@/components/ProjectManager";
@@ -25,6 +36,7 @@ import {
   Package,
   ShoppingBag,
   FolderOpen,
+  Trash2,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -241,6 +253,31 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description: "Unable to update the role.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (profile: Profile) => {
+    try {
+      const { error } = await supabase.rpc('delete_user_and_data', {
+        target_user_id: profile.user_id
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Utilisateur supprimé",
+        description: `${profile.full_name || profile.email} et toutes ses données ont été supprimés.`,
+      });
+
+      fetchProfiles();
+      fetchStats();
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de supprimer l'utilisateur.",
         variant: "destructive",
       });
     }
@@ -508,6 +545,44 @@ const AdminDashboard = () => {
                                 <option value="buyer">Buyer</option>
                                 <option value="seller">Seller</option>
                               </select>
+                            )}
+
+                            {profile.role != "admin" && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Cette action est irréversible. Toutes les données de{" "}
+                                      <strong>{profile.full_name || profile.email}</strong> seront supprimées :
+                                      <ul className="list-disc list-inside mt-2 space-y-1">
+                                        <li>Profil et compte</li>
+                                        <li>Conversations et messages</li>
+                                        <li>Produits mis en vente</li>
+                                        <li>Projets créés</li>
+                                        <li>Likes et commentaires</li>
+                                      </ul>
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteUser(profile)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Supprimer définitivement
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                           </div>
                         </div>

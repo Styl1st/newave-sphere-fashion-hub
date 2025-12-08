@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, Plus, Mail, Trash2, Edit } from 'lucide-react';
+import { Users, Plus, Mail, Trash2, Edit, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Project {
@@ -262,6 +262,24 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
     }
   };
 
+  const removeMember = async (memberId: string, memberName: string) => {
+    try {
+      const { error } = await supabase
+        .from('project_members')
+        .delete()
+        .eq('id', memberId);
+
+      if (error) throw error;
+
+      toast.success(`${memberName} a été retiré du projet`);
+      fetchProjects();
+      onProjectsChange?.();
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast.error('Erreur lors de la suppression du membre');
+    }
+  };
+
   const canEditProject = (project: Project) => {
     if (isAdmin) return true;
     if (project.creator_id === user?.id) return true;
@@ -389,9 +407,9 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
             <CardContent className="space-y-4">
               <div>
                 <h4 className="font-medium mb-2">Members:</h4>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {project.members?.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between text-sm">
+                    <div key={member.id} className="flex items-center justify-between text-sm p-2 rounded-lg hover:bg-muted/50">
                       <div className="flex items-center gap-2">
                         {member.profile?.avatar_url ? (
                           <img
@@ -408,9 +426,37 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
                           {member.profile?.full_name || member.profile?.email || 'Unknown user'}
                         </span>
                       </div>
-                      <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
-                        {member.role === 'owner' ? 'Owner' : 'Collaborator'}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
+                          {member.role === 'owner' ? 'Owner' : 'Collaborator'}
+                        </Badge>
+                        {member.role !== 'owner' && (project.creator_id === user?.id || isAdmin) && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive">
+                                <UserMinus className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Retirer ce membre ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Êtes-vous sûr de vouloir retirer {member.profile?.full_name || member.profile?.email} du projet "{project.name}" ?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => removeMember(member.id, member.profile?.full_name || member.profile?.email || 'ce membre')}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Retirer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
