@@ -38,6 +38,7 @@ type Profile = {
   role: "admin" | "seller" | "buyer";
   is_seller: boolean;
   created_at: string;
+  purchase_count?: number;
 };
 
 type Stats = {
@@ -74,7 +75,19 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setProfiles(data || []);
+      
+      // Fetch purchase counts for each user
+      const profilesWithPurchases = await Promise.all(
+        (data || []).map(async (profile) => {
+          const { count } = await supabase
+            .from("purchases")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", profile.user_id);
+          return { ...profile, purchase_count: count || 0 };
+        })
+      );
+      
+      setProfiles(profilesWithPurchases);
     } catch (error) {
       console.error("Error fetching profiles:", error);
     } finally {
@@ -353,6 +366,13 @@ const AdminDashboard = () => {
                             <Badge className={getRoleColor(profile.role)}>
                               {profile.role}
                             </Badge>
+                            
+                            {profile.purchase_count !== undefined && profile.purchase_count > 0 && (
+                              <Badge variant="outline" className="ml-2">
+                                <ShoppingBag className="h-3 w-3 mr-1" />
+                                {profile.purchase_count} achat{profile.purchase_count > 1 ? 's' : ''}
+                              </Badge>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-2">
