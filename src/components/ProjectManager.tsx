@@ -26,9 +26,9 @@ interface ProjectMember {
   id: string;
   user_id: string;
   role: string;
-  profiles?: {
-    full_name: string;
-    email: string;
+  profile?: {
+    full_name: string | null;
+    email: string | null;
   };
 }
 
@@ -103,18 +103,29 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
         }
       }
 
-      // Fetch members for each project
+      // Fetch members for each project with their profiles
       for (const project of allProjects) {
         const { data: members } = await supabase
           .from('project_members')
-          .select(`
-            id,
-            user_id,
-            role
-          `)
+          .select('id, user_id, role')
           .eq('project_id', project.id);
         
-        (project as any).members = members || [];
+        // Fetch profiles for each member
+        const membersWithProfiles: ProjectMember[] = [];
+        for (const member of members || []) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('user_id', member.user_id)
+            .maybeSingle();
+          
+          membersWithProfiles.push({
+            ...member,
+            profile: profile || undefined
+          });
+        }
+        
+        (project as any).members = membersWithProfiles;
       }
 
       setProjects(allProjects);
@@ -380,7 +391,9 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
                 <div className="space-y-1">
                   {project.members?.map((member) => (
                     <div key={member.id} className="flex items-center justify-between text-sm">
-                      <span>{member.user_id}</span>
+                      <span className="text-foreground">
+                        {member.profile?.full_name || member.profile?.email || 'Unknown user'}
+                      </span>
                       <Badge variant={member.role === 'owner' ? 'default' : 'secondary'}>
                         {member.role === 'owner' ? 'Owner' : 'Collaborator'}
                       </Badge>
