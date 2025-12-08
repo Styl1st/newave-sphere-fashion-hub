@@ -29,6 +29,7 @@ const Index = () => {
   const [scrollY, setScrollY] = useState(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isExpanding, setIsExpanding] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [heroInitialPos, setHeroInitialPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   
@@ -76,7 +77,28 @@ const Index = () => {
         setHeroInitialPos(null);
       }, 1500);
     }
-  }, [isExpanding, heroInitialPos]);
+  }, [isExpanding, heroInitialPos, isClosing]);
+
+  // Handle closing animation
+  useEffect(() => {
+    if (isClosing && heroRef.current && heroInitialPos) {
+      // Animate back to original position
+      heroRef.current.style.top = `${heroInitialPos.top}px`;
+      heroRef.current.style.left = `${heroInitialPos.left}px`;
+      heroRef.current.style.width = `${heroInitialPos.width}px`;
+      heroRef.current.style.height = `${heroInitialPos.height}px`;
+      heroRef.current.style.borderRadius = '1.5rem';
+      
+      // Wait for transition to complete before resetting
+      const timeout = setTimeout(() => {
+        setIsExpanding(false);
+        setIsClosing(false);
+        setHeroInitialPos(null);
+      }, 800);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isClosing, heroInitialPos]);
 
   // Parallax scroll effect
   useEffect(() => {
@@ -187,7 +209,7 @@ const Index = () => {
           <div className="mx-auto text-center px-4 sm:px-0 flex items-center justify-center" style={{width: '100%', height: '100vh', padding: '5vh 0'}}>
             <div 
               ref={heroRef}
-              className="rounded-3xl border border-white/20 overflow-hidden cursor-pointer" 
+              className="relative rounded-3xl border border-white/20 overflow-hidden cursor-pointer"
               style={{
                 ...heroStyle,
                 width: '90%',
@@ -214,10 +236,12 @@ const Index = () => {
               />
 
               {/* Color Theme Picker - Intuitive Swatches */}
+              {!isExpanding && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
                     className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
                     <div 
@@ -259,6 +283,7 @@ const Index = () => {
                   </div>
                 </PopoverContent>
               </Popover>
+              )}
               
               {/* Animated content with staggered entrance */}
               <div 
@@ -349,7 +374,7 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block'}}>
+        <section id="filters" style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block', scrollMarginTop: '2rem'}}>
           <div
             className="mx-auto max-w-[95%] sm:max-w-[90%] bg-card/95 backdrop-blur-md rounded-2xl border shadow-lg p-4 sm:p-6 lg:p-8"
             style={{
