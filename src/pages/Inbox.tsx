@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import BrandNavbar from '@/components/BrandNavbar';
 import { useMessages, useConversation, Conversation } from '@/hooks/useMessages';
 import { useAuth } from '@/hooks/useAuth';
@@ -167,20 +167,22 @@ const ChatArea = ({
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={conversation.other_user?.avatar_url || undefined} />
-          <AvatarFallback>
-            <User className="w-5 h-5" />
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className="font-medium">{conversation.other_user?.full_name || 'Utilisateur'}</p>
-          {conversation.product && (
-            <p className="text-xs text-muted-foreground">
-              À propos de: {conversation.product.name}
-            </p>
-          )}
-        </div>
+        <Link to={`/seller/${conversation.other_user?.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={conversation.other_user?.avatar_url || undefined} />
+            <AvatarFallback>
+              <User className="w-5 h-5" />
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-medium hover:underline">{conversation.other_user?.full_name || 'Utilisateur'}</p>
+            {conversation.product && (
+              <p className="text-xs text-muted-foreground">
+                À propos de: {conversation.product.name}
+              </p>
+            )}
+          </div>
+        </Link>
       </div>
 
       {/* Messages */}
