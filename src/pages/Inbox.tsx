@@ -100,7 +100,7 @@ const Inbox = () => {
           </div>
 
           {/* Chat Area */}
-          <div className={`md:col-span-2 flex flex-col ${!selectedConversation ? 'hidden md:flex' : ''}`}>
+          <div className={`md:col-span-2 flex flex-col h-full overflow-hidden ${!selectedConversation ? 'hidden md:flex' : ''}`}>
             {selectedConversation ? (
               <ChatArea
                 conversation={selectedConversation}
@@ -310,8 +310,9 @@ const ChatArea = ({
       </div>
 
       {/* Messages - scrollable area */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4" ref={scrollRef}>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full" ref={scrollRef}>
+          <div className="p-4">
           {loading ? (
             <div className="text-center text-muted-foreground">Chargement...</div>
           ) : messages.length === 0 ? (
@@ -349,6 +350,7 @@ const ChatArea = ({
               ))}
             </div>
           )}
+          </div>
         </ScrollArea>
       </div>
 
