@@ -132,53 +132,6 @@ const Index = () => {
                 color="rgb(255, 255, 255)" 
               />
 
-              {/* Parallax floating shapes */}
-              <div 
-                className="absolute w-32 h-32 rounded-full bg-white/10 blur-2xl"
-                style={{
-                  top: '10%',
-                  left: '5%',
-                  transform: `translate(${mousePos.x * 30}px, ${mousePos.y * 30 + scrollY * 0.1}px)`,
-                  transition: 'transform 0.3s ease-out',
-                }}
-              />
-              <div 
-                className="absolute w-48 h-48 rounded-full bg-white/5 blur-3xl"
-                style={{
-                  top: '50%',
-                  right: '10%',
-                  transform: `translate(${mousePos.x * -20}px, ${mousePos.y * -20 + scrollY * 0.15}px)`,
-                  transition: 'transform 0.3s ease-out',
-                }}
-              />
-              <div 
-                className="absolute w-24 h-24 rounded-full bg-white/15 blur-xl"
-                style={{
-                  bottom: '15%',
-                  left: '20%',
-                  transform: `translate(${mousePos.x * 40}px, ${mousePos.y * 40 + scrollY * 0.05}px)`,
-                  transition: 'transform 0.3s ease-out',
-                }}
-              />
-              <div 
-                className="absolute w-16 h-16 rounded-full border border-white/20"
-                style={{
-                  top: '20%',
-                  right: '25%',
-                  transform: `translate(${mousePos.x * -50}px, ${mousePos.y * -50}px) rotate(${scrollY * 0.1}deg)`,
-                  transition: 'transform 0.2s ease-out',
-                }}
-              />
-              <div 
-                className="absolute w-20 h-20 border border-white/10 rotate-45"
-                style={{
-                  bottom: '25%',
-                  right: '15%',
-                  transform: `translate(${mousePos.x * 25}px, ${mousePos.y * 25}px) rotate(${45 + scrollY * 0.05}deg)`,
-                  transition: 'transform 0.2s ease-out',
-                }}
-              />
-
               {/* Color Theme Picker - Intuitive Swatches */}
               <Popover>
                 <PopoverTrigger asChild>
@@ -250,18 +203,9 @@ const Index = () => {
                     style={{
                       height: '4vw', 
                       maxHeight: '80px',
-                      transform: `translateX(${mousePos.x * 10}px)`,
-                      transition: 'transform 0.3s ease-out',
                     }} 
                   />
-                  <span
-                    style={{
-                      transform: `translateX(${mousePos.x * -5}px)`,
-                      transition: 'transform 0.3s ease-out',
-                    }}
-                  >
-                    Independent Fashion Marketplace
-                  </span>
+                  Independent Fashion Marketplace
                 </h1>
                 <p 
                   className="mx-auto text-white/85 drop-shadow-sm animate-fade-in" 
