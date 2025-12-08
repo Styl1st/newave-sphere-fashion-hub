@@ -6,7 +6,7 @@ import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu } from "lucide-react";
+import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu, Home, LayoutDashboard, User, Shield, Heart, LogOut, Store, LogIn } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SupportDialog } from "@/components/SupportDialog";
@@ -170,11 +170,14 @@ const BrandNavbar = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <div className="flex flex-col gap-4 mt-8">
-                <p className="text-sm font-medium text-muted-foreground px-2">Navigation</p>
+              <div className="flex flex-col gap-2 mt-8">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">Navigation</p>
                 
                 <Link to="/" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start text-base">Home</Button>
+                  <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                    <Home className="h-5 w-5" />
+                    Home
+                  </Button>
                 </Link>
                 
                 {user && (
@@ -182,10 +185,16 @@ const BrandNavbar = () => {
                     {role === 'seller' && (
                       <>
                         <Link to="/seller" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start text-base">Dashboard</Button>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <LayoutDashboard className="h-5 w-5" />
+                            Dashboard
+                          </Button>
                         </Link>
                         <Link to="/my-profile" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start text-base">Profile</Button>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <User className="h-5 w-5" />
+                            Profile
+                          </Button>
                         </Link>
                       </>
                     )}
@@ -193,25 +202,35 @@ const BrandNavbar = () => {
                     {role === 'admin' && (
                       <>
                         <Link to="/admin" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start text-base">Admin</Button>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <Shield className="h-5 w-5" />
+                            Admin
+                          </Button>
                         </Link>
                         <Link to="/my-profile" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start text-base">Profile</Button>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <User className="h-5 w-5" />
+                            Profile
+                          </Button>
                         </Link>
                       </>
                     )}
                     
                     {role === 'buyer' && (
                       <Link to="/user" onClick={closeMobileMenu}>
-                        <Button variant="ghost" className="w-full justify-start text-base">My Space</Button>
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                          <Heart className="h-5 w-5" />
+                          My Space
+                        </Button>
                       </Link>
                     )}
 
                     <Link to="/inbox" onClick={closeMobileMenu}>
-                      <Button variant="ghost" className="w-full justify-start text-base">
+                      <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                        <MessageCircle className="h-5 w-5" />
                         Messages
                         {unreadCount > 0 && (
-                          <span className="ml-2 px-2 py-0.5 bg-destructive text-destructive-foreground text-xs rounded-full">
+                          <span className="ml-auto px-2 py-0.5 bg-destructive text-destructive-foreground text-xs rounded-full">
                             {unreadCount}
                           </span>
                         )}
@@ -220,7 +239,8 @@ const BrandNavbar = () => {
 
                     <SupportDialog
                       trigger={
-                        <Button variant="ghost" className="w-full justify-start text-base">
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                          <HelpCircle className="h-5 w-5" />
                           Support
                         </Button>
                       }
@@ -228,18 +248,25 @@ const BrandNavbar = () => {
                   </>
                 )}
 
-                <div className="border-t pt-4 mt-2">
+                <div className="border-t pt-4 mt-4">
                   {user ? (
-                    <Button onClick={() => { signOut(); closeMobileMenu(); }} variant="outline" className="w-full">
+                    <Button onClick={() => { signOut(); closeMobileMenu(); }} variant="outline" className="w-full gap-3 h-11">
+                      <LogOut className="h-5 w-5" />
                       Sign out
                     </Button>
                   ) : (
                     <div className="flex flex-col gap-2">
                       <Link to="/auth" onClick={closeMobileMenu}>
-                        <Button variant="ghost" className="w-full">Become a seller</Button>
+                        <Button variant="ghost" className="w-full gap-3 h-11">
+                          <Store className="h-5 w-5" />
+                          Become a seller
+                        </Button>
                       </Link>
                       <Link to="/auth" onClick={closeMobileMenu}>
-                        <Button variant="hero" className="w-full">Sign in</Button>
+                        <Button variant="hero" className="w-full gap-3 h-11">
+                          <LogIn className="h-5 w-5" />
+                          Sign in
+                        </Button>
                       </Link>
                     </div>
                   )}
