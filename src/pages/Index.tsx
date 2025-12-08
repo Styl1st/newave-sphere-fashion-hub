@@ -286,7 +286,13 @@ const Index = () => {
                     className="hover:scale-105 transition-transform"
                     onClick={(e) => {
                       e.stopPropagation();
-                      document.getElementById('products')?.scrollIntoView({ behavior: 'instant' });
+                      const filtersSection = document.getElementById('filters');
+                      if (filtersSection) {
+                        filtersSection.scrollIntoView({ behavior: 'instant' });
+                        filtersSection.classList.remove('animate-filters-in');
+                        void filtersSection.offsetWidth; // Force reflow
+                        filtersSection.classList.add('animate-filters-in');
+                      }
                     }}
                   >
                     Explore drops
@@ -303,7 +309,7 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block'}}>
+        <section id="filters" style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block', scrollMarginTop: '2rem'}}>
           <div
             className="mx-auto max-w-[95%] sm:max-w-[90%] bg-card/95 backdrop-blur-md rounded-2xl border shadow-lg p-4 sm:p-6 lg:p-8"
             style={{
