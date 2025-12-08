@@ -34,7 +34,7 @@ interface ProjectProductManagerProps {
 
 export const ProjectProductManager = ({ isAdminView = false }: ProjectProductManagerProps) => {
   const { user } = useAuth();
-  const { isAdmin } = useRole();
+  const { isAdmin, loading: roleLoading } = useRole();
   const [projects, setProjects] = useState<Project[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>('');
@@ -72,11 +72,11 @@ export const ProjectProductManager = ({ isAdminView = false }: ProjectProductMan
   ];
 
   useEffect(() => {
-    if (user) {
+    if (user && !roleLoading) {
       fetchProjects();
       fetchProducts();
     }
-  }, [user, isAdminView]);
+  }, [user, isAdminView, isAdmin, roleLoading]);
 
   const fetchProjects = async () => {
     try {

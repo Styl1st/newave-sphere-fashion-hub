@@ -39,7 +39,7 @@ interface ProjectManagerProps {
 
 export const ProjectManager = ({ onProjectsChange, isAdminView = false }: ProjectManagerProps) => {
   const { user } = useAuth();
-  const { isAdmin } = useRole();
+  const { isAdmin, loading: roleLoading } = useRole();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
@@ -49,10 +49,10 @@ export const ProjectManager = ({ onProjectsChange, isAdminView = false }: Projec
   const [editForm, setEditForm] = useState({ name: '', description: '' });
 
   useEffect(() => {
-    if (user) {
+    if (user && !roleLoading) {
       fetchProjects();
     }
-  }, [user, isAdminView]);
+  }, [user, isAdminView, isAdmin, roleLoading]);
 
   const fetchProjects = async () => {
     try {
