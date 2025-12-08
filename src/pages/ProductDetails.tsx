@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
-import { usePurchases } from "@/hooks/usePurchases";
+import { useCart } from "@/hooks/useCart";
 
 type Product = {
   id: string;
@@ -51,7 +51,23 @@ const ProductDetails = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { startConversation } = useMessages();
-  const { purchaseProduct, purchasing } = usePurchases();
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      image: product.images?.[0],
+      sellerId: product.user_id,
+    });
+    toast({
+      title: "Ajouté au panier",
+      description: `${product.name} a été ajouté à votre panier`,
+    });
+  };
 
   useEffect(() => {
     if (id) {
@@ -286,11 +302,10 @@ const ProductDetails = () => {
                   <Button 
                     size="lg" 
                     className="w-full" 
-                    onClick={() => purchaseProduct(product.id, product.user_id, product.price)}
-                    disabled={purchasing}
+                    onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    {purchasing ? 'Achat en cours...' : `Acheter - ${product.price} €`}
+                    Ajouter au panier - {product.price} €
                   </Button>
                 )}
                 <Button 

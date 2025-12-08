@@ -6,6 +6,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Palette, Sun, Moon, MessageCircle } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
+import { CartDrawer } from "@/components/CartDrawer";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
 const BrandNavbar = () => {
@@ -107,6 +108,9 @@ const BrandNavbar = () => {
               </PopoverContent>
             </Popover>
           </div>
+
+          {/* Cart */}
+          <CartDrawer />
 
           {/* Messages */}
           {user && (
