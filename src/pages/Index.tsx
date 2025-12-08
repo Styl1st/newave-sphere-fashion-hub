@@ -77,9 +77,17 @@ const Index = () => {
     });
   };
 
-  // Generate hero gradient based on current theme - lighter version
-  const heroGradient = `linear-gradient(135deg, hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / 0.6), hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.85)),
-    linear-gradient(rgba(255, 255, 255, 0.1) 0%, hsl(${currentTheme.hue} 40% 25%) 100%)`;
+  // Generate hero style based on current theme - subtle border glow effect
+  const heroStyle = {
+    padding: '10%',
+    background: `linear-gradient(135deg, 
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% 97%) 0%, 
+      hsl(${currentTheme.hue} ${currentTheme.saturation - 20}% 94%) 50%,
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% 97%) 100%)`,
+    boxShadow: `0 0 0 1px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), 
+                0 4px 30px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.15),
+                inset 0 1px 0 hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.1)`,
+  };
 
   return (
     <div className="min-h-screen bg-animated-fade">
@@ -88,16 +96,16 @@ const Index = () => {
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="mx-auto text-center" style={{width: '90%', padding: '10% 0'}}>
-            <div className="backdrop-blur rounded-3xl relative" style={{padding: '10%', backgroundImage: heroGradient, boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'}}>
+            <div className="backdrop-blur rounded-3xl relative border" style={heroStyle}>
               {/* Color Theme Picker - Intuitive Swatches */}
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
-                    className="absolute top-4 right-4 flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-full backdrop-blur transition-all border border-white/30 group"
+                    className="absolute top-4 right-4 flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-3 py-2 rounded-full backdrop-blur transition-all border border-primary/20 group"
                   >
                     <Palette className="w-4 h-4" />
                     <div 
-                      className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                      className="w-5 h-5 rounded-full border-2 border-primary/50 shadow-sm"
                       style={{ backgroundColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}%)` }}
                     />
                     <span className="text-sm font-medium">{currentTheme.name}</span>
@@ -136,11 +144,11 @@ const Index = () => {
                 </PopoverContent>
               </Popover>
               
-              <h1 className="flex font-semibold tracking-tight justify-center text-white" style={{fontSize: '2.5vw', gap: '2%'}}>
+              <h1 className="flex font-semibold tracking-tight justify-center text-foreground" style={{fontSize: '2.5vw', gap: '2%'}}>
                 <img src={logoTransparent} alt="logo" className="flex items-center" style={{height: '4vw', maxHeight: '80px'}} />
                 Independent Fashion Marketplace
               </h1>
-              <p className="mx-auto text-white/80" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
+              <p className="mx-auto text-muted-foreground" style={{marginTop: '3%', fontSize: '1.2vw', maxWidth: '80%'}}>
                 Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
               </p>
               <div className="flex justify-center" style={{marginTop: '5%', gap: '2%'}}>
