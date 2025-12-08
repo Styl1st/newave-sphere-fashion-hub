@@ -273,36 +273,51 @@ const Index = () => {
                 >
                   Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
                 </p>
-                <div 
-                  className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
-                  style={{
-                    animationDelay: '0.5s',
-                    animationFillMode: 'both',
-                  }}
-                >
-                  <Button 
-                    variant="hero" 
-                    size="lg" 
-                    className="hover:scale-105 transition-transform"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const filtersSection = document.getElementById('filters');
-                      if (filtersSection) {
-                        filtersSection.scrollIntoView({ behavior: 'instant' });
-                        filtersSection.classList.remove('animate-filters-in');
-                        void filtersSection.offsetWidth; // Force reflow
-                        filtersSection.classList.add('animate-filters-in');
-                      }
+                
+                {/* Buttons - only when not expanded */}
+                {!isExpanding && (
+                  <div 
+                    className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
+                    style={{
+                      animationDelay: '0.5s',
+                      animationFillMode: 'both',
                     }}
                   >
-                    Explore drops
-                  </Button>
-                  <a href="/auth">
-                    <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
-                      Become a seller
-                    </Button>
-                  </a>
-                </div>
+                    <a href="/auth">
+                      <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
+                        Become a seller
+                      </Button>
+                    </a>
+                  </div>
+                )}
+
+                {/* About Us - only when expanded */}
+                {isExpanding && (
+                  <div 
+                    className="mt-12 max-w-3xl mx-auto animate-fade-in"
+                    style={{
+                      animationDelay: '0.4s',
+                      animationFillMode: 'both',
+                    }}
+                  >
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">About Us</h2>
+                    <div className="space-y-4 text-white/90 text-sm sm:text-base md:text-lg leading-relaxed">
+                      <p>
+                        Born from the underground, Newave is more than a marketplace — it is a movement. 
+                        We connect independent designers and emerging brands with a global community of fashion rebels.
+                      </p>
+                      <p>
+                        Every piece you find here tells a story. From hand-sewn grunge aesthetics to bold streetwear statements, 
+                        we curate collections that challenge the mainstream and celebrate authenticity.
+                      </p>
+                      <p>
+                        Our mission is simple: empower creators, support small businesses, and give you access to 
+                        fashion that actually means something. No mass production. No fast fashion. Just raw, real style.
+                      </p>
+                    </div>
+                    <p className="mt-8 text-white/60 text-sm italic">Click anywhere to close</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
