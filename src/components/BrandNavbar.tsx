@@ -5,8 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { CartDrawer } from "@/components/CartDrawer";
 import { SupportDialog } from "@/components/SupportDialog";
@@ -20,42 +20,30 @@ const BrandNavbar = () => {
   const unreadCount = user ? getUnreadCount() : 0;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const NavLinks = ({ mobile = false, onClose }: { mobile?: boolean; onClose?: () => void }) => {
-    const linkClass = mobile 
-      ? "w-full justify-start text-lg py-3" 
-      : "text-sm font-medium";
-    
-    const handleClick = () => {
-      if (onClose) onClose();
-    };
-
-    return null;
-  };
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <header className="sticky z-30" style={{top: '1%', padding: '0 4%'}}>
-      <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant" style={{maxWidth: '90%', height: '4vw', minHeight: '60px', padding: '0 3%'}}>
+    <header className="sticky top-2 z-30 px-2 sm:px-4">
+      <nav className="mx-auto flex items-center justify-between bg-background/90 backdrop-blur border rounded-2xl shadow-elegant max-w-7xl h-14 sm:h-16 px-3 sm:px-6">
         {/* Logo - Left */}
-        <div className="flex justify-start">
-          <Link to="/" className="flex-shrink-0">
-            <img src={logoTransparent} alt="logo" className="w-auto dark:invert" style={{height: '2.5vw', minHeight: '36px'}} />
-          </Link>
-        </div>
+        <Link to="/" className="flex-shrink-0">
+          <img src={logoTransparent} alt="logo" className="h-8 sm:h-10 w-auto dark:invert" />
+        </Link>
 
-        {/* Navigation Links - Center */}
-        <div className="flex items-center justify-center" style={{gap: '3%'}}>
+        {/* Desktop Navigation Links - Center */}
+        <div className="hidden md:flex items-center gap-1 lg:gap-2">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Home</Button>
+            <Button variant="ghost" size="sm" className="text-sm font-medium">Home</Button>
           </Link>
           {user && (
             <>
-              {role !== 'seller' || (
+              {role === 'seller' && (
                 <>
                   <Link to="/seller">
-                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Dashboard</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Dashboard</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
                   </Link>
                 </>
               )}
@@ -63,17 +51,17 @@ const BrandNavbar = () => {
               {role === 'admin' && (
                 <>
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Admin</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Admin</Button>
                   </Link>
                   <Link to="/my-profile">
-                    <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>Profile</Button>
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">Profile</Button>
                   </Link>
                 </>
               )}
               
               {role === 'buyer' && (
                 <Link to="/user">
-                  <Button variant="ghost" size="sm" className="font-medium" style={{fontSize: '0.85vw'}}>My Space</Button>
+                  <Button variant="ghost" size="sm" className="text-sm font-medium">My Space</Button>
                 </Link>
               )}
             </>
@@ -81,42 +69,36 @@ const BrandNavbar = () => {
         </div>
 
         {/* Actions - Right */}
-        <div className="flex items-center justify-end" style={{gap: '2%'}}>
-          {/* Theme Controls */}
-          <div className="flex items-center rounded-lg bg-muted/50" style={{gap: '0.5%', padding: '0.5% 1%'}}>
-            <Button variant="ghost" size="icon" className="relative" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}} onClick={toggleMode}>
-              {mode === 'dark' ? (
-                <Sun style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
-              ) : (
-                <Moon style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
-              )}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Theme Controls - Desktop */}
+          <div className="hidden sm:flex items-center gap-1 rounded-lg bg-muted/50 p-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMode}>
+              {mode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
             <div className="w-px h-4 bg-border" />
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}}>
-                  <Palette style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
+                <Button variant="ghost" size="icon" className="h-8 w-8 relative">
+                  <Palette className="h-4 w-4" />
                   <span 
-                    className="absolute rounded-full border-2 border-background"
-                    style={{ bottom: '-2px', right: '-2px', width: '0.6vw', height: '0.6vw', minWidth: '10px', minHeight: '10px', backgroundColor: `hsl(${currentTheme.hue}, ${currentTheme.saturation}%, ${currentTheme.lightness}%)` }}
+                    className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background"
+                    style={{ backgroundColor: `hsl(${currentTheme.hue}, ${currentTheme.saturation}%, ${currentTheme.lightness}%)` }}
                   />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="bg-popover border-border" style={{width: '12vw', minWidth: '192px', padding: '2%'}} align="end">
-                <p className="font-medium text-muted-foreground" style={{fontSize: '0.75vw', marginBottom: '1%'}}>Theme Color</p>
-                <div className="grid grid-cols-4" style={{gap: '1.5%'}}>
+              <PopoverContent className="w-48 p-3" align="end">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Theme Color</p>
+                <div className="grid grid-cols-4 gap-2">
                   {themes.map((theme) => (
                     <button
                       key={theme.name}
                       onClick={() => setTheme(theme)}
-                      className={`rounded-full transition-all hover:scale-110 ${
-                        currentTheme.name === theme.name 
-                          ? 'ring-2 ring-offset-2 ring-foreground' 
-                          : ''
+                      className={`w-8 h-8 rounded-full transition-all hover:scale-110 ${
+                        currentTheme.name === theme.name ? 'ring-2 ring-offset-2 ring-foreground' : ''
                       }`}
-                      style={{ width: '2vw', height: '2vw', minWidth: '32px', minHeight: '32px', backgroundColor: `hsl(${theme.hue}, ${theme.saturation}%, ${theme.lightness}%)` }}
+                      style={{ backgroundColor: `hsl(${theme.hue}, ${theme.saturation}%, ${theme.lightness}%)` }}
                       title={theme.name}
                     />
                   ))}
@@ -125,7 +107,7 @@ const BrandNavbar = () => {
             </Popover>
           </div>
 
-          {/* Mobile Theme Toggle Only */}
+          {/* Mobile Theme Toggle */}
           <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden" onClick={toggleMode}>
             {mode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
@@ -133,7 +115,7 @@ const BrandNavbar = () => {
           {/* Cart */}
           <CartDrawer />
 
-          {/* Support - Hidden on mobile, shown in menu */}
+          {/* Support - Desktop only */}
           {user && (
             <div className="hidden sm:block">
               <SupportDialog
@@ -146,13 +128,13 @@ const BrandNavbar = () => {
             </div>
           )}
 
-          {/* Messages */}
+          {/* Messages - Desktop only */}
           {user && (
-            <Link to="/inbox" className="relative">
-              <Button variant="ghost" size="icon" style={{height: '2vw', width: '2vw', minHeight: '32px', minWidth: '32px'}}>
-                <MessageCircle style={{height: '1vw', width: '1vw', minHeight: '16px', minWidth: '16px'}} />
+            <Link to="/inbox" className="relative hidden sm:block">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MessageCircle className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute bg-destructive text-destructive-foreground font-bold rounded-full flex items-center justify-center animate-pulse shadow-lg" style={{top: '-4px', right: '-4px', width: '1.2vw', height: '1.2vw', minWidth: '20px', minHeight: '20px', fontSize: '0.7vw'}}>
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -160,21 +142,109 @@ const BrandNavbar = () => {
             </Link>
           )}
 
-          {/* Auth Buttons */}
-          {user ? (
-            <Button onClick={signOut} variant="outline" size="sm">
-              Sign out
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/auth">
-                <Button variant="ghost" size="sm" className="text-sm">Become a seller</Button>
-              </Link>
-              <Link to="/auth">
-                <Button variant="hero" size="sm">Sign in</Button>
-              </Link>
-            </div>
-          )}
+          {/* Auth Buttons - Desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <Button onClick={signOut} variant="outline" size="sm" className="text-sm">
+                Sign out
+              </Button>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm" className="text-sm">Become a seller</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="hero" size="sm" className="text-sm">Sign in</Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <div className="flex flex-col gap-4 mt-8">
+                <p className="text-sm font-medium text-muted-foreground px-2">Navigation</p>
+                
+                <Link to="/" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start text-base">Home</Button>
+                </Link>
+                
+                {user && (
+                  <>
+                    {role === 'seller' && (
+                      <>
+                        <Link to="/seller" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start text-base">Dashboard</Button>
+                        </Link>
+                        <Link to="/my-profile" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start text-base">Profile</Button>
+                        </Link>
+                      </>
+                    )}
+                    
+                    {role === 'admin' && (
+                      <>
+                        <Link to="/admin" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start text-base">Admin</Button>
+                        </Link>
+                        <Link to="/my-profile" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start text-base">Profile</Button>
+                        </Link>
+                      </>
+                    )}
+                    
+                    {role === 'buyer' && (
+                      <Link to="/user" onClick={closeMobileMenu}>
+                        <Button variant="ghost" className="w-full justify-start text-base">My Space</Button>
+                      </Link>
+                    )}
+
+                    <Link to="/inbox" onClick={closeMobileMenu}>
+                      <Button variant="ghost" className="w-full justify-start text-base">
+                        Messages
+                        {unreadCount > 0 && (
+                          <span className="ml-2 px-2 py-0.5 bg-destructive text-destructive-foreground text-xs rounded-full">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </Button>
+                    </Link>
+
+                    <SupportDialog
+                      trigger={
+                        <Button variant="ghost" className="w-full justify-start text-base">
+                          Support
+                        </Button>
+                      }
+                    />
+                  </>
+                )}
+
+                <div className="border-t pt-4 mt-2">
+                  {user ? (
+                    <Button onClick={() => { signOut(); closeMobileMenu(); }} variant="outline" className="w-full">
+                      Sign out
+                    </Button>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <Link to="/auth" onClick={closeMobileMenu}>
+                        <Button variant="ghost" className="w-full">Become a seller</Button>
+                      </Link>
+                      <Link to="/auth" onClick={closeMobileMenu}>
+                        <Button variant="hero" className="w-full">Sign in</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </header>
