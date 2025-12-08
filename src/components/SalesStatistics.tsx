@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18n } from '@/hooks/useI18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,7 @@ const COLORS = [
 
 export const SalesStatistics = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [productStats, setProductStats] = useState<ProductStats[]>([]);
@@ -91,7 +93,6 @@ export const SalesStatistics = () => {
 
   const fetchLikeStats = async () => {
     try {
-      // First get all products by the seller
       const { data: products, error: productsError } = await supabase
         .from('products')
         .select('id, name, images')
@@ -105,7 +106,6 @@ export const SalesStatistics = () => {
         return;
       }
 
-      // Then get likes for these products
       const productIds = products.map(p => p.id);
       const { data: likes, error: likesError } = await supabase
         .from('likes')
@@ -114,13 +114,11 @@ export const SalesStatistics = () => {
 
       if (likesError) throw likesError;
 
-      // Count likes per product
       const likesMap = new Map<string, number>();
       (likes || []).forEach(like => {
         likesMap.set(like.product_id, (likesMap.get(like.product_id) || 0) + 1);
       });
 
-      // Build stats
       const stats: LikeStats[] = products
         .map(product => ({
           productId: product.id,
@@ -165,7 +163,6 @@ export const SalesStatistics = () => {
 
   const totalRevenue = sales.reduce((sum, sale) => sum + sale.price_paid, 0);
   const totalSales = sales.reduce((sum, sale) => sum + sale.quantity, 0);
-  const averageOrderValue = sales.length > 0 ? totalRevenue / sales.length : 0;
 
   if (loading) {
     return (
@@ -186,7 +183,7 @@ export const SalesStatistics = () => {
                 <Euro className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Revenus totaux</p>
+                <p className="text-sm text-muted-foreground">{t.statistics.totalRevenue}</p>
                 <p className="text-2xl font-bold">{totalRevenue.toFixed(2)} €</p>
               </div>
             </div>
@@ -200,7 +197,7 @@ export const SalesStatistics = () => {
                 <ShoppingCart className="h-6 w-6 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Commandes</p>
+                <p className="text-sm text-muted-foreground">{t.statistics.orders}</p>
                 <p className="text-2xl font-bold">{sales.length}</p>
               </div>
             </div>
@@ -214,7 +211,7 @@ export const SalesStatistics = () => {
                 <Package className="h-6 w-6 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Articles vendus</p>
+                <p className="text-sm text-muted-foreground">{t.statistics.itemsSold}</p>
                 <p className="text-2xl font-bold">{totalSales}</p>
               </div>
             </div>
@@ -240,8 +237,7 @@ export const SalesStatistics = () => {
         <Card>
           <CardContent className="p-12 text-center">
             <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-            <h3 className="text-lg font-semibold mb-2">Aucune vente pour le moment</h3>
-            <p className="text-muted-foreground">Vos statistiques de vente apparaîtront ici</p>
+            <h3 className="text-lg font-semibold mb-2">{t.statistics.noSales}</h3>
           </CardContent>
         </Card>
       ) : (
@@ -249,7 +245,7 @@ export const SalesStatistics = () => {
           {/* Bar Chart - Top Products by Revenue */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Top produits par revenus</CardTitle>
+              <CardTitle className="text-lg">{t.statistics.topProducts}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -272,25 +268,15 @@ export const SalesStatistics = () => {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
-                        const maxRevenue = Math.max(...productStats.slice(0, 5).map(p => p.totalRevenue));
-                        const percent = ((data.totalRevenue / maxRevenue) * 100).toFixed(0);
                         return (
                           <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
                             <p className="font-semibold text-foreground">{data.name}</p>
                             <p className="text-sm text-muted-foreground mt-1">
-                              Revenus: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
+                              {t.statistics.totalRevenue}: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Ventes: <span className="text-foreground font-medium">{data.totalSales} unité{data.totalSales > 1 ? 's' : ''}</span>
+                              {t.statistics.itemsSold}: <span className="text-foreground font-medium">{data.totalSales}</span>
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              Prix moyen: <span className="text-foreground font-medium">{(data.totalRevenue / data.totalSales).toFixed(2)} €</span>
-                            </p>
-                            <div className="mt-2 pt-2 border-t border-border">
-                              <p className="text-xs text-muted-foreground">
-                                {percent}% du top produit
-                              </p>
-                            </div>
                           </div>
                         );
                       }
@@ -306,7 +292,7 @@ export const SalesStatistics = () => {
           {/* Pie Chart - Sales Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Répartition des ventes</CardTitle>
+              <CardTitle className="text-lg">{t.statistics.salesDistribution}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -356,13 +342,10 @@ export const SalesStatistics = () => {
                           <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
                             <p className="font-semibold text-foreground">{data.name}</p>
                             <p className="text-sm text-muted-foreground mt-1">
-                              Ventes: <span className="text-foreground font-medium">{data.totalSales}</span>
+                              {t.statistics.itemsSold}: <span className="text-foreground font-medium">{data.totalSales}</span>
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              Part: <span className="text-foreground font-medium">{percent}%</span>
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Revenus: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
+                              {t.statistics.totalRevenue}: <span className="text-primary font-medium">{data.totalRevenue.toFixed(2)} €</span>
                             </p>
                           </div>
                         );
@@ -378,7 +361,7 @@ export const SalesStatistics = () => {
           {/* Best Sellers List */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Meilleures ventes</CardTitle>
+              <CardTitle className="text-lg">{t.statistics.bestSellers}</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[300px]">
@@ -405,7 +388,7 @@ export const SalesStatistics = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{product.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {product.totalSales} vente{product.totalSales > 1 ? 's' : ''}
+                          {product.totalSales} {t.statistics.itemsSold}
                         </p>
                       </div>
                       <div className="text-right">
@@ -424,7 +407,7 @@ export const SalesStatistics = () => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Heart className="h-5 w-5 text-red-500" />
-                  Produits les plus aimés
+                  {t.statistics.mostLiked}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -452,9 +435,9 @@ export const SalesStatistics = () => {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{product.productName}</p>
                         </div>
-                        <div className="text-right flex items-center gap-2">
-                          <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                          <p className="font-bold">{product.likes}</p>
+                        <div className="flex items-center gap-1 text-red-500">
+                          <Heart className="h-4 w-4 fill-current" />
+                          <span className="font-bold">{product.likes}</span>
                         </div>
                       </div>
                     ))}
@@ -467,42 +450,35 @@ export const SalesStatistics = () => {
           {/* Recent Sales */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Ventes récentes</CardTitle>
+              <CardTitle className="text-lg">{t.statistics.recentSales}</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-3">
-                  {sales.slice(0, 20).map((sale) => (
+                  {sales.slice(0, 10).map((sale) => (
                     <div
                       key={sale.id}
-                      className="flex items-center gap-4 p-3 rounded-lg border"
+                      className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
                     >
                       {sale.product?.images?.[0] ? (
                         <img
                           src={sale.product.images[0]}
-                          alt={sale.product.name}
-                          className="w-10 h-10 rounded-lg object-cover"
+                          alt={sale.product?.name || ''}
+                          className="w-12 h-12 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                          <Package className="h-4 w-4 text-muted-foreground" />
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <Package className="h-5 w-5 text-muted-foreground" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{sale.product?.name || 'Produit supprimé'}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(sale.purchased_at).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                        <p className="font-medium truncate">{sale.product?.name || 'Unknown'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {sale.quantity}x {t.statistics.soldFor} {sale.price_paid.toFixed(2)} €
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{sale.price_paid.toFixed(2)} €</p>
-                        <p className="text-xs text-muted-foreground">x{sale.quantity}</p>
+                      <div className="text-right text-sm text-muted-foreground">
+                        {new Date(sale.purchased_at).toLocaleDateString()}
                       </div>
                     </div>
                   ))}

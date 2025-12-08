@@ -8,6 +8,7 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 import { Store, MessageCircle, Calendar, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/hooks/useI18n";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import { SupportDialog } from "@/components/SupportDialog";
@@ -39,6 +40,7 @@ const SellerProfile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const { startConversation } = useMessages();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,7 +54,6 @@ const SellerProfile = () => {
 
   const fetchSellerData = async () => {
     try {
-      // Fetch seller profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -64,7 +65,6 @@ const SellerProfile = () => {
 
       setProfile(profileData);
 
-      // Fetch seller's products
       const { data: productsData, error: productsError } = await supabase
         .from("products")
         .select("*")
@@ -73,7 +73,6 @@ const SellerProfile = () => {
 
       if (productsError) throw productsError;
 
-      // Transform database products to match ProductCard type
       const transformedProducts: Product[] = (productsData || []).map(product => ({
         id: product.id,
         name: product.name,
@@ -100,7 +99,7 @@ const SellerProfile = () => {
           <div className="flex items-center justify-center" style={{minHeight: '60vh'}}>
             <div className="text-center">
               <div className="animate-spin rounded-full border-b-2 border-primary mx-auto" style={{height: '3vw', width: '3vw', minHeight: '48px', minWidth: '48px', marginBottom: '2%'}}></div>
-              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>Chargement...</p>
+              <p className="text-muted-foreground" style={{fontSize: '1vw'}}>{t.common.loading}</p>
             </div>
           </div>
         </div>
@@ -114,17 +113,14 @@ const SellerProfile = () => {
         <BrandNavbar />
         <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
           <div className="text-center">
-            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>Profil vendeur non trouvé</h1>
-            <p className="text-muted-foreground" style={{fontSize: '1vw'}}>
-              Ce vendeur n'existe pas ou n'est pas encore activé.
-            </p>
+            <h1 className="font-bold" style={{fontSize: '2vw', marginBottom: '2%'}}>{t.profile.sellerNotFound}</h1>
           </div>
         </div>
       </div>
     );
   }
 
-  const memberSince = new Date(profile.created_at).toLocaleDateString('fr-FR', {
+  const memberSince = new Date(profile.created_at).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
     month: 'long',
     year: 'numeric'
   });
@@ -142,7 +138,7 @@ const SellerProfile = () => {
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
-                    alt={profile.full_name || "Vendeur"}
+                    alt={profile.full_name || "Seller"}
                     className="rounded-full object-cover border-4 border-background shadow-elegant"
                     style={{width: '6vw', height: '6vw', minWidth: '96px', minHeight: '96px'}}
                   />
@@ -156,11 +152,11 @@ const SellerProfile = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center" style={{gap: '2%', marginBottom: '2%'}}>
                   <h1 className="font-bold" style={{fontSize: '2.5vw'}}>
-                    {profile.full_name || "Vendeur"}
+                    {profile.full_name || "Seller"}
                   </h1>
                   <Badge variant="outline" className="bg-primary/10 text-primary">
                     <Store className="mr-1 h-3 w-3" />
-                    Vendeur vérifié
+                    {t.profile.verifiedSeller}
                   </Badge>
                 </div>
                 
@@ -173,11 +169,11 @@ const SellerProfile = () => {
                 <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>Membre depuis {memberSince}</span>
+                    <span>{t.profile.memberSince} {memberSince}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Store className="h-4 w-4" />
-                    <span>{products.length} produit{products.length !== 1 ? 's' : ''}</span>
+                    <span>{products.length} {t.profile.productCount}</span>
                   </div>
                 </div>
                 
@@ -187,8 +183,8 @@ const SellerProfile = () => {
                     onClick={async () => {
                       if (!user) {
                         toast({
-                          title: "Connexion requise",
-                          description: "Veuillez vous connecter pour contacter le vendeur",
+                          title: t.cart.signInRequired,
+                          description: t.cart.signInMessage,
                           variant: "destructive",
                         });
                         navigate('/auth');
@@ -196,8 +192,7 @@ const SellerProfile = () => {
                       }
                       if (user.id === profile.user_id) {
                         toast({
-                          title: "Action impossible",
-                          description: "Vous ne pouvez pas vous envoyer un message",
+                          title: t.auth.error,
                           variant: "destructive",
                         });
                         return;
@@ -209,7 +204,7 @@ const SellerProfile = () => {
                     }}
                   >
                     <MessageCircle className="mr-2 h-4 w-4" />
-                    Contacter
+                    {t.products.contact}
                   </Button>
                   {user && user.id !== profile.user_id && (
                     <SupportDialog
@@ -219,7 +214,7 @@ const SellerProfile = () => {
                       trigger={
                         <Button variant="ghost" className="text-destructive hover:text-destructive">
                           <Flag className="mr-2 h-4 w-4" />
-                          Signaler
+                          {t.products.report}
                         </Button>
                       }
                     />
@@ -233,11 +228,8 @@ const SellerProfile = () => {
         {/* Products Section */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">
-            Produits de {profile.full_name || "ce vendeur"}
+            {t.products.productBy} {profile.full_name || ""}
           </h2>
-          <p className="text-muted-foreground">
-            Découvrez tous les articles proposés par ce vendeur
-          </p>
         </div>
 
         {products.length > 0 ? (
@@ -250,10 +242,7 @@ const SellerProfile = () => {
           <Card className="bg-background/80 backdrop-blur border rounded-3xl">
             <CardContent className="p-12 text-center">
               <Store className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Aucun produit</h3>
-              <p className="text-muted-foreground">
-                Ce vendeur n'a pas encore publié de produits.
-              </p>
+              <h3 className="text-xl font-semibold mb-2">{t.products.noProducts}</h3>
             </CardContent>
           </Card>
         )}

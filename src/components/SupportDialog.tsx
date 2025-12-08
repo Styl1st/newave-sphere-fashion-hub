@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18n } from '@/hooks/useI18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +41,7 @@ export const SupportDialog = ({
   reportedUserName,
 }: SupportDialogProps) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,8 +56,8 @@ export const SupportDialog = ({
     
     if (!user) {
       toast({
-        title: "Connexion requise",
-        description: "Veuillez vous connecter pour contacter le support",
+        title: t.cart.signInRequired,
+        description: t.cart.signInMessage,
         variant: "destructive",
       });
       return;
@@ -63,8 +65,8 @@ export const SupportDialog = ({
 
     if (!formData.subject.trim() || !formData.message.trim()) {
       toast({
-        title: "Champs requis",
-        description: "Veuillez remplir tous les champs",
+        title: t.auth.error,
+        description: "Please fill in all fields",
         variant: "destructive",
       });
       return;
@@ -86,8 +88,7 @@ export const SupportDialog = ({
       if (error) throw error;
 
       toast({
-        title: "Message envoyé",
-        description: "Notre équipe vous répondra dans les plus brefs délais",
+        title: t.support.ticketSent,
       });
       
       setFormData({ type: defaultType, subject: '', message: '' });
@@ -95,8 +96,8 @@ export const SupportDialog = ({
     } catch (error: any) {
       console.error('Error creating support ticket:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'envoyer votre message",
+        title: t.auth.error,
+        description: t.support.error,
         variant: "destructive",
       });
     } finally {
@@ -106,9 +107,9 @@ export const SupportDialog = ({
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'support': return 'Support général';
-      case 'report_product': return 'Signaler un produit';
-      case 'report_user': return 'Signaler un utilisateur';
+      case 'support': return t.support.generalSupport;
+      case 'report_product': return t.support.reportProduct;
+      case 'report_user': return t.support.reportUser;
       default: return type;
     }
   };
@@ -126,7 +127,7 @@ export const SupportDialog = ({
   const defaultTrigger = (
     <Button variant="outline" size="sm" className="gap-2">
       {getIcon()}
-      {defaultType === 'support' ? 'Support' : 'Signaler'}
+      {defaultType === 'support' ? t.nav.support : t.products.report}
     </Button>
   );
 
@@ -141,12 +142,12 @@ export const SupportDialog = ({
             {defaultType === 'support' ? (
               <>
                 <HelpCircle className="h-5 w-5" />
-                Contacter le Support
+                {t.support.contactSupport}
               </>
             ) : (
               <>
                 <AlertTriangle className="h-5 w-5 text-destructive" />
-                Signaler un problème
+                {t.support.reportIssue}
               </>
             )}
           </DialogTitle>
@@ -155,7 +156,7 @@ export const SupportDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {!reportedProductId && !reportedUserId && (
             <div className="space-y-2">
-              <Label>Type de demande</Label>
+              <Label>{t.support.requestType}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData({ ...formData, type: value as any })}
@@ -164,9 +165,9 @@ export const SupportDialog = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="support">Support général</SelectItem>
-                  <SelectItem value="report_product">Signaler un produit</SelectItem>
-                  <SelectItem value="report_user">Signaler un utilisateur</SelectItem>
+                  <SelectItem value="support">{t.support.generalSupport}</SelectItem>
+                  <SelectItem value="report_product">{t.support.reportProduct}</SelectItem>
+                  <SelectItem value="report_user">{t.support.reportUser}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -174,36 +175,36 @@ export const SupportDialog = ({
 
           {reportedProductName && (
             <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Produit signalé:</p>
+              <p className="text-sm text-muted-foreground">{t.support.reportProduct}:</p>
               <p className="font-medium">{reportedProductName}</p>
             </div>
           )}
 
           {reportedUserName && (
             <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Utilisateur signalé:</p>
+              <p className="text-sm text-muted-foreground">{t.support.reportUser}:</p>
               <p className="font-medium">{reportedUserName}</p>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="subject">Sujet</Label>
+            <Label htmlFor="subject">{t.support.subject}</Label>
             <Input
               id="subject"
               value={formData.subject}
               onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              placeholder="Décrivez brièvement votre demande"
+              placeholder=""
               maxLength={200}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message">{t.support.message}</Label>
             <Textarea
               id="message"
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder="Décrivez votre problème ou votre demande en détail..."
+              placeholder=""
               rows={5}
               maxLength={2000}
             />
@@ -211,10 +212,10 @@ export const SupportDialog = ({
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t.support.cancel}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Envoi...' : 'Envoyer'}
+              {loading ? t.common.loading : t.support.send}
             </Button>
           </div>
         </form>

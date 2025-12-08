@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { usePurchases } from '@/hooks/usePurchases';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18n } from '@/hooks/useI18n';
 import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
@@ -22,6 +23,7 @@ export const CartDrawer = () => {
   const { items, removeFromCart, updateQuantity, clearCart, getItemCount, getTotal } = useCart();
   const { purchaseProduct, purchasing } = usePurchases();
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -33,8 +35,8 @@ export const CartDrawer = () => {
   const handleCheckout = async () => {
     if (!user) {
       toast({
-        title: "Connexion requise",
-        description: "Veuillez vous connecter pour finaliser votre achat",
+        title: t.cart.signInRequired,
+        description: t.cart.signInMessage,
         variant: "destructive",
       });
       navigate('/auth');
@@ -63,13 +65,13 @@ export const CartDrawer = () => {
       clearCart();
       setOpen(false);
       toast({
-        title: "Commande confirmée !",
-        description: `${successCount} article(s) acheté(s) pour ${total.toFixed(2)} €`,
+        title: t.cart.orderConfirmed,
+        description: `${successCount} ${t.cart.itemsPurchased}`,
       });
     } else if (successCount > 0) {
       toast({
-        title: "Commande partielle",
-        description: `${successCount}/${items.length} articles achetés`,
+        title: t.cart.partialOrder,
+        description: t.cart.someItemsFailed,
         variant: "destructive",
       });
     }
@@ -94,14 +96,14 @@ export const CartDrawer = () => {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Panier ({itemCount})
+            {t.cart.title} ({itemCount})
           </SheetTitle>
         </SheetHeader>
 
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
             <Package className="h-16 w-16 mb-4 opacity-50" />
-            <p>Votre panier est vide</p>
+            <p>{t.cart.empty}</p>
           </div>
         ) : (
           <>
@@ -162,11 +164,11 @@ export const CartDrawer = () => {
               <Separator />
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Sous-total</span>
+                  <span className="text-muted-foreground">{t.cart.subtotal}</span>
                   <span>{total.toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
+                  <span>{t.cart.total}</span>
                   <span className="text-primary">{total.toFixed(2)} €</span>
                 </div>
               </div>
@@ -177,17 +179,17 @@ export const CartDrawer = () => {
                   onClick={handleCheckout}
                   disabled={checkingOut || purchasing}
                 >
-                  {checkingOut ? 'Traitement...' : `Payer ${total.toFixed(2)} €`}
+                  {checkingOut ? t.common.loading : `${t.cart.pay} ${total.toFixed(2)} €`}
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full"
                   onClick={() => {
                     clearCart();
-                    toast({ title: "Panier vidé" });
+                    toast({ title: t.cart.clear });
                   }}
                 >
-                  Vider le panier
+                  {t.cart.clear}
                 </Button>
               </SheetFooter>
             </div>

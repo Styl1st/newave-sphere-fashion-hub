@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18n } from '@/hooks/useI18n';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
+  const { t } = useI18n();
   const { toast } = useToast();
 
   // Redirect if already authenticated
@@ -27,7 +29,7 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password) {
       toast({
-        title: "Error",
+        title: t.auth.error,
         description: "Please fill in all fields",
         variant: "destructive"
       });
@@ -39,7 +41,7 @@ const Auth = () => {
     
     if (error) {
       toast({
-        title: "Login error",
+        title: t.auth.error,
         description: error.message || "Unable to sign in",
         variant: "destructive"
       });
@@ -51,7 +53,7 @@ const Auth = () => {
     e.preventDefault();
     if (!email || !password || !fullName) {
       toast({
-        title: "Error",
+        title: t.auth.error,
         description: "Please fill in all fields",
         variant: "destructive"
       });
@@ -64,20 +66,20 @@ const Auth = () => {
     if (error) {
       if (error.message?.includes('already registered')) {
         toast({
-          title: "Account exists",
+          title: t.auth.error,
           description: "An account with this email already exists. Try signing in.",
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Registration error",
+          title: t.auth.error,
           description: error.message || "Unable to create account",
           variant: "destructive"
         });
       }
     } else {
       toast({
-        title: "Account created successfully!",
+        title: t.auth.accountCreated,
         description: "You can now sign in."
       });
     }
@@ -90,22 +92,22 @@ const Auth = () => {
       <main className="mx-auto flex items-center justify-center" style={{maxWidth: '90%', padding: '10% 0'}}>
         <Card className="w-full" style={{maxWidth: '90%'}}>
           <CardHeader className="text-center">
-            <CardTitle style={{fontSize: '2vw'}}>Authentification</CardTitle>
+            <CardTitle style={{fontSize: '2vw'}}>{t.auth.authentication}</CardTitle>
             <CardDescription>
-              Sign in or create your brand account
+              {t.nav.signIn}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Sign up</TabsTrigger>
+                <TabsTrigger value="signin">{t.auth.signIn}</TabsTrigger>
+                <TabsTrigger value="signup">{t.auth.signUp}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin" style={{marginTop: '3%'}}>
                 <form onSubmit={handleSignIn} style={{display: 'flex', flexDirection: 'column', gap: '2%'}}>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email">{t.auth.email}</Label>
                     <Input
                       id="signin-email"
                       type="email"
@@ -116,7 +118,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="signin-password">{t.auth.password}</Label>
                     <Input
                       id="signin-password"
                       type="password"
@@ -127,7 +129,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign in"}
+                    {loading ? t.common.loading : t.auth.signIn}
                   </Button>
                 </form>
               </TabsContent>
@@ -135,7 +137,7 @@ const Auth = () => {
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full name</Label>
+                    <Label htmlFor="signup-name">{t.auth.fullName}</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -146,7 +148,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">{t.auth.email}</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -157,7 +159,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">{t.auth.password}</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -168,7 +170,7 @@ const Auth = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating..." : "Create account"}
+                    {loading ? t.common.loading : t.auth.signUp}
                   </Button>
                 </form>
               </TabsContent>
