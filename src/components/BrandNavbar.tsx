@@ -29,6 +29,9 @@ const BrandNavbar = () => {
       if (onClose) onClose();
     };
 
+    return null;
+  };
+
   return (
     <header className="sticky z-30" style={{top: '1%', padding: '0 4%'}}>
       <nav className="mx-auto grid grid-cols-3 items-center bg-background/90 backdrop-blur border rounded-2xl shadow-elegant" style={{maxWidth: '90%', height: '4vw', minHeight: '60px', padding: '0 3%'}}>
