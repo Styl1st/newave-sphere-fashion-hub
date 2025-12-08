@@ -196,6 +196,7 @@ const Index = () => {
               />
 
               {/* Color Theme Picker - Intuitive Swatches */}
+              {!isExpanding && (
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
@@ -242,6 +243,7 @@ const Index = () => {
                   </div>
                 </PopoverContent>
               </Popover>
+              )}
               
               {/* Animated content with staggered entrance */}
               <div 
