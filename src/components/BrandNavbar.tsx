@@ -114,7 +114,7 @@ const BrandNavbar = () => {
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MessageCircle className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse shadow-lg">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
