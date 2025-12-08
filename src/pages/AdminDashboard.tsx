@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import BrandNavbar from "@/components/BrandNavbar";
 import { ProjectManager } from "@/components/ProjectManager";
 import { ProjectProductManager } from "@/components/ProjectProductManager";
+import { SupportTicketManager } from "@/components/SupportTicketManager";
 import {
   Settings,
   Edit,
@@ -37,6 +38,7 @@ import {
   ShoppingBag,
   FolderOpen,
   Trash2,
+  MessageSquare,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -414,9 +416,10 @@ const AdminDashboard = () => {
 
           {/* Tabs for different admin sections */}
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="purchases">Purchases</TabsTrigger>
+              <TabsTrigger value="support">Support</TabsTrigger>
               <TabsTrigger value="projects">Projects</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
             </TabsList>
@@ -650,6 +653,20 @@ const AdminDashboard = () => {
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="support">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Support & Signalements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SupportTicketManager />
                 </CardContent>
               </Card>
             </TabsContent>

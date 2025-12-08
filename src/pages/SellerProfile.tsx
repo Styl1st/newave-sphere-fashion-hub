@@ -5,11 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductCard, type Product } from "@/components/ProductCard";
-import { Store, MessageCircle, Calendar } from "lucide-react";
+import { Store, MessageCircle, Calendar, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
+import { SupportDialog } from "@/components/SupportDialog";
 
 type Profile = {
   user_id: string;
@@ -210,6 +211,19 @@ const SellerProfile = () => {
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Contacter
                   </Button>
+                  {user && user.id !== profile.user_id && (
+                    <SupportDialog
+                      defaultType="report_user"
+                      reportedUserId={profile.user_id}
+                      reportedUserName={profile.full_name || profile.email}
+                      trigger={
+                        <Button variant="ghost" className="text-destructive hover:text-destructive">
+                          <Flag className="mr-2 h-4 w-4" />
+                          Signaler
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               </div>
             </div>

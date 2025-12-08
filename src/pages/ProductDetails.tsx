@@ -11,13 +11,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Heart, ArrowLeft, Store, MessageSquare, ShoppingCart } from "lucide-react";
+import { Heart, ArrowLeft, Store, MessageSquare, ShoppingCart, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessages } from "@/hooks/useMessages";
 import BrandNavbar from "@/components/BrandNavbar";
 import ProductComments from "@/components/ProductComments";
 import { useCart } from "@/hooks/useCart";
+import { SupportDialog } from "@/components/SupportDialog";
 
 type Product = {
   id: string;
@@ -317,6 +318,23 @@ const ProductDetails = () => {
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Contacter le vendeur
                 </Button>
+                {user && user.id !== product.user_id && (
+                  <SupportDialog
+                    defaultType="report_product"
+                    reportedProductId={product.id}
+                    reportedProductName={product.name}
+                    trigger={
+                      <Button 
+                        size="lg" 
+                        className="w-full" 
+                        variant="ghost"
+                      >
+                        <Flag className="mr-2 h-5 w-5" />
+                        Signaler ce produit
+                      </Button>
+                    }
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
