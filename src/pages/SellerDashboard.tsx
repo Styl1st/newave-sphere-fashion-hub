@@ -2,6 +2,7 @@ import BrandNavbar from "@/components/BrandNavbar";
 import { ProjectManager } from "@/components/ProjectManager";
 import { ProjectProductManager } from "@/components/ProjectProductManager";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { SalesStatistics } from "@/components/SalesStatistics";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
@@ -53,38 +54,37 @@ const SellerDashboard = () => {
     <ProtectedRoute allowedRoles={["seller"]}>
       <div className="min-h-screen bg-animated-fade">
         <BrandNavbar />
-        <div className="mx-auto" style={{maxWidth: '90%', padding: '4% 2%'}}>
-          <div className="mx-auto" style={{maxWidth: '95%'}}>
-            <h1 className="font-bold" style={{fontSize: '2.5vw', marginBottom: '4%'}}>Tableau de bord vendeur</h1>
+        <div className="mx-auto max-w-[95%] sm:max-w-[90%] px-4 sm:px-6 py-6 sm:py-8 lg:py-12">
+          <h1 className="font-bold text-xl sm:text-2xl lg:text-3xl mb-6 sm:mb-8">Tableau de bord vendeur</h1>
 
-            <Tabs defaultValue="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
-              <TabsList
-                className={`grid w-full ${
-                  hasProjects ? "grid-cols-3" : "grid-cols-2"
-                }`}
-              >
-                <TabsTrigger value="projects">Mes Projets</TabsTrigger>
-                {hasProjects && (
-                  <TabsTrigger value="products">Produits</TabsTrigger>
-                )}
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="projects" style={{display: 'flex', flexDirection: 'column', gap: '3%'}}>
-                <ProjectManager onProjectsChange={checkUserProjects} />
-              </TabsContent>
-
+          <Tabs defaultValue="projects" className="space-y-4 sm:space-y-6">
+            <TabsList className={`grid w-full h-auto ${hasProjects ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3"}`}>
+              <TabsTrigger value="projects" className="text-xs sm:text-sm py-2">Mes Projets</TabsTrigger>
               {hasProjects && (
-                <TabsContent value="products" className="space-y-6">
-                  <ProjectProductManager />
-                </TabsContent>
+                <TabsTrigger value="products" className="text-xs sm:text-sm py-2">Produits</TabsTrigger>
               )}
+              <TabsTrigger value="statistics" className="text-xs sm:text-sm py-2">Statistiques</TabsTrigger>
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2">Notifications</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="notifications" className="space-y-6">
-                <NotificationCenter />
+            <TabsContent value="projects" className="space-y-4 sm:space-y-6">
+              <ProjectManager onProjectsChange={checkUserProjects} />
+            </TabsContent>
+
+            {hasProjects && (
+              <TabsContent value="products" className="space-y-4 sm:space-y-6">
+                <ProjectProductManager />
               </TabsContent>
-            </Tabs>
-          </div>
+            )}
+
+            <TabsContent value="statistics" className="space-y-4 sm:space-y-6">
+              <SalesStatistics />
+            </TabsContent>
+
+            <TabsContent value="notifications" className="space-y-4 sm:space-y-6">
+              <NotificationCenter />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </ProtectedRoute>
