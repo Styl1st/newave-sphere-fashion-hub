@@ -335,7 +335,17 @@ const Index = () => {
                       animationFillMode: 'both',
                     }}
                   >
-                    <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
+                    <Button 
+                      variant="hero" 
+                      size="lg" 
+                      className="hover:scale-105 transition-transform"
+                      onClick={() => {
+                        document.getElementById('filters')?.scrollIntoView({ 
+                          behavior: 'smooth',
+                          block: 'start'
+                        });
+                      }}
+                    >
                       Explore drops
                     </Button>
                     {/* Show become seller only if not logged in or if buyer */}
