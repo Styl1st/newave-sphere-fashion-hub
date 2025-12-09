@@ -18,6 +18,7 @@ import ProductDetails from "./pages/ProductDetails";
 import SellerProfile from "./pages/SellerProfile";
 import MyProfile from "./pages/MyProfile";
 import Inbox from "./pages/Inbox";
+import BecomeSellerRequest from "./pages/BecomeSellerRequest";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/seller/:userId" element={<SellerProfile />} />
                 <Route path="/my-profile" element={<MyProfile />} />
                 <Route path="/inbox" element={<Inbox />} />
+                <Route path="/become-seller" element={<BecomeSellerRequest />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

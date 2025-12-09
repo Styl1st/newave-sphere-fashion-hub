@@ -123,6 +123,7 @@ export const translations = {
       adminResponse: "Admin response:",
       close: "Close",
       update: "Update",
+      sellerRequest: "Seller Request",
     },
     // Statistics
     statistics: {
@@ -162,6 +163,22 @@ export const translations = {
       discoverProducts: "Discover unique products from independent creators",
       viewAll: "View all",
       allCategories: "All categories",
+    },
+    // Seller Request
+    sellerRequest: {
+      title: "Become a Seller",
+      description: "Submit your application to become a seller on our platform. Tell us about your brand and your motivations.",
+      brandName: "Brand Name",
+      brandNamePlaceholder: "Your brand or store name",
+      motivation: "Your Motivation",
+      motivationPlaceholder: "Tell us why you want to become a seller. What makes your brand unique? What kind of products do you plan to sell?",
+      motivationHint: "Be specific about your vision and what you bring to our community.",
+      submit: "Submit Application",
+      requestTitle: "Seller Request",
+      requestSent: "Application Submitted!",
+      requestSentMessage: "Your application has been sent. An admin will review it shortly.",
+      fillAllFields: "Please fill in all fields.",
+      pendingRequest: "Pending Request",
     },
   },
   fr: {
@@ -288,6 +305,7 @@ export const translations = {
       adminResponse: "Réponse admin :",
       close: "Fermer",
       update: "Mettre à jour",
+      sellerRequest: "Demande Vendeur",
     },
     // Statistics
     statistics: {
@@ -327,6 +345,22 @@ export const translations = {
       discoverProducts: "Découvrez des produits uniques de créateurs indépendants",
       viewAll: "Voir tout",
       allCategories: "Toutes les catégories",
+    },
+    // Seller Request
+    sellerRequest: {
+      title: "Devenir Vendeur",
+      description: "Soumettez votre candidature pour devenir vendeur sur notre plateforme. Parlez-nous de votre marque et de vos motivations.",
+      brandName: "Nom de la Marque",
+      brandNamePlaceholder: "Le nom de votre marque ou boutique",
+      motivation: "Votre Motivation",
+      motivationPlaceholder: "Dites-nous pourquoi vous souhaitez devenir vendeur. Qu'est-ce qui rend votre marque unique ? Quel type de produits comptez-vous vendre ?",
+      motivationHint: "Soyez précis sur votre vision et ce que vous apportez à notre communauté.",
+      submit: "Soumettre la Candidature",
+      requestTitle: "Demande Vendeur",
+      requestSent: "Candidature Envoyée !",
+      requestSentMessage: "Votre candidature a été envoyée. Un admin l'examinera sous peu.",
+      fillAllFields: "Veuillez remplir tous les champs.",
+      pendingRequest: "Demande en attente",
     },
   },
 } as const;

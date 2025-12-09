@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import { useTheme } from "@/hooks/useTheme";
 import { useI18n } from "@/hooks/useI18n";
+import { useOpenTickets } from "@/hooks/useOpenTickets";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Palette, Sun, Moon, MessageCircle, HelpCircle, Menu, Home, LayoutDashboard, User, Shield, Heart, LogOut, Store, LogIn } from "lucide-react";
@@ -20,6 +21,7 @@ const BrandNavbar = () => {
   const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
   const { t } = useI18n();
   const { getUnreadCount } = useMessages();
+  const { openTicketsCount } = useOpenTickets();
   const unreadCount = user ? getUnreadCount() : 0;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -55,8 +57,15 @@ const BrandNavbar = () => {
               
               {role === 'admin' && (
                 <>
-                  <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.admin}</Button>
+                  <Link to="/admin" className="relative">
+                    <Button variant="ghost" size="sm" className="text-sm font-medium">
+                      {t.nav.admin}
+                      {openTicketsCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                          {openTicketsCount > 9 ? '9+' : openTicketsCount}
+                        </span>
+                      )}
+                    </Button>
                   </Link>
                   <Link to="/my-profile">
                     <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.profile}</Button>
@@ -167,6 +176,12 @@ const BrandNavbar = () => {
                 </Link>
               </>
             )}
+            {/* Become seller button only for buyers */}
+            {user && role === 'buyer' && (
+              <Link to="/become-seller">
+                <Button variant="ghost" size="sm" className="text-sm">{t.nav.becomeSeller}</Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -208,10 +223,15 @@ const BrandNavbar = () => {
                     
                     {role === 'admin' && (
                       <>
-                        <Link to="/admin" onClick={closeMobileMenu}>
+                        <Link to="/admin" onClick={closeMobileMenu} className="relative">
                           <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
                             <Shield className="h-5 w-5" />
                             {t.nav.admin}
+                            {openTicketsCount > 0 && (
+                              <span className="ml-auto px-2 py-0.5 bg-destructive text-destructive-foreground text-xs rounded-full animate-pulse">
+                                {openTicketsCount}
+                              </span>
+                            )}
                           </Button>
                         </Link>
                         <Link to="/my-profile" onClick={closeMobileMenu}>
@@ -224,12 +244,20 @@ const BrandNavbar = () => {
                     )}
                     
                     {role === 'buyer' && (
-                      <Link to="/user" onClick={closeMobileMenu}>
-                        <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
-                          <Heart className="h-5 w-5" />
-                          {t.nav.mySpace}
-                        </Button>
-                      </Link>
+                      <>
+                        <Link to="/user" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <Heart className="h-5 w-5" />
+                            {t.nav.mySpace}
+                          </Button>
+                        </Link>
+                        <Link to="/become-seller" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start gap-3 text-base h-11">
+                            <Store className="h-5 w-5" />
+                            {t.nav.becomeSeller}
+                          </Button>
+                        </Link>
+                      </>
                     )}
 
                     <Link to="/inbox" onClick={closeMobileMenu}>
