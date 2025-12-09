@@ -10,6 +10,8 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Palette, Check } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState, useEffect, useRef } from "react";
@@ -34,7 +36,8 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   
   const { currentTheme, themes, setTheme } = useTheme();
-
+  const { user } = useAuth();
+  const { role } = useRole();
   // Animate expansion when isExpanding changes
   useEffect(() => {
     if (isExpanding && heroRef.current && heroInitialPos) {
@@ -335,11 +338,14 @@ const Index = () => {
                     <Button variant="hero" size="lg" className="hover:scale-105 transition-transform">
                       Explore drops
                     </Button>
-                    <a href="/auth">
-                      <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
-                        Become a seller
-                      </Button>
-                    </a>
+                    {/* Show become seller only if not logged in or if buyer */}
+                    {(!user || role === 'buyer') && (
+                      <a href={user ? "/become-seller" : "/auth"}>
+                        <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
+                          Become a seller
+                        </Button>
+                      </a>
+                    )}
                   </div>
                 </div>
 

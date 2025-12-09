@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useI18n } from '@/hooks/useI18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, Flag, User, Package, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, Flag, User, Package, Clock, CheckCircle, XCircle, Store } from 'lucide-react';
 
 interface SupportTicket {
   id: string;
@@ -39,6 +40,7 @@ interface SupportTicket {
 
 export const SupportTicketManager = () => {
   const { toast } = useToast();
+  const { t } = useI18n();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -103,9 +105,19 @@ export const SupportTicketManager = () => {
 
       if (error) throw error;
 
+      // If approving a seller request, update the user's role
+      if (selectedTicket.type === 'seller_request' && newStatus === 'resolved') {
+        await supabase
+          .from('profiles')
+          .update({ role: 'seller', is_seller: true })
+          .eq('user_id', selectedTicket.user_id);
+      }
+
       toast({
-        title: "Ticket mis à jour",
-        description: "Le ticket a été mis à jour avec succès",
+        title: t.tickets.update,
+        description: selectedTicket.type === 'seller_request' && newStatus === 'resolved' 
+          ? "L'utilisateur a été promu vendeur" 
+          : "Le ticket a été mis à jour avec succès",
       });
 
       setSelectedTicket(null);
@@ -115,7 +127,7 @@ export const SupportTicketManager = () => {
     } catch (error) {
       console.error('Error updating ticket:', error);
       toast({
-        title: "Erreur",
+        title: t.auth.error,
         description: "Impossible de mettre à jour le ticket",
         variant: "destructive",
       });
@@ -125,13 +137,13 @@ export const SupportTicketManager = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
-        return <Badge variant="destructive" className="gap-1"><Clock className="h-3 w-3" />Ouvert</Badge>;
+        return <Badge variant="destructive" className="gap-1"><Clock className="h-3 w-3" />{t.tickets.open}</Badge>;
       case 'in_progress':
-        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 gap-1"><Clock className="h-3 w-3" />En cours</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 gap-1"><Clock className="h-3 w-3" />{t.tickets.inProgress}</Badge>;
       case 'resolved':
-        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30 gap-1"><CheckCircle className="h-3 w-3" />Résolu</Badge>;
+        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30 gap-1"><CheckCircle className="h-3 w-3" />{t.tickets.resolved}</Badge>;
       case 'closed':
-        return <Badge variant="secondary" className="gap-1"><XCircle className="h-3 w-3" />Fermé</Badge>;
+        return <Badge variant="secondary" className="gap-1"><XCircle className="h-3 w-3" />{t.tickets.closed}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -140,11 +152,13 @@ export const SupportTicketManager = () => {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'support':
-        return <Badge variant="outline" className="gap-1"><MessageSquare className="h-3 w-3" />Support</Badge>;
+        return <Badge variant="outline" className="gap-1"><MessageSquare className="h-3 w-3" />{t.tickets.supportType}</Badge>;
       case 'report_product':
-        return <Badge variant="outline" className="gap-1 text-orange-600 border-orange-500/30"><Package className="h-3 w-3" />Produit signalé</Badge>;
+        return <Badge variant="outline" className="gap-1 text-orange-600 border-orange-500/30"><Package className="h-3 w-3" />{t.tickets.reportedProduct}</Badge>;
       case 'report_user':
-        return <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30"><Flag className="h-3 w-3" />Utilisateur signalé</Badge>;
+        return <Badge variant="outline" className="gap-1 text-red-600 border-red-500/30"><Flag className="h-3 w-3" />{t.tickets.reportedUser}</Badge>;
+      case 'seller_request':
+        return <Badge variant="outline" className="gap-1 text-purple-600 border-purple-500/30"><Store className="h-3 w-3" />{t.tickets.sellerRequest}</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
