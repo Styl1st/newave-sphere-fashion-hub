@@ -12,18 +12,19 @@ import { Palette, Check } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
+import { useI18n } from "@/hooks/useI18n";
 
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState, useEffect, useRef } from "react";
 
-const CATEGORIES = ["Chaussures", "Sweats", "Vestes", "Pantalons", "T-shirts", "Sous-vêtements", "Accessoires", "Robes", "Jupes"] as const;
+const CATEGORY_KEYS = ["shoes", "sweaters", "jackets", "pants", "tshirts", "underwear", "accessories", "dresses", "skirts"] as const;
 
-type Category = typeof CATEGORIES[number];
+type CategoryKey = typeof CATEGORY_KEYS[number];
 
 type Sort = "relevance" | "price_asc" | "price_desc";
 
 const Index = () => {
-  const [selected, setSelected] = useState<Set<Category>>(new Set());
+  const [selected, setSelected] = useState<Set<CategoryKey>>(new Set());
   const [maxPrice, setMaxPrice] = useState<number>(300);
   const [sort, setSort] = useState<Sort>("relevance");
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,6 +39,20 @@ const Index = () => {
   const { currentTheme, themes, setTheme } = useTheme();
   const { user } = useAuth();
   const { role } = useRole();
+  const { t } = useI18n();
+
+  // Map category keys to translated names for filtering
+  const categoryKeyToDb: Record<CategoryKey, string> = {
+    shoes: "Chaussures",
+    sweaters: "Sweats",
+    jackets: "Vestes",
+    pants: "Pantalons",
+    tshirts: "T-shirts",
+    underwear: "Sous-vêtements",
+    accessories: "Accessoires",
+    dresses: "Robes",
+    skirts: "Jupes",
+  };
   // Animate expansion when isExpanding changes
   useEffect(() => {
     if (isExpanding && heroRef.current && heroInitialPos) {
@@ -157,14 +172,16 @@ const Index = () => {
   const filtered = useMemo(() => {
     let list = products.filter(p => p.price <= maxPrice);
     if (selected.size > 0) {
-      list = list.filter(p => selected.has(p.category as Category));
+      // Convert selected category keys to DB category names for filtering
+      const selectedDbCategories = Array.from(selected).map(key => categoryKeyToDb[key]);
+      list = list.filter(p => selectedDbCategories.includes(p.category));
     }
     if (sort === "price_asc") list = [...list].sort((a,b) => a.price - b.price);
     if (sort === "price_desc") list = [...list].sort((a,b) => b.price - a.price);
     return list;
-  }, [products, selected, maxPrice, sort]);
+  }, [products, selected, maxPrice, sort, categoryKeyToDb]);
 
-  const toggleCategory = (c: Category) => {
+  const toggleCategory = (c: CategoryKey) => {
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(c)) next.delete(c); else next.add(c);
@@ -308,7 +325,7 @@ const Index = () => {
                     alt="logo" 
                     className="flex items-center invert h-8 sm:h-10 md:h-12 lg:h-16"
                   />
-                  <span>Independent Fashion Marketplace</span>
+                  <span>{t.home.heroTitle}</span>
                 </h1>
                 
                 <div 
@@ -326,7 +343,7 @@ const Index = () => {
                       animationFillMode: 'both',
                     }}
                   >
-                    Discover streetwear, denim, grunge, goth and more from emerging brands. Curated pieces, community-first.
+                    {t.home.heroSubtitle}
                   </p>
                   <div 
                     className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
@@ -347,13 +364,13 @@ const Index = () => {
                         });
                       }}
                     >
-                      Explore drops
+                      {t.home.exploreDrops}
                     </Button>
                     {/* Show become seller only if not logged in or if buyer */}
                     {(!user || role === 'buyer') && (
                       <a href={user ? "/become-seller" : "/auth"}>
                         <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
-                          Become a seller
+                          {t.home.becomeSeller}
                         </Button>
                       </a>
                     )}
@@ -371,16 +388,16 @@ const Index = () => {
                   <div className="text-white max-w-4xl mx-auto mt-8">
                     <div className="space-y-6 text-lg sm:text-xl leading-relaxed">
                       <p>
-                        <strong>Newave</strong> is an independent fashion marketplace dedicated to connecting emerging brands with a community that values authenticity, creativity, and self-expression.
+                        {t.home.aboutText1}
                       </p>
                       <p>
-                        We curate a diverse range of styles—from streetwear and denim to grunge, goth, and everything in between. Our platform empowers independent designers and sellers to showcase their unique pieces directly to fashion enthusiasts who appreciate quality and individuality.
+                        {t.home.aboutText2}
                       </p>
                       <p>
-                        At Newave, we believe fashion is more than just clothing—it's a form of art, a statement, and a way to build community. We're committed to fostering a space where creativity thrives and where every piece tells a story.
+                        {t.home.aboutText3}
                       </p>
                       <p className="text-center pt-6 text-white/80">
-                        Join us in redefining fashion, one drop at a time.
+                        {t.home.aboutText4}
                       </p>
                     </div>
                   </div>
@@ -409,9 +426,9 @@ const Index = () => {
             <div className="flex flex-col gap-4 sm:gap-6">
               {/* Categories - Pill Style */}
               <div>
-                <span className="font-medium text-foreground text-sm sm:text-base">Categories</span>
+                <span className="font-medium text-foreground text-sm sm:text-base">{t.filters.categories}</span>
                 <div className="flex flex-wrap gap-2 sm:gap-3 mt-3">
-                  {CATEGORIES.map((c) => (
+                  {CATEGORY_KEYS.map((c) => (
                     <button
                       key={c}
                       onClick={() => toggleCategory(c)}
@@ -436,7 +453,7 @@ const Index = () => {
                           : `0 0 8px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`;
                       }}
                     >
-                      {c}
+                      {t.categories[c]}
                     </button>
                   ))}
                 </div>
@@ -445,7 +462,7 @@ const Index = () => {
               {/* Price and Sort */}
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 border-t border-border pt-4 sm:pt-6">
                 <div className="flex-1">
-                  <Label className="font-medium text-sm sm:text-base">Max price: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
+                  <Label className="font-medium text-sm sm:text-base">{t.filters.maxPrice}: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
                   <Slider 
                     value={[maxPrice]} 
                     min={20} 
@@ -456,15 +473,15 @@ const Index = () => {
                   />
                 </div>
                 <div className="w-full sm:w-48 lg:w-56">
-                  <Label className="font-medium text-sm sm:text-base">Sort by</Label>
+                  <Label className="font-medium text-sm sm:text-base">{t.filters.sortBy}</Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
                     <SelectTrigger className="bg-background border-border mt-2">
-                      <SelectValue placeholder="Sort by" />
+                      <SelectValue placeholder={t.filters.sortBy} />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border shadow-lg z-50">
-                      <SelectItem value="relevance">Relevance</SelectItem>
-                      <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                      <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                      <SelectItem value="relevance">{t.filters.relevance}</SelectItem>
+                      <SelectItem value="price_asc">{t.filters.priceLowHigh}</SelectItem>
+                      <SelectItem value="price_desc">{t.filters.priceHighLow}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -478,14 +495,14 @@ const Index = () => {
           <div className="mx-auto max-w-[95%] sm:max-w-[90%]">
             {loading ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-sm sm:text-base">Chargement des produits...</p>
+                <p className="text-muted-foreground text-sm sm:text-base">{t.home.loadingProducts}</p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-sm sm:text-base">
                   {products.length === 0 
-                    ? "No products available at the moment." 
-                    : "No products match your search criteria."
+                    ? t.home.noProductsAvailable
+                    : t.home.noProductsMatch
                   }
                 </p>
               </div>
