@@ -339,7 +339,8 @@ const Index = () => {
                       variant="hero" 
                       size="lg" 
                       className="hover:scale-105 transition-transform"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         document.getElementById('filters')?.scrollIntoView({ 
                           behavior: 'smooth',
                           block: 'start'
