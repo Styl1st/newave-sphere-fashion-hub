@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { commentSchema, validateForm } from "@/lib/validations";
 
 type Comment = {
   id: string;
@@ -32,6 +33,8 @@ interface ProductCommentsProps {
   productId: string;
 }
 
+const MAX_COMMENT_LENGTH = 1000;
+
 const ProductComments = ({ productId }: ProductCommentsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,6 +44,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchComments();
@@ -89,6 +93,14 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
   const handleSubmitComment = async () => {
     if (!user || !newComment.trim()) return;
 
+    // Validate the comment
+    const validation = validateForm(commentSchema, { content: newComment });
+    if (!validation.success) {
+      setValidationError('errors' in validation ? (validation.errors.content || "Invalid comment") : "Invalid comment");
+      return;
+    }
+    setValidationError(null);
+
     setSubmitting(true);
 
     try {
@@ -97,7 +109,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
         .insert({
           user_id: user.id,
           product_id: productId,
-          content: newComment.trim(),
+          content: validation.data.content,
         });
 
       if (error) throw error;
@@ -124,12 +136,24 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
   const handleEditComment = async () => {
     if (!editingComment || !editContent.trim()) return;
 
+    // Validate the edited comment
+    const validation = validateForm(commentSchema, { content: editContent });
+    if (!validation.success) {
+      const errorMsg = 'errors' in validation ? (validation.errors.content || "Invalid comment") : "Invalid comment";
+      toast({
+        title: "Error",
+        description: errorMsg,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const { error } = await supabase
         .from("comments")
-        .update({ content: editContent.trim() })
+        .update({ content: validation.data.content })
         .eq("id", editingComment.id);
 
       if (error) throw error;
@@ -153,6 +177,7 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
       setSubmitting(false);
     }
   };
+
 
   const handleDeleteComment = async (commentId: string) => {
     try {
@@ -202,13 +227,26 @@ const ProductComments = ({ productId }: ProductCommentsProps) => {
         {/* Add Comment Form (only if user is logged in) */}
         {user && (
           <div className="space-y-3">
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Share your thoughts on this item..."
-              rows={3}
-              disabled={submitting}
-            />
+            <div className="relative">
+              <Textarea
+                value={newComment}
+                onChange={(e) => {
+                  const value = e.target.value.slice(0, MAX_COMMENT_LENGTH);
+                  setNewComment(value);
+                  if (validationError) setValidationError(null);
+                }}
+                placeholder="Share your thoughts on this item..."
+                rows={3}
+                disabled={submitting}
+                maxLength={MAX_COMMENT_LENGTH}
+              />
+              <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                {newComment.length}/{MAX_COMMENT_LENGTH}
+              </div>
+            </div>
+            {validationError && (
+              <p className="text-sm text-destructive">{validationError}</p>
+            )}
             <Button
               onClick={handleSubmitComment}
               disabled={submitting || !newComment.trim()}
