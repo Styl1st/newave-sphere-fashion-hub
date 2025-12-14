@@ -417,11 +417,43 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_update_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      approve_seller_request: { Args: { ticket_id: string }; Returns: boolean }
       delete_user_and_data: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -429,6 +461,17 @@ export type Database = {
       get_user_role: {
         Args: { user_uuid: string }
         Returns: Database["public"]["Enums"]["user_role"]
+      }
+      get_user_role_secure: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       invite_user_to_project: {
         Args: {
