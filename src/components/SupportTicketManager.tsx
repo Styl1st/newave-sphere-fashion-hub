@@ -94,41 +94,54 @@ export const SupportTicketManager = () => {
     if (!selectedTicket) return;
 
     try {
-      const updates: any = {};
-      if (newStatus) updates.status = newStatus;
-      if (response.trim()) updates.admin_response = response;
-
-      const { error } = await supabase
-        .from('support_tickets')
-        .update(updates)
-        .eq('id', selectedTicket.id);
-
-      if (error) throw error;
-
-      // If approving a seller request, update the user's role
+      // If approving a seller request, use the secure approve_seller_request function
       if (selectedTicket.type === 'seller_request' && newStatus === 'resolved') {
-        await supabase
-          .from('profiles')
-          .update({ role: 'seller', is_seller: true })
-          .eq('user_id', selectedTicket.user_id);
-      }
+        const { error: approveError } = await supabase.rpc('approve_seller_request', {
+          ticket_id: selectedTicket.id
+        });
 
-      toast({
-        title: t.tickets.update,
-        description: selectedTicket.type === 'seller_request' && newStatus === 'resolved' 
-          ? "L'utilisateur a été promu vendeur" 
-          : "Le ticket a été mis à jour avec succès",
-      });
+        if (approveError) throw approveError;
+
+        // Also update admin response if provided
+        if (response.trim()) {
+          await supabase
+            .from('support_tickets')
+            .update({ admin_response: response })
+            .eq('id', selectedTicket.id);
+        }
+
+        toast({
+          title: t.tickets.update,
+          description: "L'utilisateur a été promu vendeur",
+        });
+      } else {
+        // For non-seller-request tickets, update normally
+        const updates: any = {};
+        if (newStatus) updates.status = newStatus;
+        if (response.trim()) updates.admin_response = response;
+
+        const { error } = await supabase
+          .from('support_tickets')
+          .update(updates)
+          .eq('id', selectedTicket.id);
+
+        if (error) throw error;
+
+        toast({
+          title: t.tickets.update,
+          description: "Le ticket a été mis à jour avec succès",
+        });
+      }
 
       setSelectedTicket(null);
       setResponse('');
       setNewStatus('');
       fetchTickets();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating ticket:', error);
       toast({
         title: t.auth.error,
-        description: "Impossible de mettre à jour le ticket",
+        description: error.message || "Impossible de mettre à jour le ticket",
         variant: "destructive",
       });
     }

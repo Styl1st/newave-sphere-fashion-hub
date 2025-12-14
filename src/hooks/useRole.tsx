@@ -18,14 +18,25 @@ export const useRole = () => {
       }
 
       try {
+        // Use the secure user_roles table instead of profiles
         const { data, error } = await supabase
-          .from('profiles')
+          .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
-        setRole(data?.role || 'buyer');
+        if (error) {
+          console.error('Error fetching role from user_roles:', error);
+          // Fallback to profiles table for backwards compatibility
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+          setRole(profileData?.role || 'buyer');
+        } else {
+          setRole(data?.role || 'buyer');
+        }
       } catch (error) {
         console.error('Error fetching role:', error);
         setRole('buyer');

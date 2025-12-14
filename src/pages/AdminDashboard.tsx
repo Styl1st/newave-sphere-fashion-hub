@@ -232,17 +232,15 @@ const AdminDashboard = () => {
   };
 
   const handleRoleChange = async (
-    profileId: string,
+    userId: string,
     newRole: "admin" | "seller" | "buyer"
   ) => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          role: newRole,
-          is_seller: newRole === "seller",
-        })
-        .eq("id", profileId);
+      // Use the secure admin_update_user_role function instead of direct table update
+      const { error } = await supabase.rpc('admin_update_user_role', {
+        target_user_id: userId,
+        new_role: newRole
+      });
 
       if (error) throw error;
 
@@ -252,11 +250,11 @@ const AdminDashboard = () => {
       });
 
       fetchProfiles();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "Unable to update the role.",
+        description: error.message || "Unable to update the role.",
         variant: "destructive",
       });
     }
@@ -544,7 +542,7 @@ const AdminDashboard = () => {
                               value={profile.role}
                               onChange={(e) =>
                                 handleRoleChange(
-                                  profile.id,
+                                  profile.user_id,
                                   e.target.value as any
                                 )
                               }
