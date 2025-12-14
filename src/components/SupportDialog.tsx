@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { HelpCircle, Flag, AlertTriangle } from 'lucide-react';
+import { supportTicketSchema, validateForm } from '@/lib/validations';
 
 interface SupportDialogProps {
   trigger?: React.ReactNode;
@@ -31,6 +32,9 @@ interface SupportDialogProps {
   reportedUserId?: string;
   reportedUserName?: string;
 }
+
+const MAX_SUBJECT_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 2000;
 
 export const SupportDialog = ({
   trigger,
@@ -45,6 +49,7 @@ export const SupportDialog = ({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     type: defaultType,
     subject: '',
@@ -63,14 +68,15 @@ export const SupportDialog = ({
       return;
     }
 
-    if (!formData.subject.trim() || !formData.message.trim()) {
-      toast({
-        title: t.auth.error,
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+    // Validate form data
+    const validation = validateForm(supportTicketSchema, formData);
+    if (!validation.success) {
+      if ('errors' in validation) {
+        setErrors(validation.errors);
+      }
       return;
     }
+    setErrors({});
 
     setLoading(true);
     try {
@@ -78,9 +84,9 @@ export const SupportDialog = ({
         .from('support_tickets')
         .insert({
           user_id: user.id,
-          type: formData.type,
-          subject: formData.subject,
-          message: formData.message,
+          type: validation.data.type,
+          subject: validation.data.subject,
+          message: validation.data.message,
           reported_product_id: reportedProductId || null,
           reported_user_id: reportedUserId || null,
         });
@@ -192,10 +198,20 @@ export const SupportDialog = ({
             <Input
               id="subject"
               value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value.slice(0, MAX_SUBJECT_LENGTH);
+                setFormData({ ...formData, subject: value });
+                if (errors.subject) setErrors({ ...errors, subject: '' });
+              }}
               placeholder=""
-              maxLength={200}
+              maxLength={MAX_SUBJECT_LENGTH}
             />
+            {errors.subject && (
+              <p className="text-sm text-destructive">{errors.subject}</p>
+            )}
+            <p className="text-xs text-muted-foreground text-right">
+              {formData.subject.length}/{MAX_SUBJECT_LENGTH}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -203,11 +219,21 @@ export const SupportDialog = ({
             <Textarea
               id="message"
               value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value.slice(0, MAX_MESSAGE_LENGTH);
+                setFormData({ ...formData, message: value });
+                if (errors.message) setErrors({ ...errors, message: '' });
+              }}
               placeholder=""
               rows={5}
-              maxLength={2000}
+              maxLength={MAX_MESSAGE_LENGTH}
             />
+            {errors.message && (
+              <p className="text-sm text-destructive">{errors.message}</p>
+            )}
+            <p className="text-xs text-muted-foreground text-right">
+              {formData.message.length}/{MAX_MESSAGE_LENGTH}
+            </p>
           </div>
 
           <div className="flex justify-end gap-2">

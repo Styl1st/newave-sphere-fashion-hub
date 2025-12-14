@@ -8,6 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User, Upload, Camera } from "lucide-react";
+import { profileSchema, validateForm } from "@/lib/validations";
+
+const MAX_NAME_LENGTH = 100;
+const MAX_BIO_LENGTH = 500;
 
 type Profile = {
   user_id: string;
@@ -151,11 +155,23 @@ export const SellerProfileManager = () => {
     e.preventDefault();
     if (!user) return;
 
+    // Validate form data
+    const validation = validateForm(profileSchema, formData);
+    if (!validation.success) {
+      const errors = 'errors' in validation ? validation.errors : {};
+      toast({
+        title: "Erreur de validation",
+        description: Object.values(errors)[0] || "Veuillez vérifier les champs",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await updateProfile({
-        full_name: formData.full_name,
-        bio: formData.bio,
+        full_name: validation.data.full_name,
+        bio: validation.data.bio,
       });
 
       toast({
@@ -229,11 +245,16 @@ export const SellerProfileManager = () => {
             <Input
               id="full_name"
               value={formData.full_name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, full_name: e.target.value }))
-              }
+              onChange={(e) => {
+                const value = e.target.value.slice(0, MAX_NAME_LENGTH);
+                setFormData((prev) => ({ ...prev, full_name: value }));
+              }}
               placeholder="Votre nom de marque ou nom complet"
+              maxLength={MAX_NAME_LENGTH}
             />
+            <p className="text-xs text-muted-foreground text-right mt-1">
+              {formData.full_name.length}/{MAX_NAME_LENGTH}
+            </p>
           </div>
 
           <div>
@@ -241,12 +262,17 @@ export const SellerProfileManager = () => {
             <Textarea
               id="bio"
               value={formData.bio}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, bio: e.target.value }))
-              }
+              onChange={(e) => {
+                const value = e.target.value.slice(0, MAX_BIO_LENGTH);
+                setFormData((prev) => ({ ...prev, bio: value }));
+              }}
               placeholder="Décrivez votre marque, votre style, votre histoire..."
               rows={4}
+              maxLength={MAX_BIO_LENGTH}
             />
+            <p className="text-xs text-muted-foreground text-right mt-1">
+              {formData.bio.length}/{MAX_BIO_LENGTH}
+            </p>
           </div>
 
           <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-xl">
