@@ -58,11 +58,14 @@ const Index = () => {
     if (isExpanding && heroRef.current && heroInitialPos) {
       // Start from captured position, then expand to fullscreen
       heroRef.current.style.position = 'fixed';
+      heroRef.current.style.zIndex = '50';
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
       heroRef.current.style.height = `${heroInitialPos.height}px`;
+      heroRef.current.style.transition = 'all 0.8s cubic-bezier(0.32, 0.72, 0, 1)';
       
+      // Small delay then animate to fullscreen
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (heroRef.current) {
@@ -74,8 +77,9 @@ const Index = () => {
           }
         });
       });
-    } else if (!isExpanding && heroRef.current && heroInitialPos) {
+    } else if (!isExpanding && !isClosing && heroRef.current && heroInitialPos) {
       // Collapse back to initial position
+      heroRef.current.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
@@ -86,21 +90,24 @@ const Index = () => {
       setTimeout(() => {
         if (heroRef.current) {
           heroRef.current.style.position = '';
+          heroRef.current.style.zIndex = '';
           heroRef.current.style.top = '';
           heroRef.current.style.left = '';
           heroRef.current.style.width = '';
           heroRef.current.style.height = '';
           heroRef.current.style.borderRadius = '';
+          heroRef.current.style.transition = '';
         }
         setHeroInitialPos(null);
-      }, 1500);
+      }, 700);
     }
   }, [isExpanding, heroInitialPos, isClosing]);
 
   // Handle closing animation
   useEffect(() => {
     if (isClosing && heroRef.current && heroInitialPos) {
-      // Animate back to original position
+      // Smooth closing transition
+      heroRef.current.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
@@ -109,10 +116,20 @@ const Index = () => {
       
       // Wait for transition to complete before resetting
       const timeout = setTimeout(() => {
+        if (heroRef.current) {
+          heroRef.current.style.position = '';
+          heroRef.current.style.zIndex = '';
+          heroRef.current.style.top = '';
+          heroRef.current.style.left = '';
+          heroRef.current.style.width = '';
+          heroRef.current.style.height = '';
+          heroRef.current.style.borderRadius = '';
+          heroRef.current.style.transition = '';
+        }
         setIsExpanding(false);
         setIsClosing(false);
         setHeroInitialPos(null);
-      }, 800);
+      }, 650);
       
       return () => clearTimeout(timeout);
     }
@@ -191,16 +208,17 @@ const Index = () => {
 
   // Generate hero style based on current theme - matches background with slight contrast
   const heroStyle = {
-    padding: isExpanding ? '15%' : '12%',
+    padding: isExpanding ? '8% 15%' : '12%',
     background: `linear-gradient(135deg, 
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 0%, 
       hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / ${isExpanding ? '1' : '0.8'}) 50%,
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 100%)`,
-    boxShadow: `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
+    boxShadow: isExpanding 
+      ? 'none' 
+      : `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
                 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
                 inset 0 0 60px hsl(0 0% 100% / 0.18)`,
     backdropFilter: 'blur(12px)',
-    transition: 'all 1.5s cubic-bezier(0.4, 0.0, 0.2, 1)',
   };
 
   const handleHeroClick = () => {
@@ -331,9 +349,11 @@ const Index = () => {
                 <div 
                   style={{
                     opacity: isExpanding ? 0 : 1,
-                    maxHeight: isExpanding ? 0 : '500px',
+                    maxHeight: isExpanding ? '0' : '500px',
                     overflow: 'hidden',
-                    transition: 'opacity 0.6s ease, max-height 0.6s ease',
+                    transition: isExpanding 
+                      ? 'opacity 0.3s ease-out, max-height 0.4s ease-out' 
+                      : 'opacity 0.4s ease-in 0.2s, max-height 0.5s ease-in 0.1s',
                   }}
                 >
                   <p 
@@ -381,8 +401,10 @@ const Index = () => {
                   style={{
                     opacity: isExpanding ? 1 : 0,
                     maxHeight: isExpanding ? '1000px' : '0',
-                    overflow: 'hidden',
-                    transition: 'opacity 0.8s ease 0.4s, max-height 0.8s ease 0.4s',
+                    overflow: isExpanding ? 'auto' : 'hidden',
+                    transition: isExpanding 
+                      ? 'opacity 0.5s ease-in 0.3s, max-height 0.6s ease-in 0.2s' 
+                      : 'opacity 0.2s ease-out, max-height 0.3s ease-out',
                   }}
                 >
                   <div className="text-white max-w-4xl mx-auto mt-8">
