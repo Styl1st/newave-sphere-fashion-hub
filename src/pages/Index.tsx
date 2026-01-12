@@ -55,98 +55,79 @@ const Index = () => {
   };
   // Animate expansion when isExpanding changes
   useEffect(() => {
-    if (isExpanding && heroRef.current && heroInitialPos) {
-      // Start from captured position, then expand to fullscreen
-      heroRef.current.style.position = 'fixed';
-      heroRef.current.style.zIndex = '50';
-      heroRef.current.style.top = `${heroInitialPos.top}px`;
-      heroRef.current.style.left = `${heroInitialPos.left}px`;
-      heroRef.current.style.width = `${heroInitialPos.width}px`;
-      heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
-      
-      // Small delay then animate to fullscreen
+    if (!isExpanding || !heroRef.current || !heroInitialPos) return;
+
+    const hero = heroRef.current;
+
+    // Start from captured position, then expand to fullscreen
+    hero.style.position = "fixed";
+    hero.style.zIndex = "50";
+    hero.style.top = `${heroInitialPos.top}px`;
+    hero.style.left = `${heroInitialPos.left}px`;
+    hero.style.width = `${heroInitialPos.width}px`;
+    hero.style.height = `${heroInitialPos.height}px`;
+    hero.style.transition = "all 2.5s cubic-bezier(0.32, 0.72, 0, 1)";
+
+    // Small delay then animate to fullscreen
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (heroRef.current) {
-            heroRef.current.style.top = '0';
-            heroRef.current.style.left = '0';
-            heroRef.current.style.width = '100vw';
-            heroRef.current.style.height = '100vh';
-            heroRef.current.style.borderRadius = '0';
-          }
-        });
+        if (!heroRef.current) return;
+        heroRef.current.style.top = "0";
+        heroRef.current.style.left = "0";
+        heroRef.current.style.width = "100vw";
+        heroRef.current.style.height = "100vh";
+        heroRef.current.style.borderRadius = "0";
       });
-    } else if (!isExpanding && !isClosing && heroRef.current && heroInitialPos) {
-      // Collapse back to initial position
-      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
-      heroRef.current.style.top = `${heroInitialPos.top}px`;
-      heroRef.current.style.left = `${heroInitialPos.left}px`;
-      heroRef.current.style.width = `${heroInitialPos.width}px`;
-      heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.borderRadius = '1.5rem';
-      
-      // After collapse animation, switch back to relative
-      setTimeout(() => {
-        if (heroRef.current) {
-          heroRef.current.style.position = '';
-          heroRef.current.style.zIndex = '';
-          heroRef.current.style.top = '';
-          heroRef.current.style.left = '';
-          heroRef.current.style.width = '';
-          heroRef.current.style.height = '';
-          heroRef.current.style.borderRadius = '';
-          heroRef.current.style.transition = '';
-        }
-        setHeroInitialPos(null);
-      }, 1500);
-    }
-  }, [isExpanding, heroInitialPos, isClosing]);
+    });
+  }, [isExpanding, heroInitialPos]);
 
   // Handle closing animation
   useEffect(() => {
-    if (isClosing && heroRef.current && heroInitialPos) {
-      const hero = heroRef.current;
-      
-      // Smooth closing transition
-      hero.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
-      hero.style.top = `${heroInitialPos.top}px`;
-      hero.style.left = `${heroInitialPos.left}px`;
-      hero.style.width = `${heroInitialPos.width}px`;
-      hero.style.height = `${heroInitialPos.height}px`;
-      hero.style.borderRadius = '1.5rem';
-      
-      // Use transitionend event for precise timing
-      const handleTransitionEnd = (e: TransitionEvent) => {
-        if (e.propertyName === 'width' || e.propertyName === 'height') {
-          hero.removeEventListener('transitionend', handleTransitionEnd);
-          
-          // Reset styles without transition to avoid micro-adjustment
-          hero.style.transition = 'none';
-          hero.style.position = '';
-          hero.style.zIndex = '';
-          hero.style.top = '';
-          hero.style.left = '';
-          hero.style.width = '';
-          hero.style.height = '';
-          hero.style.borderRadius = '';
-          
-          // Force reflow then clear transition
-          hero.offsetHeight;
-          hero.style.transition = '';
-          
-          setIsExpanding(false);
-          setIsClosing(false);
-          setHeroInitialPos(null);
-        }
-      };
-      
-      hero.addEventListener('transitionend', handleTransitionEnd);
-      
-      return () => {
-        hero.removeEventListener('transitionend', handleTransitionEnd);
-      };
-    }
+    if (!isClosing || !heroRef.current || !heroInitialPos) return;
+
+    const hero = heroRef.current;
+
+    // Clear any hover-driven inline styles before animating back
+    hero.style.transform = "";
+    hero.style.boxShadow = "";
+
+    hero.style.transition = "all 2.5s cubic-bezier(0.32, 0.72, 0, 1)";
+    hero.style.top = `${heroInitialPos.top}px`;
+    hero.style.left = `${heroInitialPos.left}px`;
+    hero.style.width = `${heroInitialPos.width}px`;
+    hero.style.height = `${heroInitialPos.height}px`;
+    hero.style.borderRadius = "1.5rem";
+
+    // Use transitionend event for precise timing (avoid early reset = visible "saut")
+    const handleTransitionEnd = (e: TransitionEvent) => {
+      if (e.target !== hero) return;
+      if (e.propertyName !== "height") return;
+
+      hero.removeEventListener("transitionend", handleTransitionEnd);
+
+      // Reset styles without transition to avoid micro-adjustment
+      hero.style.transition = "none";
+      hero.style.position = "";
+      hero.style.zIndex = "";
+      hero.style.top = "";
+      hero.style.left = "";
+      hero.style.width = "";
+      hero.style.height = "";
+      hero.style.borderRadius = "";
+
+      // Force reflow then clear transition
+      hero.offsetHeight;
+      hero.style.transition = "";
+
+      setIsClosing(false);
+      setHeroInitialPos(null);
+    };
+
+    hero.addEventListener("transitionend", handleTransitionEnd);
+
+    return () => {
+      hero.removeEventListener("transitionend", handleTransitionEnd);
+    };
   }, [isClosing, heroInitialPos]);
 
   // Parallax scroll effect
