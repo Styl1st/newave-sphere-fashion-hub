@@ -106,32 +106,46 @@ const Index = () => {
   // Handle closing animation
   useEffect(() => {
     if (isClosing && heroRef.current && heroInitialPos) {
+      const hero = heroRef.current;
+      
       // Smooth closing transition
-      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
-      heroRef.current.style.top = `${heroInitialPos.top}px`;
-      heroRef.current.style.left = `${heroInitialPos.left}px`;
-      heroRef.current.style.width = `${heroInitialPos.width}px`;
-      heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.borderRadius = '1.5rem';
+      hero.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
+      hero.style.top = `${heroInitialPos.top}px`;
+      hero.style.left = `${heroInitialPos.left}px`;
+      hero.style.width = `${heroInitialPos.width}px`;
+      hero.style.height = `${heroInitialPos.height}px`;
+      hero.style.borderRadius = '1.5rem';
       
-      // Wait for transition to complete before resetting
-      const timeout = setTimeout(() => {
-        if (heroRef.current) {
-          heroRef.current.style.position = '';
-          heroRef.current.style.zIndex = '';
-          heroRef.current.style.top = '';
-          heroRef.current.style.left = '';
-          heroRef.current.style.width = '';
-          heroRef.current.style.height = '';
-          heroRef.current.style.borderRadius = '';
-          heroRef.current.style.transition = '';
+      // Use transitionend event for precise timing
+      const handleTransitionEnd = (e: TransitionEvent) => {
+        if (e.propertyName === 'width' || e.propertyName === 'height') {
+          hero.removeEventListener('transitionend', handleTransitionEnd);
+          
+          // Reset styles without transition to avoid micro-adjustment
+          hero.style.transition = 'none';
+          hero.style.position = '';
+          hero.style.zIndex = '';
+          hero.style.top = '';
+          hero.style.left = '';
+          hero.style.width = '';
+          hero.style.height = '';
+          hero.style.borderRadius = '';
+          
+          // Force reflow then clear transition
+          hero.offsetHeight;
+          hero.style.transition = '';
+          
+          setIsExpanding(false);
+          setIsClosing(false);
+          setHeroInitialPos(null);
         }
-        setIsExpanding(false);
-        setIsClosing(false);
-        setHeroInitialPos(null);
-      }, 1500);
+      };
       
-      return () => clearTimeout(timeout);
+      hero.addEventListener('transitionend', handleTransitionEnd);
+      
+      return () => {
+        hero.removeEventListener('transitionend', handleTransitionEnd);
+      };
     }
   }, [isClosing, heroInitialPos]);
 
