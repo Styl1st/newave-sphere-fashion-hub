@@ -63,7 +63,7 @@ const Index = () => {
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
       heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.transition = 'all 0.8s cubic-bezier(0.32, 0.72, 0, 1)';
+      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
       
       // Small delay then animate to fullscreen
       requestAnimationFrame(() => {
@@ -79,7 +79,7 @@ const Index = () => {
       });
     } else if (!isExpanding && !isClosing && heroRef.current && heroInitialPos) {
       // Collapse back to initial position
-      heroRef.current.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
+      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
@@ -99,7 +99,7 @@ const Index = () => {
           heroRef.current.style.transition = '';
         }
         setHeroInitialPos(null);
-      }, 700);
+      }, 1500);
     }
   }, [isExpanding, heroInitialPos, isClosing]);
 
@@ -107,7 +107,7 @@ const Index = () => {
   useEffect(() => {
     if (isClosing && heroRef.current && heroInitialPos) {
       // Smooth closing transition
-      heroRef.current.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
+      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
@@ -129,7 +129,7 @@ const Index = () => {
         setIsExpanding(false);
         setIsClosing(false);
         setHeroInitialPos(null);
-      }, 650);
+      }, 1500);
       
       return () => clearTimeout(timeout);
     }
