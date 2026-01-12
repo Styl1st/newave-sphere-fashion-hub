@@ -4,8 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ProductCard, type Product } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Palette, Check } from "lucide-react";
@@ -17,9 +27,19 @@ import { useI18n } from "@/hooks/useI18n";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 import { useMemo, useState, useEffect, useRef } from "react";
 
-const CATEGORY_KEYS = ["shoes", "sweaters", "jackets", "pants", "tshirts", "underwear", "accessories", "dresses", "skirts"] as const;
+const CATEGORY_KEYS = [
+  "shoes",
+  "sweaters",
+  "jackets",
+  "pants",
+  "tshirts",
+  "underwear",
+  "accessories",
+  "dresses",
+  "skirts",
+] as const;
 
-type CategoryKey = typeof CATEGORY_KEYS[number];
+type CategoryKey = (typeof CATEGORY_KEYS)[number];
 
 type Sort = "relevance" | "price_asc" | "price_desc";
 
@@ -33,9 +53,14 @@ const Index = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isExpanding, setIsExpanding] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [heroInitialPos, setHeroInitialPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [heroInitialPos, setHeroInitialPos] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
-  
+
   const { currentTheme, themes, setTheme } = useTheme();
   const { user } = useAuth();
   const { role } = useRole();
@@ -57,49 +82,36 @@ const Index = () => {
   useEffect(() => {
     if (isExpanding && heroRef.current && heroInitialPos) {
       // Start from captured position, then expand to fullscreen
-      heroRef.current.style.position = 'fixed';
-      heroRef.current.style.zIndex = '50';
+      heroRef.current.style.position = "fixed";
+      heroRef.current.style.zIndex = "50";
       heroRef.current.style.top = `${heroInitialPos.top}px`;
       heroRef.current.style.left = `${heroInitialPos.left}px`;
       heroRef.current.style.width = `${heroInitialPos.width}px`;
       heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
-      
+      heroRef.current.style.transition =
+        "all 2.5s cubic-bezier(0.32, 0.72, 0, 1)";
+
       // Small delay then animate to fullscreen
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (heroRef.current) {
-            heroRef.current.style.top = '0';
-            heroRef.current.style.left = '0';
-            heroRef.current.style.width = '100vw';
-            heroRef.current.style.height = '100vh';
-            heroRef.current.style.borderRadius = '0';
+            heroRef.current.style.top = "0";
+            heroRef.current.style.left = "0";
+            heroRef.current.style.width = "100vw";
+            heroRef.current.style.height = "100vh";
+            heroRef.current.style.borderRadius = "0";
           }
         });
       });
-    } else if (!isExpanding && !isClosing && heroRef.current && heroInitialPos) {
-      // Collapse back to initial position
-      heroRef.current.style.transition = 'all 2.5s cubic-bezier(0.32, 0.72, 0, 1)';
-      heroRef.current.style.top = `${heroInitialPos.top}px`;
-      heroRef.current.style.left = `${heroInitialPos.left}px`;
-      heroRef.current.style.width = `${heroInitialPos.width}px`;
-      heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.borderRadius = '1.5rem';
-      
-      // After collapse animation, switch back to relative
-      setTimeout(() => {
-        if (heroRef.current) {
-          heroRef.current.style.position = '';
-          heroRef.current.style.zIndex = '';
-          heroRef.current.style.top = '';
-          heroRef.current.style.left = '';
-          heroRef.current.style.width = '';
-          heroRef.current.style.height = '';
-          heroRef.current.style.borderRadius = '';
-          heroRef.current.style.transition = '';
-        }
-        setHeroInitialPos(null);
-      }, 1500);
+    } else if (
+      !isExpanding &&
+      !isClosing &&
+      heroRef.current &&
+      heroInitialPos
+    ) {
+      // Don't collapse here - let the closing animation handle it
+      // This branch handles keyboard escape or other collapse triggers
+      setIsClosing(true);
     }
   }, [isExpanding, heroInitialPos, isClosing]);
 
@@ -107,44 +119,48 @@ const Index = () => {
   useEffect(() => {
     if (isClosing && heroRef.current && heroInitialPos) {
       const hero = heroRef.current;
-      
+      let transitionEnded = false;
+
       // Smooth closing transition
-      hero.style.transition = 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)';
+      hero.style.transition = "all 0.8s cubic-bezier(0.32, 0.72, 0, 1)";
       hero.style.top = `${heroInitialPos.top}px`;
       hero.style.left = `${heroInitialPos.left}px`;
       hero.style.width = `${heroInitialPos.width}px`;
       hero.style.height = `${heroInitialPos.height}px`;
-      hero.style.borderRadius = '1.5rem';
-      
-      // Use transitionend event for precise timing
+      hero.style.borderRadius = "1.5rem";
+
+      // Use transitionend event for precise timing - but only fire once
       const handleTransitionEnd = (e: TransitionEvent) => {
-        if (e.propertyName === 'width' || e.propertyName === 'height') {
-          hero.removeEventListener('transitionend', handleTransitionEnd);
-          
-          // Reset styles without transition to avoid micro-adjustment
-          hero.style.transition = 'none';
-          hero.style.position = '';
-          hero.style.zIndex = '';
-          hero.style.top = '';
-          hero.style.left = '';
-          hero.style.width = '';
-          hero.style.height = '';
-          hero.style.borderRadius = '';
-          
-          // Force reflow then clear transition
-          hero.offsetHeight;
-          hero.style.transition = '';
-          
+        if (
+          !transitionEnded &&
+          (e.propertyName === "width" || e.propertyName === "height")
+        ) {
+          transitionEnded = true;
+          hero.removeEventListener("transitionend", handleTransitionEnd);
+
+          // Reset styles without transition to avoid any micro-adjustment
+          hero.style.transition = "none";
+          // Force the computed style to apply
+          void hero.offsetHeight;
+
+          hero.style.position = "";
+          hero.style.zIndex = "";
+          hero.style.top = "";
+          hero.style.left = "";
+          hero.style.width = "";
+          hero.style.height = "";
+          hero.style.borderRadius = "";
+
           setIsExpanding(false);
           setIsClosing(false);
           setHeroInitialPos(null);
         }
       };
-      
-      hero.addEventListener('transitionend', handleTransitionEnd);
-      
+
+      hero.addEventListener("transitionend", handleTransitionEnd);
+
       return () => {
-        hero.removeEventListener('transitionend', handleTransitionEnd);
+        hero.removeEventListener("transitionend", handleTransitionEnd);
       };
     }
   }, [isClosing, heroInitialPos]);
@@ -152,8 +168,8 @@ const Index = () => {
   // Parallax scroll effect
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Mouse parallax effect
@@ -166,8 +182,8 @@ const Index = () => {
         setMousePos({ x, y });
       }
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
@@ -182,8 +198,8 @@ const Index = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
-      const transformedProducts: Product[] = (data || []).map(product => ({
+
+      const transformedProducts: Product[] = (data || []).map((product) => ({
         id: product.id,
         name: product.name,
         brand: product.brand,
@@ -191,7 +207,7 @@ const Index = () => {
         price: Number(product.price),
         image: product.images?.[0] || "/placeholder.svg",
       }));
-      
+
       setProducts(transformedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -201,38 +217,49 @@ const Index = () => {
   };
 
   const filtered = useMemo(() => {
-    let list = products.filter(p => p.price <= maxPrice);
+    let list = products.filter((p) => p.price <= maxPrice);
     if (selected.size > 0) {
       // Convert selected category keys to DB category names for filtering
-      const selectedDbCategories = Array.from(selected).map(key => categoryKeyToDb[key]);
-      list = list.filter(p => selectedDbCategories.includes(p.category));
+      const selectedDbCategories = Array.from(selected).map(
+        (key) => categoryKeyToDb[key]
+      );
+      list = list.filter((p) => selectedDbCategories.includes(p.category));
     }
-    if (sort === "price_asc") list = [...list].sort((a,b) => a.price - b.price);
-    if (sort === "price_desc") list = [...list].sort((a,b) => b.price - a.price);
+    if (sort === "price_asc")
+      list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === "price_desc")
+      list = [...list].sort((a, b) => b.price - a.price);
     return list;
   }, [products, selected, maxPrice, sort, categoryKeyToDb]);
 
   const toggleCategory = (c: CategoryKey) => {
-    setSelected(prev => {
+    setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(c)) next.delete(c); else next.add(c);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
       return next;
     });
   };
 
   // Generate hero style based on current theme - matches background with slight contrast
   const heroStyle = {
-    padding: isExpanding ? '8% 15%' : '12%',
+    padding: isExpanding ? "8% 15%" : "12%",
     background: `linear-gradient(135deg, 
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 0%, 
-      hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${currentTheme.lightness + 10}% / ${isExpanding ? '1' : '0.8'}) 50%,
-      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness + 15}% / ${isExpanding ? '1' : '0.7'}) 100%)`,
-    boxShadow: isExpanding 
-      ? 'none' 
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${
+      currentTheme.lightness + 15
+    }% / ${isExpanding ? "1" : "0.7"}) 0%, 
+      hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${
+      currentTheme.lightness + 10
+    }% / ${isExpanding ? "1" : "0.8"}) 50%,
+      hsl(${currentTheme.hue} ${currentTheme.saturation}% ${
+      currentTheme.lightness + 15
+    }% / ${isExpanding ? "1" : "0.7"}) 100%)`,
+    boxShadow: isExpanding
+      ? "none"
       : `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
                 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
                 inset 0 0 60px hsl(0 0% 100% / 0.18)`,
-    backdropFilter: 'blur(12px)',
+    backdropFilter: "blur(12px)",
   };
 
   const handleHeroClick = () => {
@@ -243,12 +270,12 @@ const Index = () => {
         top: rect.top,
         left: rect.left,
         width: rect.width,
-        height: rect.height
+        height: rect.height,
       });
       setIsExpanding(true);
-    } else {
-      // Collapse back to initial position
-      setIsExpanding(false);
+    } else if (isExpanding) {
+      // Start closing animation
+      setIsClosing(true);
     }
   };
 
@@ -257,9 +284,15 @@ const Index = () => {
       <BrandNavbar />
       <main className="">
         {/* Hero */}
-        <section className="relative overflow-hidden" style={{minHeight: '100vh'}}>
-          <div className="mx-auto text-center px-4 sm:px-0 flex items-center justify-center" style={{width: '100%', height: '100vh', padding: '5vh 0'}}>
-            <div 
+        <section
+          className="relative overflow-hidden"
+          style={{ minHeight: "100vh" }}
+        >
+          <div
+            className="mx-auto text-center px-4 sm:px-0 flex items-center justify-center"
+            style={{ width: "100%", height: "100vh", padding: "5vh 0" }}
+          >
+            <div
               ref={heroRef}
               className="relative rounded-3xl border border-white/20 overflow-hidden cursor-pointer w-[90%]"
               style={{
@@ -268,140 +301,155 @@ const Index = () => {
               onClick={handleHeroClick}
               onMouseEnter={(e) => {
                 if (!isExpanding) {
-                  e.currentTarget.style.transform = 'scale(1.01)';
+                  e.currentTarget.style.transform = "scale(1.01)";
                   e.currentTarget.style.boxShadow = `0 0 3vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.5), 0 0 5vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35), inset 0 0 70px hsl(0 0% 100% / 0.2)`;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isExpanding) {
-                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.transform = "scale(1)";
                   e.currentTarget.style.boxShadow = `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3), inset 0 0 60px hsl(0 0% 100% / 0.18)`;
                 }
               }}
             >
               {/* Animated particles */}
-              <ParticlesBackground 
-                particleCount={60} 
-                color="rgb(255, 255, 255)" 
+              <ParticlesBackground
+                particleCount={60}
+                color="rgb(255, 255, 255)"
               />
 
               {/* Color Theme Picker - Intuitive Swatches */}
               {!isExpanding && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button 
-                    className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
-                    onClick={(e) => e.stopPropagation()}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1 sm:gap-2 bg-white/20 hover:bg-white/30 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-full backdrop-blur transition-all border border-white/30 group z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <div
+                        className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white/50 shadow-sm"
+                        style={{
+                          backgroundColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}%)`,
+                        }}
+                      />
+                      <span className="text-xs sm:text-sm font-medium hidden sm:inline">
+                        {currentTheme.name}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-64 p-4 bg-card border shadow-lg z-50"
+                    align="end"
                   >
-                    <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <div 
-                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-white/50 shadow-sm"
-                      style={{ backgroundColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}%)` }}
-                    />
-                    <span className="text-xs sm:text-sm font-medium hidden sm:inline">{currentTheme.name}</span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-4 bg-card border shadow-lg z-50" align="end">
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium text-foreground">Choose your theme</p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {themes.map((theme) => (
-                        <button
-                          key={theme.name}
-                          onClick={() => setTheme(theme)}
-                          className="relative group flex flex-col items-center gap-1"
-                          title={theme.name}
-                        >
-                          <div 
-                            className={`w-10 h-10 rounded-full transition-all border-2 ${
-                              currentTheme.name === theme.name 
-                                ? 'border-foreground scale-110 shadow-lg' 
-                                : 'border-transparent hover:scale-105 hover:border-muted-foreground/50'
-                            }`}
-                            style={{ backgroundColor: `hsl(${theme.hue} ${theme.saturation}% ${theme.lightness}%)` }}
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground">
+                        Choose your theme
+                      </p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {themes.map((theme) => (
+                          <button
+                            key={theme.name}
+                            onClick={() => setTheme(theme)}
+                            className="relative group flex flex-col items-center gap-1"
+                            title={theme.name}
                           >
-                            {currentTheme.name === theme.name && (
-                              <Check className="w-4 h-4 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                            )}
-                          </div>
-                          <span className="text-[10px] text-muted-foreground truncate max-w-[48px]">
-                            {theme.name}
-                          </span>
-                        </button>
-                      ))}
+                            <div
+                              className={`w-10 h-10 rounded-full transition-all border-2 ${
+                                currentTheme.name === theme.name
+                                  ? "border-foreground scale-110 shadow-lg"
+                                  : "border-transparent hover:scale-105 hover:border-muted-foreground/50"
+                              }`}
+                              style={{
+                                backgroundColor: `hsl(${theme.hue} ${theme.saturation}% ${theme.lightness}%)`,
+                              }}
+                            >
+                              {currentTheme.name === theme.name && (
+                                <Check className="w-4 h-4 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                              )}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground truncate max-w-[48px]">
+                              {theme.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
               )}
-              
+
               {/* Animated content with staggered entrance */}
-              <div 
+              <div
                 className="relative z-10"
                 style={{
                   transform: `translateY(${scrollY * -0.1}px)`,
-                  transition: 'transform 0.1s linear',
+                  transition: "transform 0.1s linear",
                 }}
               >
-                <h1 
+                <h1
                   className="flex flex-col sm:flex-row font-semibold tracking-tight justify-center items-center text-white drop-shadow-md animate-fade-in text-xl sm:text-2xl md:text-3xl lg:text-4xl gap-2 sm:gap-4"
                   style={{
-                    animationDelay: '0.1s',
-                    animationFillMode: 'both',
+                    animationDelay: "0.1s",
+                    animationFillMode: "both",
                   }}
                 >
-                  <img 
-                    src={logoTransparent} 
-                    alt="logo" 
+                  <img
+                    src={logoTransparent}
+                    alt="logo"
                     className="flex items-center invert h-8 sm:h-10 md:h-12 lg:h-16"
                   />
                   <span>{t.home.heroTitle}</span>
                 </h1>
-                
-                <div 
+
+                <div
                   style={{
                     opacity: isExpanding ? 0 : 1,
-                    maxHeight: isExpanding ? '0' : '500px',
-                    overflow: 'hidden',
-                    transition: isExpanding 
-                      ? 'opacity 0.3s ease-out, max-height 0.4s ease-out' 
-                      : 'opacity 0.4s ease-in 0.2s, max-height 0.5s ease-in 0.1s',
+                    maxHeight: isExpanding ? "0" : "500px",
+                    overflow: "hidden",
+                    transition: isExpanding
+                      ? "opacity 0.3s ease-out, max-height 0.4s ease-out"
+                      : "opacity 0.4s ease-in 0.2s, max-height 0.5s ease-in 0.1s",
                   }}
                 >
-                  <p 
-                    className="mx-auto text-white/85 drop-shadow-sm animate-fade-in mt-4 sm:mt-6 text-sm sm:text-base md:text-lg max-w-[90%] sm:max-w-[80%]" 
+                  <p
+                    className="mx-auto text-white/85 drop-shadow-sm animate-fade-in mt-4 sm:mt-6 text-sm sm:text-base md:text-lg max-w-[90%] sm:max-w-[80%]"
                     style={{
-                      animationDelay: '0.3s',
-                      animationFillMode: 'both',
+                      animationDelay: "0.3s",
+                      animationFillMode: "both",
                     }}
                   >
                     {t.home.heroSubtitle}
                   </p>
-                  <div 
-                    className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4" 
+                  <div
+                    className="flex flex-col sm:flex-row justify-center animate-fade-in mt-6 sm:mt-8 gap-3 sm:gap-4"
                     style={{
-                      animationDelay: '0.5s',
-                      animationFillMode: 'both',
+                      animationDelay: "0.5s",
+                      animationFillMode: "both",
                     }}
                   >
-                    <Button 
-                      variant="hero" 
-                      size="lg" 
+                    <Button
+                      variant="hero"
+                      size="lg"
                       className="hover:scale-105 transition-transform"
                       onClick={(e) => {
                         e.stopPropagation();
-                        document.getElementById('filters')?.scrollIntoView({ 
-                          behavior: 'smooth',
-                          block: 'start'
+                        document.getElementById("filters")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
                         });
                       }}
                     >
                       {t.home.exploreDrops}
                     </Button>
                     {/* Show become seller only if not logged in or if buyer */}
-                    {(!user || role === 'buyer') && (
+                    {(!user || role === "buyer") && (
                       <a href={user ? "/become-seller" : "/auth"}>
-                        <Button variant="secondary" size="lg" className="hover:scale-105 transition-transform w-full sm:w-auto">
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          className="hover:scale-105 transition-transform w-full sm:w-auto"
+                        >
                           {t.home.becomeSeller}
                         </Button>
                       </a>
@@ -409,27 +457,21 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div 
+                <div
                   style={{
                     opacity: isExpanding ? 1 : 0,
-                    maxHeight: isExpanding ? '1000px' : '0',
-                    overflow: isExpanding ? 'auto' : 'hidden',
-                    transition: isExpanding 
-                      ? 'opacity 0.5s ease-in 0.3s, max-height 0.6s ease-in 0.2s' 
-                      : 'opacity 0.2s ease-out, max-height 0.3s ease-out',
+                    maxHeight: isExpanding ? "1000px" : "0",
+                    overflow: isExpanding ? "auto" : "hidden",
+                    transition: isExpanding
+                      ? "opacity 0.5s ease-in 0.3s, max-height 0.6s ease-in 0.2s"
+                      : "opacity 0.2s ease-out, max-height 0.3s ease-out",
                   }}
                 >
                   <div className="text-white max-w-4xl mx-auto mt-8">
                     <div className="space-y-6 text-lg sm:text-xl leading-relaxed">
-                      <p>
-                        {t.home.aboutText1}
-                      </p>
-                      <p>
-                        {t.home.aboutText2}
-                      </p>
-                      <p>
-                        {t.home.aboutText3}
-                      </p>
+                      <p>{t.home.aboutText1}</p>
+                      <p>{t.home.aboutText2}</p>
+                      <p>{t.home.aboutText3}</p>
                       <p className="text-center pt-6 text-white/80">
                         {t.home.aboutText4}
                       </p>
@@ -442,25 +484,41 @@ const Index = () => {
         </section>
 
         {/* Filters */}
-        <section id="filters" style={{padding: '0 4%', marginTop: isExpanding ? '0' : '-3%', position: 'relative', zIndex: 10, display: isExpanding ? 'none' : 'block', scrollMarginTop: '2rem'}}>
+        <section
+          id="filters"
+          style={{
+            padding: "0 4%",
+            marginTop: isExpanding ? "0" : "-3%",
+            position: "relative",
+            zIndex: 10,
+            display: isExpanding ? "none" : "block",
+            scrollMarginTop: "2rem",
+          }}
+        >
           <div
             className="mx-auto max-w-[95%] sm:max-w-[90%] bg-card/95 backdrop-blur-md rounded-2xl border shadow-lg p-4 sm:p-6 lg:p-8"
             style={{
               borderColor: `hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`,
               boxShadow: `0 0 20px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 40px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3)`,
-              transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
+              transition: "box-shadow 0.3s ease, border-color 0.3s ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 25px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 50px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.38)`;
+              (
+                e.currentTarget as HTMLDivElement
+              ).style.boxShadow = `0 0 25px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 50px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.38)`;
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 20px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 40px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3)`;
+              (
+                e.currentTarget as HTMLDivElement
+              ).style.boxShadow = `0 0 20px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45), 0 0 40px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3)`;
             }}
           >
             <div className="flex flex-col gap-4 sm:gap-6">
               {/* Categories - Pill Style */}
               <div>
-                <span className="font-medium text-foreground text-sm sm:text-base">{t.filters.categories}</span>
+                <span className="font-medium text-foreground text-sm sm:text-base">
+                  {t.filters.categories}
+                </span>
                 <div className="flex flex-wrap gap-2 sm:gap-3 mt-3">
                   {CATEGORY_KEYS.map((c) => (
                     <button
@@ -468,23 +526,29 @@ const Index = () => {
                       onClick={() => toggleCategory(c)}
                       className={`rounded-full transition-all border text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 ${
                         selected.has(c)
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-muted/50 text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                       }`}
                       style={{
                         boxShadow: selected.has(c)
                           ? `0 0 15px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 25px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35)`
                           : `0 0 8px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`,
-                        transform: selected.has(c) ? 'translateY(-1px)' : 'none',
-                        transition: 'box-shadow 0.25s ease, transform 0.2s ease, background-color 0.2s ease',
+                        transform: selected.has(c)
+                          ? "translateY(-1px)"
+                          : "none",
+                        transition:
+                          "box-shadow 0.25s ease, transform 0.2s ease, background-color 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 18px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.6), 0 0 30px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.4)`;
+                        (
+                          e.currentTarget as HTMLButtonElement
+                        ).style.boxShadow = `0 0 18px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.6), 0 0 30px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.4)`;
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = selected.has(c)
-                          ? `0 0 15px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 25px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35)`
-                          : `0 0 8px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`;
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                          selected.has(c)
+                            ? `0 0 15px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.55), 0 0 25px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.35)`
+                            : `0 0 8px hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.25)`;
                       }}
                     >
                       {t.categories[c]}
@@ -492,30 +556,43 @@ const Index = () => {
                   ))}
                 </div>
               </div>
-              
+
               {/* Price and Sort */}
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 border-t border-border pt-4 sm:pt-6">
                 <div className="flex-1">
-                  <Label className="font-medium text-sm sm:text-base">{t.filters.maxPrice}: <span className="text-primary font-semibold">€{maxPrice}</span></Label>
-                  <Slider 
-                    value={[maxPrice]} 
-                    min={20} 
-                    max={500} 
-                    step={5} 
+                  <Label className="font-medium text-sm sm:text-base">
+                    {t.filters.maxPrice}:{" "}
+                    <span className="text-primary font-semibold">
+                      €{maxPrice}
+                    </span>
+                  </Label>
+                  <Slider
+                    value={[maxPrice]}
+                    min={20}
+                    max={500}
+                    step={5}
                     onValueChange={(v) => setMaxPrice(v[0] ?? 300)}
                     className="glow-slider mt-3"
                   />
                 </div>
                 <div className="w-full sm:w-48 lg:w-56">
-                  <Label className="font-medium text-sm sm:text-base">{t.filters.sortBy}</Label>
+                  <Label className="font-medium text-sm sm:text-base">
+                    {t.filters.sortBy}
+                  </Label>
                   <Select value={sort} onValueChange={(v: Sort) => setSort(v)}>
                     <SelectTrigger className="bg-background border-border mt-2">
                       <SelectValue placeholder={t.filters.sortBy} />
                     </SelectTrigger>
                     <SelectContent className="bg-popover border-border shadow-lg z-50">
-                      <SelectItem value="relevance">{t.filters.relevance}</SelectItem>
-                      <SelectItem value="price_asc">{t.filters.priceLowHigh}</SelectItem>
-                      <SelectItem value="price_desc">{t.filters.priceHighLow}</SelectItem>
+                      <SelectItem value="relevance">
+                        {t.filters.relevance}
+                      </SelectItem>
+                      <SelectItem value="price_asc">
+                        {t.filters.priceLowHigh}
+                      </SelectItem>
+                      <SelectItem value="price_desc">
+                        {t.filters.priceHighLow}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -525,19 +602,23 @@ const Index = () => {
         </section>
 
         {/* Grid */}
-        <section className="px-4 sm:px-6 py-6 sm:py-8" style={{display: isExpanding ? 'none' : 'block'}}>
+        <section
+          className="px-4 sm:px-6 py-6 sm:py-8"
+          style={{ display: isExpanding ? "none" : "block" }}
+        >
           <div className="mx-auto max-w-[95%] sm:max-w-[90%]">
             {loading ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-sm sm:text-base">{t.home.loadingProducts}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">
+                  {t.home.loadingProducts}
+                </p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-sm sm:text-base">
-                  {products.length === 0 
+                  {products.length === 0
                     ? t.home.noProductsAvailable
-                    : t.home.noProductsMatch
-                  }
+                    : t.home.noProductsMatch}
                 </p>
               </div>
             ) : (
