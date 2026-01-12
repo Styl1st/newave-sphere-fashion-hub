@@ -122,7 +122,7 @@ const Index = () => {
       let transitionEnded = false;
 
       // Smooth closing transition
-      hero.style.transition = "all 0.8s cubic-bezier(0.32, 0.72, 0, 1)";
+      hero.style.transition = "all 2s cubic-bezier(0.32, 0.72, 0, 1)";
       hero.style.top = `${heroInitialPos.top}px`;
       hero.style.left = `${heroInitialPos.left}px`;
       hero.style.width = `${heroInitialPos.width}px`;
