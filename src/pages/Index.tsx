@@ -115,6 +115,126 @@ const Index = () => {
     }
   }, [isExpanding, heroInitialPos, isClosing]);
 
+  // Smooth hero open/close animation (store page coords, compute viewport coords at animate time)
+  useEffect(() => {
+    const DURATION = 700; // ms
+    const EASING = 'cubic-bezier(0.22, 0.9, 0.2, 1)';
+
+    const hero = heroRef.current;
+    if (!hero || !heroInitialPos) return;
+
+    // compute viewport coords from stored page coords
+    const viewportTop = heroInitialPos.top - window.scrollY;
+    const viewportLeft = heroInitialPos.left - window.scrollX;
+
+    // prepare transition string for geometric properties only
+    const transition = `top ${DURATION}ms ${EASING}, left ${DURATION}ms ${EASING}, width ${DURATION}ms ${EASING}, height ${DURATION}ms ${EASING}, border-radius ${Math.round(DURATION * 0.9)}ms ${EASING}`;
+
+    if (isExpanding) {
+      // set element to fixed at its current viewport rect
+      hero.style.position = 'fixed';
+      hero.style.top = `${viewportTop}px`;
+      hero.style.left = `${viewportLeft}px`;
+      hero.style.width = `${heroInitialPos.width}px`;
+      hero.style.height = `${heroInitialPos.height}px`;
+      hero.style.borderRadius = '1.5rem';
+      hero.style.overflow = 'hidden';
+      hero.style.willChange = 'top, left, width, height, border-radius';
+      hero.style.zIndex = '50';
+      // apply transition then animate to fullscreen
+      hero.style.transition = transition;
+
+      // force layout then animate
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          hero.style.top = '0';
+          hero.style.left = '0';
+          hero.style.width = '100vw';
+          hero.style.height = '100vh';
+          hero.style.borderRadius = '0';
+        });
+      });
+
+      return; // expanding path doesn't need cleanup here
+    }
+
+    if (isClosing) {
+      let cleaned = false;
+
+      hero.style.transition = transition;
+      // animate back to original viewport rect (recompute in case of scroll)
+      const targetTop = heroInitialPos.top - window.scrollY;
+      const targetLeft = heroInitialPos.left - window.scrollX;
+
+      // set target
+      requestAnimationFrame(() => {
+        hero.style.top = `${targetTop}px`;
+        hero.style.left = `${targetLeft}px`;
+        hero.style.width = `${heroInitialPos.width}px`;
+        hero.style.height = `${heroInitialPos.height}px`;
+        hero.style.borderRadius = '1.5rem';
+      });
+
+      const handleTransitionEnd = (e: TransitionEvent) => {
+        // listen to any of the geometry properties finishing (width/height/top/left)
+        if (!e.propertyName) return;
+        const prop = e.propertyName;
+        if (prop !== 'width' && prop !== 'height' && prop !== 'top' && prop !== 'left') return;
+        if (cleaned) return;
+        cleaned = true;
+
+        hero.removeEventListener('transitionend', handleTransitionEnd as any);
+
+        // delay cleanup by one animation frame to avoid micro-jump
+        requestAnimationFrame(() => {
+          // hide element to mask micro-jump during style reset
+          hero.style.visibility = 'hidden';
+
+          // remove transitions to avoid flicker while clearing
+          hero.style.transition = 'none';
+          // force reflow
+          void hero.offsetHeight;
+
+          // clear positioning so element returns to normal flow exactly where it should be
+          hero.style.position = '';
+          hero.style.zIndex = '';
+          hero.style.top = '';
+          hero.style.left = '';
+          hero.style.width = '';
+          hero.style.height = '';
+          hero.style.borderRadius = '';
+          hero.style.overflow = '';
+          hero.style.willChange = '';
+
+          // restore visibility next frame
+          requestAnimationFrame(() => {
+            hero.style.visibility = '';
+            setIsExpanding(false);
+            setIsClosing(false);
+            setHeroInitialPos(null);
+          });
+        });
+      };
+
+      hero.addEventListener('transitionend', handleTransitionEnd as any);
+
+      // fallback in case transitionend doesn't fire
+      const fallback = window.setTimeout(() => {
+        try {
+          handleTransitionEnd({ propertyName: 'width' } as TransitionEvent);
+        } catch (err) {
+          // ignore
+        }
+      }, DURATION + 200);
+
+      return () => {
+        window.clearTimeout(fallback);
+        hero.removeEventListener('transitionend', handleTransitionEnd as any);
+      };
+    }
+
+  }, [isExpanding, isClosing, heroInitialPos]);
+
   // Handle closing animation
   useEffect(() => {
     if (isClosing && heroRef.current && heroInitialPos) {
@@ -264,17 +384,16 @@ const Index = () => {
 
   const handleHeroClick = () => {
     if (!isExpanding && heroRef.current) {
-      // Capture exact position and dimensions before expanding
       const rect = heroRef.current.getBoundingClientRect();
+      // store page coordinates so closing target is correct even after page scroll
       setHeroInitialPos({
-        top: rect.top,
-        left: rect.left,
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
         width: rect.width,
         height: rect.height,
       });
       setIsExpanding(true);
     } else if (isExpanding) {
-      // Start closing animation
       setIsClosing(true);
     }
   };
