@@ -78,60 +78,21 @@ const Index = () => {
     dresses: "Robes",
     skirts: "Jupes",
   };
-  // Animate expansion when isExpanding changes
+  // Single unified animation controller for open/close
   useEffect(() => {
-    if (isExpanding && heroRef.current && heroInitialPos) {
-      // Start from captured position, then expand to fullscreen
-      heroRef.current.style.position = "fixed";
-      heroRef.current.style.zIndex = "50";
-      heroRef.current.style.top = `${heroInitialPos.top}px`;
-      heroRef.current.style.left = `${heroInitialPos.left}px`;
-      heroRef.current.style.width = `${heroInitialPos.width}px`;
-      heroRef.current.style.height = `${heroInitialPos.height}px`;
-      heroRef.current.style.transition =
-        "all 2.5s cubic-bezier(0.32, 0.72, 0, 1)";
-
-      // Small delay then animate to fullscreen
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (heroRef.current) {
-            heroRef.current.style.top = "0";
-            heroRef.current.style.left = "0";
-            heroRef.current.style.width = "100vw";
-            heroRef.current.style.height = "100vh";
-            heroRef.current.style.borderRadius = "0";
-          }
-        });
-      });
-    } else if (
-      !isExpanding &&
-      !isClosing &&
-      heroRef.current &&
-      heroInitialPos
-    ) {
-      // Don't collapse here - let the closing animation handle it
-      // This branch handles keyboard escape or other collapse triggers
-      setIsClosing(true);
-    }
-  }, [isExpanding, heroInitialPos, isClosing]);
-
-  // Smooth hero open/close animation (store page coords, compute viewport coords at animate time)
-  useEffect(() => {
-    const DURATION = 700; // ms
-    const EASING = 'cubic-bezier(0.22, 0.9, 0.2, 1)';
-
     const hero = heroRef.current;
     if (!hero || !heroInitialPos) return;
 
-    // compute viewport coords from stored page coords
+    const DURATION = 700;
+    const EASING = 'cubic-bezier(0.22, 0.9, 0.2, 1)';
+    const transition = `top ${DURATION}ms ${EASING}, left ${DURATION}ms ${EASING}, width ${DURATION}ms ${EASING}, height ${DURATION}ms ${EASING}, border-radius ${Math.round(DURATION * 0.9)}ms ${EASING}`;
+
+    // Compute viewport coords from stored page coords
     const viewportTop = heroInitialPos.top - window.scrollY;
     const viewportLeft = heroInitialPos.left - window.scrollX;
 
-    // prepare transition string for geometric properties only
-    const transition = `top ${DURATION}ms ${EASING}, left ${DURATION}ms ${EASING}, width ${DURATION}ms ${EASING}, height ${DURATION}ms ${EASING}, border-radius ${Math.round(DURATION * 0.9)}ms ${EASING}`;
-
-    if (isExpanding) {
-      // set element to fixed at its current viewport rect
+    if (isExpanding && !isClosing) {
+      // Set element to fixed at its current viewport rect
       hero.style.position = 'fixed';
       hero.style.top = `${viewportTop}px`;
       hero.style.left = `${viewportLeft}px`;
@@ -141,10 +102,9 @@ const Index = () => {
       hero.style.overflow = 'hidden';
       hero.style.willChange = 'top, left, width, height, border-radius';
       hero.style.zIndex = '50';
-      // apply transition then animate to fullscreen
       hero.style.transition = transition;
 
-      // force layout then animate
+      // Force layout then animate to fullscreen
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           hero.style.top = '0';
@@ -154,19 +114,19 @@ const Index = () => {
           hero.style.borderRadius = '0';
         });
       });
-
-      return; // expanding path doesn't need cleanup here
+      return;
     }
 
     if (isClosing) {
       let cleaned = false;
 
-      hero.style.transition = transition;
-      // animate back to original viewport rect (recompute in case of scroll)
+      // Recompute target position for closing
       const targetTop = heroInitialPos.top - window.scrollY;
       const targetLeft = heroInitialPos.left - window.scrollX;
 
-      // set target
+      hero.style.transition = transition;
+
+      // Animate back to original rect
       requestAnimationFrame(() => {
         hero.style.top = `${targetTop}px`;
         hero.style.left = `${targetLeft}px`;
@@ -176,39 +136,41 @@ const Index = () => {
       });
 
       const handleTransitionEnd = (e: TransitionEvent) => {
-        // listen to any of the geometry properties finishing (width/height/top/left)
-        if (!e.propertyName) return;
-        const prop = e.propertyName;
-        if (prop !== 'width' && prop !== 'height' && prop !== 'top' && prop !== 'left') return;
+        if (e.target !== hero) return;
+        if (e.propertyName !== 'width' && e.propertyName !== 'height') return;
         if (cleaned) return;
         cleaned = true;
 
-        hero.removeEventListener('transitionend', handleTransitionEnd as any);
+        hero.removeEventListener('transitionend', handleTransitionEnd);
 
-        // delay cleanup by one animation frame to avoid micro-jump
+        // CRITICAL: Wait 2 frames before resetting layout to prevent jump
         requestAnimationFrame(() => {
-          // hide element to mask micro-jump during style reset
-          hero.style.visibility = 'hidden';
-
-          // remove transitions to avoid flicker while clearing
-          hero.style.transition = 'none';
-          // force reflow
-          void hero.offsetHeight;
-
-          // clear positioning so element returns to normal flow exactly where it should be
-          hero.style.position = '';
-          hero.style.zIndex = '';
-          hero.style.top = '';
-          hero.style.left = '';
-          hero.style.width = '';
-          hero.style.height = '';
-          hero.style.borderRadius = '';
-          hero.style.overflow = '';
-          hero.style.willChange = '';
-
-          // restore visibility next frame
           requestAnimationFrame(() => {
-            hero.style.visibility = '';
+            // Disable all transitions during reset
+            hero.style.transition = 'none';
+            // Force reflow
+            void hero.offsetHeight;
+
+            // Clear all inline positioning styles
+            hero.style.position = '';
+            hero.style.zIndex = '';
+            hero.style.top = '';
+            hero.style.left = '';
+            hero.style.width = '';
+            hero.style.height = '';
+            hero.style.borderRadius = '';
+            hero.style.overflow = '';
+            hero.style.willChange = '';
+            hero.style.transform = '';
+            hero.style.boxShadow = '';
+
+            // Force reflow again
+            void hero.offsetHeight;
+
+            // Restore transitions
+            hero.style.transition = '';
+
+            // Update state after layout is stable
             setIsExpanding(false);
             setIsClosing(false);
             setHeroInitialPos(null);
@@ -216,74 +178,23 @@ const Index = () => {
         });
       };
 
-      hero.addEventListener('transitionend', handleTransitionEnd as any);
+      hero.addEventListener('transitionend', handleTransitionEnd);
 
-      // fallback in case transitionend doesn't fire
+      // Fallback timeout
       const fallback = window.setTimeout(() => {
-        try {
-          handleTransitionEnd({ propertyName: 'width' } as TransitionEvent);
-        } catch (err) {
-          // ignore
+        if (!cleaned) {
+          handleTransitionEnd({ target: hero, propertyName: 'width' } as unknown as TransitionEvent);
         }
-      }, DURATION + 200);
+      }, DURATION + 300);
 
       return () => {
         window.clearTimeout(fallback);
-        hero.removeEventListener('transitionend', handleTransitionEnd as any);
+        hero.removeEventListener('transitionend', handleTransitionEnd);
       };
     }
-
   }, [isExpanding, isClosing, heroInitialPos]);
 
-  // Handle closing animation
-  useEffect(() => {
-    if (isClosing && heroRef.current && heroInitialPos) {
-      const hero = heroRef.current;
-      let transitionEnded = false;
-
-      // Smooth closing transition
-      hero.style.transition = "all 2s cubic-bezier(0.32, 0.72, 0, 1)";
-      hero.style.top = `${heroInitialPos.top}px`;
-      hero.style.left = `${heroInitialPos.left}px`;
-      hero.style.width = `${heroInitialPos.width}px`;
-      hero.style.height = `${heroInitialPos.height}px`;
-      hero.style.borderRadius = "1.5rem";
-
-      // Use transitionend event for precise timing - but only fire once
-      const handleTransitionEnd = (e: TransitionEvent) => {
-        if (
-          !transitionEnded &&
-          (e.propertyName === "width" || e.propertyName === "height")
-        ) {
-          transitionEnded = true;
-          hero.removeEventListener("transitionend", handleTransitionEnd);
-
-          // Reset styles without transition to avoid any micro-adjustment
-          hero.style.transition = "none";
-          // Force the computed style to apply
-          void hero.offsetHeight;
-
-          hero.style.position = "";
-          hero.style.zIndex = "";
-          hero.style.top = "";
-          hero.style.left = "";
-          hero.style.width = "";
-          hero.style.height = "";
-          hero.style.borderRadius = "";
-
-          setIsExpanding(false);
-          setIsClosing(false);
-          setHeroInitialPos(null);
-        }
-      };
-
-      hero.addEventListener("transitionend", handleTransitionEnd);
-
-      return () => {
-        hero.removeEventListener("transitionend", handleTransitionEnd);
-      };
-    }
-  }, [isClosing, heroInitialPos]);
+  // (closing animation now handled in unified controller above)
 
   // Parallax scroll effect
   useEffect(() => {
@@ -362,19 +273,21 @@ const Index = () => {
   };
 
   // Generate hero style based on current theme - matches background with slight contrast
+  // CRITICAL: Keep padding constant during closing to prevent layout jump
+  const isAnimating = isExpanding || isClosing;
   const heroStyle = {
-    padding: isExpanding ? "8% 15%" : "12%",
+    padding: isExpanding && !isClosing ? "8% 15%" : "12%",
     background: `linear-gradient(135deg, 
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${
       currentTheme.lightness + 15
-    }% / ${isExpanding ? "1" : "0.7"}) 0%, 
+    }% / ${isExpanding && !isClosing ? "1" : "0.7"}) 0%, 
       hsl(${(currentTheme.hue + 40) % 360} ${currentTheme.saturation}% ${
       currentTheme.lightness + 10
-    }% / ${isExpanding ? "1" : "0.8"}) 50%,
+    }% / ${isExpanding && !isClosing ? "1" : "0.8"}) 50%,
       hsl(${currentTheme.hue} ${currentTheme.saturation}% ${
       currentTheme.lightness + 15
-    }% / ${isExpanding ? "1" : "0.7"}) 100%)`,
-    boxShadow: isExpanding
+    }% / ${isExpanding && !isClosing ? "1" : "0.7"}) 100%)`,
+    boxShadow: isExpanding && !isClosing
       ? "none"
       : `0 0 2.6vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.45),
                 0 0 4.2vw hsl(${currentTheme.hue} ${currentTheme.saturation}% ${currentTheme.lightness}% / 0.3),
