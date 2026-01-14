@@ -53,6 +53,7 @@ const Index = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isExpanding, setIsExpanding] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isTextFading, setIsTextFading] = useState(false);
   const [heroInitialPos, setHeroInitialPos] = useState<{
     top: number;
     left: number;
@@ -173,6 +174,7 @@ const Index = () => {
             // Update state after layout is stable
             setIsExpanding(false);
             setIsClosing(false);
+            setIsTextFading(false);
             setHeroInitialPos(null);
           });
         });
@@ -306,10 +308,23 @@ const Index = () => {
         height: rect.height,
       });
       setIsExpanding(true);
-    } else if (isExpanding) {
-      setIsClosing(true);
+      setIsTextFading(false);
+    } else if (isExpanding && !isTextFading && !isClosing) {
+      // First fade out the text, then start closing
+      setIsTextFading(true);
     }
   };
+
+  // When text fade completes, start closing the hero
+  useEffect(() => {
+    if (!isTextFading) return;
+    
+    const fadeTimer = setTimeout(() => {
+      setIsClosing(true);
+    }, 300); // Match the text fade duration
+    
+    return () => clearTimeout(fadeTimer);
+  }, [isTextFading]);
 
   return (
     <div className="min-h-screen bg-animated-fade">
@@ -491,12 +506,14 @@ const Index = () => {
 
                 <div
                   style={{
-                    opacity: isExpanding ? 1 : 0,
-                    maxHeight: isExpanding ? "1000px" : "0",
-                    overflow: isExpanding ? "auto" : "hidden",
-                    transition: isExpanding
-                      ? "opacity 0.5s ease-in 0.3s, max-height 0.6s ease-in 0.2s"
-                      : "opacity 0.2s ease-out, max-height 0.3s ease-out",
+                    opacity: isExpanding && !isTextFading ? 1 : 0,
+                    maxHeight: isExpanding && !isTextFading ? "1000px" : "0",
+                    overflow: isExpanding && !isTextFading ? "auto" : "hidden",
+                    transition: isTextFading
+                      ? "opacity 0.25s ease-out, max-height 0.3s ease-out"
+                      : isExpanding
+                        ? "opacity 0.5s ease-in 0.3s, max-height 0.6s ease-in 0.2s"
+                        : "opacity 0.2s ease-out, max-height 0.3s ease-out",
                   }}
                 >
                   <div className="text-white max-w-4xl mx-auto mt-8">
