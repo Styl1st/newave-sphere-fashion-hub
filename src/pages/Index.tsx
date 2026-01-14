@@ -451,12 +451,12 @@ const Index = () => {
 
                 <div
                   style={{
-                    opacity: isExpanding ? 0 : 1,
-                    maxHeight: isExpanding ? "0" : "500px",
+                    opacity: isExpanding || isClosing ? 0 : 1,
+                    maxHeight: isExpanding || isClosing ? "0" : "500px",
                     overflow: "hidden",
-                    transition: isExpanding
-                      ? "opacity 0.3s ease-out, max-height 0.4s ease-out"
-                      : "opacity 0.4s ease-in 0.2s, max-height 0.5s ease-in 0.1s",
+                    transition: isExpanding || isClosing
+                      ? "opacity 0.2s ease-out, max-height 0.25s ease-out"
+                      : "opacity 0.3s ease-in 0.1s, max-height 0.35s ease-in",
                   }}
                 >
                   <p
