@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
-import { usePurchases } from '@/hooks/usePurchases';
 import { useAuth } from '@/hooks/useAuth';
 import { useI18n } from '@/hooks/useI18n';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Sheet,
   SheetContent,
@@ -16,12 +16,11 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Plus, Minus, Trash2, Package } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Package, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export const CartDrawer = () => {
   const { items, removeFromCart, updateQuantity, clearCart, getItemCount, getTotal } = useCart();
-  const { purchaseProduct, purchasing } = usePurchases();
   const { user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -47,33 +46,28 @@ export const CartDrawer = () => {
     if (items.length === 0) return;
 
     setCheckingOut(true);
-    let successCount = 0;
 
-    for (const item of items) {
-      const success = await purchaseProduct(
-        item.productId,
-        item.sellerId,
-        item.price,
-        item.quantity
-      );
-      if (success) successCount++;
-    }
-
-    setCheckingOut(false);
-
-    if (successCount === items.length) {
-      clearCart();
-      setOpen(false);
-      toast({
-        title: t.cart.orderConfirmed,
-        description: `${successCount} ${t.cart.itemsPurchased}`,
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { items },
       });
-    } else if (successCount > 0) {
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
-        title: t.cart.partialOrder,
-        description: t.cart.someItemsFailed,
+        title: "Erreur",
+        description: error.message || "Impossible de créer la session de paiement",
         variant: "destructive",
       });
+      setCheckingOut(false);
     }
   };
 
@@ -177,9 +171,16 @@ export const CartDrawer = () => {
                   className="w-full" 
                   size="lg"
                   onClick={handleCheckout}
-                  disabled={checkingOut || purchasing}
+                  disabled={checkingOut}
                 >
-                  {checkingOut ? t.common.loading : `${t.cart.pay} ${total.toFixed(2)} €`}
+                  {checkingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t.common.loading}
+                    </>
+                  ) : (
+                    `${t.cart.pay} ${total.toFixed(2)} €`
+                  )}
                 </Button>
                 <Button 
                   variant="outline" 
