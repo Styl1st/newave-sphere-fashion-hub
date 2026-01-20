@@ -37,8 +37,8 @@ const BrandNavbar = () => {
           </Link>
         </div>
 
-        {/* Desktop Navigation Links - Center */}
-        <div className="hidden md:flex items-center justify-center gap-1 lg:gap-2">
+        {/* Desktop Navigation Links - Center (only on lg+) */}
+        <div className="hidden lg:flex items-center justify-center gap-1 xl:gap-2">
           <Link to="/">
             <Button variant="ghost" size="sm" className="text-sm font-medium">{t.nav.home}</Button>
           </Link>
@@ -160,8 +160,8 @@ const BrandNavbar = () => {
             </Link>
           )}
 
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Auth Buttons - Desktop (lg+) */}
+          <div className="hidden lg:flex items-center gap-2">
             {user ? (
               <Button onClick={signOut} variant="outline" size="sm" className="text-sm">
                 {t.nav.signOut}
@@ -184,10 +184,10 @@ const BrandNavbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile/Tablet Menu Button (shows on < lg) */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden">
+              <Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
