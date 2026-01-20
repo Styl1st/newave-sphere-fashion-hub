@@ -541,9 +541,9 @@ const Index = () => {
           id="filters"
           style={{
             padding: "0 4%",
-            marginTop: isExpanding ? "0" : "-3%",
+            marginTop: "2rem",
             position: "relative",
-            zIndex: 10,
+            zIndex: 5,
             display: isExpanding ? "none" : "block",
             scrollMarginTop: "2rem",
           }}
