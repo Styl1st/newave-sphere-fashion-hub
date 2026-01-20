@@ -1,4 +1,5 @@
 import BrandNavbar from "@/components/BrandNavbar";
+import ProductMarquee from "@/components/ProductMarquee";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -531,6 +532,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Product Marquee */}
+        {!isExpanding && <ProductMarquee />}
 
         {/* Filters */}
         <section
