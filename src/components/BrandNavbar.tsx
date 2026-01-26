@@ -283,6 +283,35 @@ const BrandNavbar = () => {
                   </>
                 )}
 
+                {/* Settings Section - Mobile */}
+                <div className="border-t pt-4 mt-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">{t.nav.settings || 'Settings'}</p>
+                  
+                  {/* Theme Color Picker */}
+                  <div className="px-3 py-2">
+                    <p className="text-sm text-muted-foreground mb-2">{t.nav.themeColor}</p>
+                    <div className="grid grid-cols-6 gap-2">
+                      {themes.map((theme) => (
+                        <button
+                          key={theme.name}
+                          onClick={() => setTheme(theme)}
+                          className={`w-8 h-8 rounded-full transition-all hover:scale-110 ${
+                            currentTheme.name === theme.name ? 'ring-2 ring-offset-2 ring-foreground' : ''
+                          }`}
+                          style={{ backgroundColor: `hsl(${theme.hue}, ${theme.saturation}%, ${theme.lightness}%)` }}
+                          title={theme.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Language Switcher */}
+                  <div className="px-3 py-2 flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">{t.nav.language || 'Language'}</p>
+                    <LanguageSwitcher />
+                  </div>
+                </div>
+
                 <div className="border-t pt-4 mt-4">
                   {user ? (
                     <Button onClick={() => { signOut(); closeMobileMenu(); }} variant="outline" className="w-full gap-3 h-11">
