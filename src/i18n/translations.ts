@@ -14,6 +14,8 @@ export const translations = {
       becomeSeller: "Become a seller",
       themeColor: "Theme Color",
       navigation: "Navigation",
+      settings: "Settings",
+      language: "Language",
     },
     // Auth
     auth: {
@@ -224,6 +226,8 @@ export const translations = {
       becomeSeller: "Devenir vendeur",
       themeColor: "Couleur du thème",
       navigation: "Navigation",
+      settings: "Paramètres",
+      language: "Langue",
     },
     // Auth
     auth: {

@@ -5,6 +5,7 @@ interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: typeof translations.en;
+  isTransitioning: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
@@ -21,10 +22,24 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     const browserLang = navigator.language.split("-")[0];
     return browserLang === "fr" ? "fr" : "en";
   });
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
+    if (lang === language) return;
+    
+    // Start transition animation
+    setIsTransitioning(true);
+    
+    // Change language after fade out
+    setTimeout(() => {
+      setLanguageState(lang);
+      localStorage.setItem(STORAGE_KEY, lang);
+      
+      // End transition after fade in
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 200);
+    }, 150);
   };
 
   useEffect(() => {
@@ -35,8 +50,13 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const t = translations[language] as typeof translations.en;
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
-      {children}
+    <I18nContext.Provider value={{ language, setLanguage, t, isTransitioning }}>
+      <div 
+        className={`transition-opacity duration-200 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}
+        style={{ minHeight: '100vh' }}
+      >
+        {children}
+      </div>
     </I18nContext.Provider>
   );
 };

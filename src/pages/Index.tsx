@@ -360,11 +360,19 @@ const Index = () => {
                 }
               }}
             >
-              {/* Animated particles */}
-              <ParticlesBackground
-                particleCount={60}
-                color="rgb(255, 255, 255)"
-              />
+              {/* Animated particles - cover entire hero including when expanded */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  width: isExpanding && !isClosing ? '100vw' : '100%',
+                  height: isExpanding && !isClosing ? '100vh' : '100%',
+                }}
+              >
+                <ParticlesBackground
+                  particleCount={isExpanding && !isClosing ? 120 : 60}
+                  color="rgb(255, 255, 255)"
+                />
+              </div>
 
               {/* Color Theme Picker - Intuitive Swatches */}
               {!isExpanding && (
