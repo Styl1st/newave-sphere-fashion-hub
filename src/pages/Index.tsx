@@ -199,16 +199,36 @@ const Index = () => {
 
   // (closing animation now handled in unified controller above)
 
-  // Parallax scroll effect
+  // Throttled parallax scroll effect
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    let ticking = false;
+    let lastScrollY = 0;
+    
+    const handleScroll = () => {
+      lastScrollY = window.scrollY;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(lastScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Mouse parallax effect
+  // Throttled mouse parallax effect
   useEffect(() => {
+    let lastUpdate = 0;
+    const THROTTLE_MS = 60; // ~16fps for mouse parallax
+    
     const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate < THROTTLE_MS) return;
+      lastUpdate = now;
+      
       if (heroRef.current) {
         const rect = heroRef.current.getBoundingClientRect();
         const x = (e.clientX - rect.left - rect.width / 2) / rect.width;
@@ -216,7 +236,7 @@ const Index = () => {
         setMousePos({ x, y });
       }
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 

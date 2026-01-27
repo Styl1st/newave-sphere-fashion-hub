@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, memo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 type MarqueeProduct = {
@@ -10,7 +10,7 @@ type MarqueeProduct = {
   image: string;
 };
 
-const ProductMarquee = () => {
+const ProductMarquee = memo(() => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<MarqueeProduct[]>([]);
   const [isPaused, setIsPaused] = useState(false);
@@ -49,11 +49,11 @@ const ProductMarquee = () => {
     return [...shuffled, ...shuffled, ...shuffled];
   }, [products]);
 
-  if (products.length === 0) return null;
-
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = useCallback((productId: string) => {
     navigate(`/product/${productId}`);
-  };
+  }, [navigate]);
+
+  if (products.length === 0) return null;
 
   return (
     <div className="w-full py-6 overflow-hidden bg-gradient-to-r from-background via-muted/30 to-background">
@@ -100,6 +100,8 @@ const ProductMarquee = () => {
       </div>
     </div>
   );
-};
+});
+
+ProductMarquee.displayName = 'ProductMarquee';
 
 export default ProductMarquee;
