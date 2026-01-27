@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +15,7 @@ import { SupportDialog } from "@/components/SupportDialog";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import logoTransparent from "@/assets/newave/logo_transparent.png";
 
-const BrandNavbar = () => {
+const BrandNavbar = memo(() => {
   const { user, signOut } = useAuth();
   const { role } = useRole();
   const { currentTheme, themes, setTheme, mode, toggleMode } = useTheme();
@@ -25,7 +25,7 @@ const BrandNavbar = () => {
   const unreadCount = user ? getUnreadCount() : 0;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 
   return (
     <header className="sticky top-2 z-30 px-2 sm:px-4">
@@ -342,6 +342,8 @@ const BrandNavbar = () => {
       </nav>
     </header>
   );
-};
+});
+
+BrandNavbar.displayName = 'BrandNavbar';
 
 export default BrandNavbar;

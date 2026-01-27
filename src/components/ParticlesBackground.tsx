@@ -33,6 +33,11 @@ const ParticlesBackground = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Limit particle count for performance
+    const effectiveParticleCount = Math.min(particleCount, 40);
+    const connectionDistance = 80; // Reduced from 100
+    const maxConnections = 3; // Limit connections per particle
+
     const resizeCanvas = () => {
       const parent = canvas.parentElement;
       if (parent) {
@@ -42,28 +47,40 @@ const ParticlesBackground = ({
     };
 
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    
+    // Throttled resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const throttledResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeCanvas, 100);
+    };
+    window.addEventListener('resize', throttledResize, { passive: true });
 
     // Initialize particles
     const initParticles = () => {
       particlesRef.current = [];
-      for (let i = 0; i < particleCount; i++) {
+      for (let i = 0; i < effectiveParticleCount; i++) {
         particlesRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 3 + 1,
-          speedX: (Math.random() - 0.5) * 0.15,
-          speedY: (Math.random() - 0.5) * 0.15,
-          opacity: Math.random() * 0.5 + 0.2,
-          opacitySpeed: (Math.random() - 0.5) * 0.005,
+          size: Math.random() * 2.5 + 1, // Slightly smaller
+          speedX: (Math.random() - 0.5) * 0.12, // Slightly slower
+          speedY: (Math.random() - 0.5) * 0.12,
+          opacity: Math.random() * 0.4 + 0.2,
+          opacitySpeed: (Math.random() - 0.5) * 0.004,
         });
       }
     };
 
     initParticles();
 
-    // Mouse tracking
+    // Throttled mouse tracking
+    let lastMouseUpdate = 0;
     const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastMouseUpdate < 50) return; // 20fps for mouse
+      lastMouseUpdate = now;
+      
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = {
         x: e.clientX - rect.left,
@@ -71,10 +88,16 @@ const ParticlesBackground = ({
       };
     };
 
-    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Animation loop
+    // Animation loop with frame skipping for performance
+    let frameCount = 0;
     const animate = () => {
+      frameCount++;
+      
+      // Skip connection drawing every other frame for performance
+      const drawConnections = frameCount % 2 === 0;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particlesRef.current.forEach((particle, index) => {
@@ -82,28 +105,29 @@ const ParticlesBackground = ({
         particle.x += particle.speedX;
         particle.y += particle.speedY;
 
-        // Mouse interaction - subtle attraction
+        // Mouse interaction - subtle attraction (simplified)
         const dx = mouseRef.current.x - particle.x;
         const dy = mouseRef.current.y - particle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
         
-        if (distance < 150) {
+        if (distSq < 22500) { // 150^2
+          const distance = Math.sqrt(distSq);
           const force = (150 - distance) / 150;
-          particle.speedX += (dx / distance) * force * 0.003;
-          particle.speedY += (dy / distance) * force * 0.003;
+          particle.speedX += (dx / distance) * force * 0.002;
+          particle.speedY += (dy / distance) * force * 0.002;
         }
 
         // Limit speed
-        const maxSpeed = 0.5;
-        const speed = Math.sqrt(particle.speedX ** 2 + particle.speedY ** 2);
-        if (speed > maxSpeed) {
-          particle.speedX = (particle.speedX / speed) * maxSpeed;
-          particle.speedY = (particle.speedY / speed) * maxSpeed;
+        const speedSq = particle.speedX ** 2 + particle.speedY ** 2;
+        if (speedSq > 0.16) { // 0.4^2
+          const speed = Math.sqrt(speedSq);
+          particle.speedX = (particle.speedX / speed) * 0.4;
+          particle.speedY = (particle.speedY / speed) * 0.4;
         }
 
         // Update opacity (pulsing effect)
         particle.opacity += particle.opacitySpeed;
-        if (particle.opacity <= 0.1 || particle.opacity >= 0.7) {
+        if (particle.opacity <= 0.1 || particle.opacity >= 0.6) {
           particle.opacitySpeed *= -1;
         }
 
@@ -119,21 +143,27 @@ const ParticlesBackground = ({
         ctx.fillStyle = color.replace(')', `, ${particle.opacity})`).replace('rgb', 'rgba');
         ctx.fill();
 
-        // Draw connections between nearby particles
-        particlesRef.current.slice(index + 1).forEach((otherParticle) => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+        // Draw connections (limited for performance)
+        if (drawConnections) {
+          let connectionCount = 0;
+          for (let j = index + 1; j < particlesRef.current.length && connectionCount < maxConnections; j++) {
+            const otherParticle = particlesRef.current[j];
+            const cdx = particle.x - otherParticle.x;
+            const cdy = particle.y - otherParticle.y;
+            const cdistSq = cdx * cdx + cdy * cdy;
 
-          if (distance < 100) {
-            ctx.beginPath();
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = color.replace(')', `, ${0.15 * (1 - distance / 100)})`).replace('rgb', 'rgba');
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+            if (cdistSq < connectionDistance * connectionDistance) {
+              connectionCount++;
+              const cdist = Math.sqrt(cdistSq);
+              ctx.beginPath();
+              ctx.moveTo(particle.x, particle.y);
+              ctx.lineTo(otherParticle.x, otherParticle.y);
+              ctx.strokeStyle = color.replace(')', `, ${0.1 * (1 - cdist / connectionDistance)})`).replace('rgb', 'rgba');
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
           }
-        });
+        }
       });
 
       animationRef.current = requestAnimationFrame(animate);
@@ -142,8 +172,9 @@ const ParticlesBackground = ({
     animate();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', throttledResize);
       canvas.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(resizeTimeout);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
