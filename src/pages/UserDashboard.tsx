@@ -11,7 +11,7 @@ import { UserProfileManager } from "@/components/UserProfileManager";
 import { Heart, ShoppingBag, User, Package, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
-
+ 
 type LikedProduct = {
   id: string;
   product_id: string;

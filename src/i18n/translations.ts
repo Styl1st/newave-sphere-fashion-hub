@@ -1,3 +1,5 @@
+import { Fullscreen } from "lucide-react";
+
 export const translations = {
   en: {
     // Navigation
@@ -66,6 +68,11 @@ export const translations = {
       productCount: "product(s)",
       sellerNotFound: "Seller profile not found",
       noAccess: "You don't have access to this profile.",
+      fullName: "Full name",
+      fullNamePlaceholder: "Your full name or nickname",
+      aboutMe: "About me",
+      aboutMePlaceholder: "Describe yourself in a few words...",
+
     },
     // Dashboard - User
     userDashboard: {
@@ -211,6 +218,7 @@ export const translations = {
       pendingRequest: "Pending Request",
     },
   },
+
   fr: {
     // Navigation
     nav: {
@@ -278,6 +286,10 @@ export const translations = {
       productCount: "produit(s)",
       sellerNotFound: "Profil vendeur introuvable",
       noAccess: "Vous n'avez pas accès à ce profil.",
+      fullName: "Nom complet",
+      fullNamePlaceholder: "Votre nom complet ou pseudo",
+      aboutMe: "À propos de moi",
+      aboutMePlaceholder: "Décrivez-vous en quelques mots...",
     },
     // Dashboard - User
     userDashboard: {

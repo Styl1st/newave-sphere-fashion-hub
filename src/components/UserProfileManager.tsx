@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { User, Camera } from "lucide-react";
 import { profileSchema, validateForm } from "@/lib/validations";
+import { useI18n } from "@/hooks/useI18n";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_BIO_LENGTH = 500;
@@ -28,7 +29,8 @@ export const UserProfileManager = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+  const { t } = useI18n();
+
   const [formData, setFormData] = useState({
     full_name: "",
     bio: "",
@@ -194,7 +196,7 @@ export const UserProfileManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
-          Mon profil
+          {t.profile.myProfile}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -241,7 +243,7 @@ export const UserProfileManager = () => {
         {/* Profile Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="full_name">Nom complet</Label>
+            <Label htmlFor="full_name">{t.profile.fullName}</Label>
             <Input
               id="full_name"
               value={formData.full_name}
@@ -249,7 +251,7 @@ export const UserProfileManager = () => {
                 const value = e.target.value.slice(0, MAX_NAME_LENGTH);
                 setFormData((prev) => ({ ...prev, full_name: value }));
               }}
-              placeholder="Votre nom complet ou pseudo"
+              placeholder={t.profile.fullNamePlaceholder}
               maxLength={MAX_NAME_LENGTH}
             />
             <p className="text-xs text-muted-foreground text-right mt-1">
@@ -258,7 +260,7 @@ export const UserProfileManager = () => {
           </div>
 
           <div>
-            <Label htmlFor="bio">À propos de moi</Label>
+            <Label htmlFor="bio">{t.profile.aboutMe}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
@@ -266,7 +268,7 @@ export const UserProfileManager = () => {
                 const value = e.target.value.slice(0, MAX_BIO_LENGTH);
                 setFormData((prev) => ({ ...prev, bio: value }));
               }}
-              placeholder="Décrivez-vous en quelques mots..."
+              placeholder={t.profile.aboutMePlaceholder}
               rows={4}
               maxLength={MAX_BIO_LENGTH}
             />
