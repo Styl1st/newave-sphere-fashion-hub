@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useI18n } from '@/hooks/useI18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -18,8 +19,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { MessageSquare, Flag, User, Package, Clock, CheckCircle, XCircle, Store } from 'lucide-react';
+import { MessageSquare, Flag, User, Package, Clock, CheckCircle, XCircle, Store, Trash2, Search, Filter, X } from 'lucide-react';
 
 interface SupportTicket {
   id: string;
@@ -46,6 +58,9 @@ export const SupportTicketManager = () => {
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [response, setResponse] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
 
   useEffect(() => {
     fetchTickets();
@@ -89,6 +104,56 @@ export const SupportTicketManager = () => {
       setLoading(false);
     }
   };
+
+  const filteredTickets = useMemo(() => {
+    return tickets.filter((ticket) => {
+      const matchesSearch =
+        searchQuery === '' ||
+        ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ticket.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ticket.user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ticket.user?.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus = statusFilter === 'all' || ticket.status === statusFilter;
+      const matchesType = typeFilter === 'all' || ticket.type === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [tickets, searchQuery, statusFilter, typeFilter]);
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .delete()
+        .eq('id', ticketId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Ticket supprimé',
+        description: 'Le ticket a été supprimé avec succès.',
+      });
+
+      setSelectedTicket(null);
+      fetchTickets();
+    } catch (error: any) {
+      console.error('Error deleting ticket:', error);
+      toast({
+        title: 'Erreur',
+        description: error.message || 'Impossible de supprimer le ticket.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const clearFilters = useCallback(() => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setTypeFilter('all');
+  }, []);
+
+  const hasActiveFilters = searchQuery !== '' || statusFilter !== 'all' || typeFilter !== 'all';
 
   const handleUpdateTicket = async () => {
     if (!selectedTicket) return;
@@ -183,20 +248,74 @@ export const SupportTicketManager = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Tickets de support ({tickets.length})</h3>
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher par sujet, message ou utilisateur..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <div className="flex gap-2 flex-wrap">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous statuts</SelectItem>
+              <SelectItem value="open">Ouvert</SelectItem>
+              <SelectItem value="in_progress">En cours</SelectItem>
+              <SelectItem value="resolved">Résolu</SelectItem>
+              <SelectItem value="closed">Fermé</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous types</SelectItem>
+              <SelectItem value="support">Support</SelectItem>
+              <SelectItem value="report_product">Produit</SelectItem>
+              <SelectItem value="report_user">Utilisateur</SelectItem>
+              <SelectItem value="seller_request">Vendeur</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="icon" onClick={clearFilters}>
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
-      {tickets.length === 0 ? (
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Tickets ({filteredTickets.length})</h3>
+      </div>
+
+      {filteredTickets.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-            <p className="text-muted-foreground">Aucun ticket pour le moment</p>
+            <p className="text-muted-foreground">
+              {hasActiveFilters ? 'Aucun ticket ne correspond à votre recherche' : 'Aucun ticket pour le moment'}
+            </p>
+            {hasActiveFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">
+                Effacer les filtres
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {tickets.map((ticket) => (
+          {filteredTickets.map((ticket) => (
             <Card key={ticket.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
               setSelectedTicket(ticket);
               setNewStatus(ticket.status);
@@ -225,6 +344,35 @@ export const SupportTicketManager = () => {
                       <p className="text-xs text-red-600">Utilisateur signalé: {ticket.reported_user.full_name || ticket.reported_user.email}</p>
                     )}
                   </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer ce ticket ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Cette action est irréversible. Le ticket "{ticket.subject}" sera supprimé définitivement.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteTicket(ticket.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
@@ -299,13 +447,41 @@ export const SupportTicketManager = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSelectedTicket(null)}>
-                  Fermer
-                </Button>
-                <Button onClick={handleUpdateTicket}>
-                  Mettre à jour
-                </Button>
+              <div className="flex justify-between gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Supprimer ce ticket ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action est irréversible. Le ticket sera supprimé définitivement.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteTicket(selectedTicket.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setSelectedTicket(null)}>
+                    Fermer
+                  </Button>
+                  <Button onClick={handleUpdateTicket}>
+                    Mettre à jour
+                  </Button>
+                </div>
               </div>
             </div>
           )}
