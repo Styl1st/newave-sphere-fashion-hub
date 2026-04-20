@@ -31,26 +31,29 @@ const App = () => (
         <AuthProvider>
           <CartProvider>
             <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-                <Route path="/seller" element={<SellerDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/user" element={<UserDashboard />} />
-                <Route path="/product/:id" element={<ProductDetails />} />
-                <Route path="/seller/:userId" element={<SellerProfile />} />
-                <Route path="/my-profile" element={<MyProfile />} />
-                <Route path="/inbox" element={<Inbox />} />
-                <Route path="/become-seller" element={<BecomeSellerRequest />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="/payment-test" element={<PaymentTest />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+                  <Route path="/seller" element={<SellerDashboard />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/user" element={<UserDashboard />} />
+                  <Route path="/product/:id" element={<ProductDetails />} />
+                  <Route path="/seller/:userId" element={<SellerProfile />} />
+                  <Route path="/my-profile" element={<MyProfile />} />
+                  <Route path="/inbox" element={<Inbox />} />
+                  <Route
+                    path="/become-seller"
+                    element={<BecomeSellerRequest />}
+                  />
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/payment-test" element={<PaymentTest />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
             </TooltipProvider>
           </CartProvider>
         </AuthProvider>

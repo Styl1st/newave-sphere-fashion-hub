@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { User } from '@supabase/supabase-js';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, CreditCard, AlertCircle, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { User } from "@supabase/supabase-js";
 
 const PaymentTest = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [testAmount, setTestAmount] = useState('10.00');
+  const [testAmount, setTestAmount] = useState("10.00");
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -22,11 +22,13 @@ const PaymentTest = () => {
     // Get current user
     const getUser = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         setUser(user);
         setAuthLoading(false);
       } catch (err) {
-        console.error('Error getting user:', err);
+        console.error("Error getting user:", err);
         setAuthLoading(false);
       }
     };
@@ -36,37 +38,44 @@ const PaymentTest = () => {
 
   const handleTestPayment = async () => {
     setError(null);
-    
+
     if (!user) {
-      setError('Vous devez être connecté pour tester les paiements');
+      setError("Vous devez être connecté pour tester les paiements");
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log('Initiating test payment...');
-      
-      const testItems = [{
-        productId: 'test-product-123',
-        name: 'Produit de Test',
-        brand: 'Newave Fashion',
-        price: parseFloat(testAmount),
-        quantity: 1,
-        image: 'https://via.placeholder.com/150',
-        sellerId: user.id
-      }];
+      console.log("Initiating test payment...");
 
-      console.log('Test items:', testItems);
+      const testItems = [
+        {
+          productId: "test-product-123",
+          name: "Produit de Test",
+          brand: "Newave Fashion",
+          price: parseFloat(testAmount),
+          quantity: 1,
+          image: "https://via.placeholder.com/150",
+          sellerId: user.id,
+        },
+      ];
 
-      const { data, error: functionError } = await supabase.functions.invoke('create-checkout', {
-        body: { items: testItems },
-      });
+      console.log("Test items:", testItems);
 
-      console.log('Response:', { data, error: functionError });
+      const { data, error: functionError } = await supabase.functions.invoke(
+        "create-checkout",
+        {
+          body: { items: testItems },
+        },
+      );
+
+      console.log("Response:", { data, error: functionError });
 
       if (functionError) {
-        throw new Error(functionError.message || 'Erreur lors de l\'appel de la fonction');
+        throw new Error(
+          functionError.message || "Erreur lors de l'appel de la fonction",
+        );
       }
 
       if (data?.url) {
@@ -75,11 +84,12 @@ const PaymentTest = () => {
           window.location.href = data.url;
         }, 1000);
       } else {
-        throw new Error('Aucune URL de paiement reçue');
+        throw new Error("Aucune URL de paiement reçue");
       }
     } catch (err: any) {
-      console.error('Erreur de paiement test:', err);
-      const errorMsg = err.message || 'Impossible de créer la session de paiement';
+      console.error("Erreur de paiement test:", err);
+      const errorMsg =
+        err.message || "Impossible de créer la session de paiement";
       setError(errorMsg);
       toast({
         title: "Erreur de paiement",
@@ -104,7 +114,9 @@ const PaymentTest = () => {
           {success && (
             <Alert className="bg-green-50 border-green-200">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">Redirection vers Stripe Checkout...</AlertDescription>
+              <AlertDescription className="text-green-800">
+                Redirection vers Stripe Checkout...
+              </AlertDescription>
             </Alert>
           )}
 
@@ -118,7 +130,9 @@ const PaymentTest = () => {
           {!user && !authLoading && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>Vous devez être connecté pour tester les paiements</AlertDescription>
+              <AlertDescription>
+                Vous devez être connecté pour tester les paiements
+              </AlertDescription>
             </Alert>
           )}
 
@@ -138,7 +152,9 @@ const PaymentTest = () => {
               </div>
 
               <div className="text-sm text-muted-foreground space-y-2">
-                <p><strong>Instructions de test:</strong></p>
+                <p>
+                  <strong>Instructions de test:</strong>
+                </p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Utilisez les cartes de test Stripe:</li>
                   <li>• Succès: 4242 4242 4242 4242</li>

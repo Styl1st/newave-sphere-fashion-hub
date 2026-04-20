@@ -4,7 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 interface CartItem {
@@ -29,7 +30,7 @@ serve(async (req) => {
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
 
   try {
@@ -38,18 +39,18 @@ serve(async (req) => {
     if (!authHeader) {
       throw new Error("Authorization header missing");
     }
-    
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    
+
     if (!user?.email) {
       throw new Error("User not authenticated or email not available");
     }
 
     // Get cart items from request body
     const { items }: CheckoutRequest = await req.json();
-    
+
     if (!items || items.length === 0) {
       throw new Error("No items in cart");
     }
@@ -60,7 +61,10 @@ serve(async (req) => {
     });
 
     // Check if a Stripe customer record exists for this user
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1,
+    });
     let customerId: string | undefined;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
@@ -91,12 +95,14 @@ serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/`,
       metadata: {
         user_id: user.id,
-        items: JSON.stringify(items.map(i => ({ 
-          productId: i.productId, 
-          sellerId: i.sellerId,
-          price: i.price,
-          quantity: i.quantity 
-        }))),
+        items: JSON.stringify(
+          items.map((i) => ({
+            productId: i.productId,
+            sellerId: i.sellerId,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+        ),
       },
     });
 
