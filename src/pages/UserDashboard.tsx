@@ -4,6 +4,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BrandNavbar from "@/components/BrandNavbar";
 import { NotificationCenter } from "@/components/NotificationCenter";
@@ -214,54 +215,18 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingBag className="h-5 w-5 text-green-600" />
-                  {t.userDashboard.purchaseHistory} ({purchases.length})
+                  {t.userDashboard.purchaseHistory}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">{t.common.loading}</div>
-                ) : purchases.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <ShoppingBag className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>{t.userDashboard.noPurchases}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {purchases.map((purchase) => (
-                      <div
-                        key={purchase.id}
-                        className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleProductClick(purchase.products.id)}
-                      >
-                        {purchase.products.images && purchase.products.images.length > 0 ? (
-                          <img
-                            src={purchase.products.images[0]}
-                            alt={purchase.products.name}
-                            className="w-16 h-16 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                            <Package className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                        
-                        <div className="flex-1">
-                          <h3 className="font-medium">{purchase.products.name}</h3>
-                          <p className="text-sm text-muted-foreground">{purchase.products.brand}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm text-muted-foreground">
-                              x{purchase.quantity}
-                            </span>
-                            <span className="font-semibold">{purchase.price_paid}€</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {t.userDashboard.purchased} {new Date(purchase.purchased_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <CardContent className="flex flex-col items-center justify-center py-8 gap-4">
+                <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground text-center">
+                  {purchases.length} {purchases.length > 1 ? "commandes" : "commande"}
+                </p>
+                <Button onClick={() => navigate("/my-orders")} className="w-full sm:w-auto">
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                  Voir mes commandes
+                </Button>
               </CardContent>
             </Card>
               </div>
