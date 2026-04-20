@@ -81,12 +81,13 @@ serve(async (req) => {
     }));
 
     // Create checkout session
+    const successPage = `${req.headers.get("origin")}/payment-success.html`;
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${successPage}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/`,
       metadata: {
         user_id: user.id,

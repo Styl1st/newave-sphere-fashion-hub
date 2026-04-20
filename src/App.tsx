@@ -20,6 +20,7 @@ import MyProfile from "./pages/MyProfile";
 import Inbox from "./pages/Inbox";
 import BecomeSellerRequest from "./pages/BecomeSellerRequest";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentTest from "./pages/PaymentTest";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +47,7 @@ const App = () => (
                 <Route path="/inbox" element={<Inbox />} />
                 <Route path="/become-seller" element={<BecomeSellerRequest />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/payment-test" element={<PaymentTest />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
