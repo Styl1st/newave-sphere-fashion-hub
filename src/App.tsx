@@ -21,6 +21,7 @@ import Inbox from "./pages/Inbox";
 import BecomeSellerRequest from "./pages/BecomeSellerRequest";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentTest from "./pages/PaymentTest";
+import MyOrders from "./pages/MyOrders";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
                     path="/become-seller"
                     element={<BecomeSellerRequest />}
                   />
+                  <Route path="/my-orders" element={<MyOrders />} />
                   <Route path="/payment-success" element={<PaymentSuccess />} />
                   <Route path="/payment-test" element={<PaymentTest />} />
                   <Route path="*" element={<NotFound />} />

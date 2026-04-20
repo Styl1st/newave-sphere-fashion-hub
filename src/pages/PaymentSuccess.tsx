@@ -39,7 +39,7 @@ const PaymentSuccess = () => {
           )}
 
           <div className="flex flex-col gap-3">
-            <Button onClick={() => navigate('/user')} className="w-full">
+            <Button onClick={() => navigate('/my-orders')} className="w-full">
               <ShoppingBag className="mr-2 h-4 w-4" />
               Voir mes achats
             </Button>
